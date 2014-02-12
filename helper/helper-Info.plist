@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.eeaapps.launchctl.helper</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>com.eeaapps.launchctl.helper</string>
+	<key>CFBundleVersion</key>
+	<string>0.1</string>
+	<key>SMAuthorizedClients</key>
+	<array>
+		<string>identifier &quot;com.eeaapps.LaunchControl&quot; and certificate leaf = H&quot;f30730e7f976c288e6972913cae6e438e6df6ec3&quot;</string>
+	</array>
+</dict>
+</plist>
