@@ -9,8 +9,7 @@ that run in a priviledged context.
 ```objective-c
 	AHLaunchJob _job = [AHLaunchJob new];
 	job.Label = @"com.eeaapps.echo";
-	job.Program = @"/bin/echo";
-	job.ProgramArguments = @[@"hello world"];
+	job.ProgramArguments = @[@"/bin/echo",@"hello world"];
 	job.StartInterval = 10;
     job.StandardOutPath = @"/tmp/echo-test.txt";
 	job.RunAtLoad = YES;
@@ -50,42 +49,46 @@ that run in a priviledged context.
 This uses the SMJobBless to install a helper tool.
 
 ```objective-c
+    [AHLaunchCtl installHelper:kAHLaunchCtlHelperTool prompt:@"Install Helper?" error:&error];
+    if(error){
+            NSLog(@"error: %@",error.localizedDescription);
 ```
 ####Remove Helper
-
+this uses the helper tool to uninstall itself;
 ```objective-c
+    [AHLaunchCtl uninstallHelper:kAHLaunchCtlHelperTool reply:^(NSError *error) {
+        if(error){
+            NSLog(@"error: %@",error.localizedDescription);
+        }else{
+            NSLog(@"Helper And Associated files removed");
+        }
+    }];
+
 ```
 
-####It also comes bundled with an Session Authorizer
+####It also comes bundled with an Session Authorizer for the Helper
 
 ```objective-c
 	AHLaunchCtl *controller = [AHLaunchCtl new];
-    [controller authorizeSessionFor:10 error:^(NSError *error) {
-        NSLog(@"error: %@",error.localizedDescription);
-    } timeRemaining:^(NSInteger time) {
+        [controller authorizeSessionForNumberOfSeconds:10 timeRemaining:^(NSInteger time) {
         NSLog(@"Time Remaining: %ld",time);
+    } error:^(NSError *error) {
+        NSLog(@"error: %@",error.localizedDescription);
     }];
 ```
 
 
-####The helper tool can be implamented in just a few lines of code
+####The helper tool can be implemented in just a few lines of code
 ```objective-c
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtlHelper.h"
 
-static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check whether to quit
-
 int main(int argc, const char * argv[])
 {
-    AHLaunchCtlXPCListener *helper = [[AHLaunchCtlXPCListener alloc]initConnection];
-    
-    NSRunLoop * helperLoop = [NSRunLoop currentRunLoop];
-    while (!helper.helperToolShouldQuit)
-    {
-        [helperLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:kHelperCheckInterval]];
+    @autoreleasepool {
+        AHLaunchCtlXPCListener *helper = [[AHLaunchCtlXPCListener alloc]init];
+        [helper run];
     }
-
-    return 0;
-
+	return 0;
 }
 ```

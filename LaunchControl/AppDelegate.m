@@ -9,112 +9,161 @@
 #import "AppDelegate.h"
 #import "AHLaunchCtl.h"
 
-@implementation AppDelegate
+@implementation AppDelegate{
+    AHlaunchDomain domain;
+}
 -(void)applicationWillTerminate:(NSNotification *)notification{
     [AHLaunchCtl quitHelper];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    NSError* error;
-    [AHLaunchCtl installHelper:kAHLaunchCtlHelperName prompt:@"Install Helper?" error:&error];
-    if(error){
-        [NSApp presentError:error];
-    }
+    domain = [[(NSButton*)_JobType.selectedCell identifier]intValue];
 }
 
 - (IBAction)addJob:(id)sender {
-    AHlaunchDomain domain;
-
-    NSButton* b = _JobType.selectedCell;
-    if([b.identifier intValue] == 1){
-        domain = kAHUserLaunchAgent;
-    }else if([b.identifier intValue] == 2){
-        domain = kAHGlobalLaunchAgent;
-    }else{
-        domain = kAHGlobalLaunchDaemon;
-    }
-    
     AHLaunchJob *job = [AHLaunchJob new];
+    
     job.Label = _label.stringValue;
-    job.Program = _command.stringValue;
-    job.ProgramArguments = @[@"hello"];
+    
+    NSArray* array = [_command.stringValue componentsSeparatedByString:@" "];
+    assert(array != nil);
+    
+//    job.Program = array[0];
+    job.ProgramArguments = array;
     job.StartInterval =  [_timer.stringValue integerValue];
     job.StandardOutPath = [NSString stringWithFormat:@"/tmp/%@.txt",_label.stringValue];
     job.RunAtLoad = YES;
 
-    [[AHLaunchCtl sharedControler]add:job toDomain:domain reply:^(NSError *error) {
+    [[AHLaunchCtl sharedControler]add:job toDomain:domain overwrite:_overwrite.state reply:^(NSError *error) {
         if(error){
-            NSLog(@"error: %@",error.localizedDescription);
+            [self logError:error];
         }else{
-            NSLog(@"added job");
+            [self logText:@"added job"];
         }
     }];
 }
 
 - (IBAction)removeJob:(id)sender {
-    AHlaunchDomain domain;
-    
-    NSButton* b = _JobType.selectedCell;
-    if([b.identifier intValue] == 1)
-        domain = kAHUserLaunchAgent;
-    else if([b.identifier intValue] == 2)
-        domain = kAHGlobalLaunchAgent;
-    else
-        domain = kAHGlobalLaunchDaemon;
-    
     
     [[AHLaunchCtl sharedControler]remove:_label.stringValue fromDomain:domain reply:^(NSError *error) {
         if(error){
-            NSLog(@"error: %@",error.localizedDescription);
+            [self logError:error];
         }else{
-            NSLog(@"removed job");
+            [self logText:@"removed job"];
+
         }
     }];
     
 }
 
+- (IBAction)load:(id)sender {
+    [[AHLaunchCtl sharedControler]start:_label.stringValue inDomain:domain reply:^(NSError *error) {
+        if(error)
+            [self logError:error];
+        else
+            [self logText:@"Started LaunchD job"];
+    }];
+}
+
+- (IBAction)unload:(id)sender {
+    [[AHLaunchCtl sharedControler]stop:_label.stringValue inDomain:domain reply:^(NSError *error) {
+        if(error)
+            [self logError:error];
+        else
+            [self logText:@"Stopped LaunchD job"];
+    }];
+}
+
+
 - (IBAction)authorize:(NSButton*)sender {
     AHLaunchCtl *controller = [AHLaunchCtl new];
-    
-    [controller authorizeSessionFor:10 error:^(NSError *error){
-        if(error)
-            NSLog(@"error: %@",error.localizedDescription);
-        
-    }timeRemaining:^(NSInteger time){
+    [controller authorizeSessionForNumberOfSeconds:60 timeRemaining:^(NSInteger time) {
         if(time <= 0){
-            _countdown.stringValue = @"expired";
+            sender.title = @"Authorize";
         }else{
-         [[NSOperationQueue mainQueue]addOperationWithBlock:^{
-             _countdown.stringValue = [NSString stringWithFormat:@"%ld",time];
-         }];
+            [[NSOperationQueue mainQueue]addOperationWithBlock:^{
+                sender.title = [NSString stringWithFormat:@"%ld",time];
+            }];
         }
+    } reply:^(NSError *error) {
+        if(error)
+            [self logError:error];
     }];
-
 }
 
 - (IBAction)deauthorize:(id)sender {
     AHLaunchCtl *controller = [AHLaunchCtl new];
     [controller deAuthorizeSession:^(NSError *error) {
         if(error){
-            NSLog(@"error: %@",error.localizedDescription);
+            [self logError:error];
         }else{
-            NSLog(@"Deauthorized Session job");
+            [self logText:@"Deauthorized Session job"];
         }
     }];
 }
 
+
+
 - (IBAction)uninstallHelper:(id)sender {
-    [AHLaunchCtl uninstallHelper:kAHLaunchCtlHelperName reply:^(NSError *error) {
+    [AHLaunchCtl uninstallHelper:kAHLaunchCtlHelperTool reply:^(NSError *error) {
         if(error){
-            [NSApp presentError:error];
+            [self logError:error];
         }else{
-            NSLog(@"Helper Uninstaled");
+            [self logText:@"helper removed"];
         }
     }];
+}
+
+- (IBAction)installHelperTool:(id)sender {
+    NSError* error;
+    [AHLaunchCtl installHelper:kAHLaunchCtlHelperTool prompt:@"Install Helper?" error:&error];
+    if(error){
+        [self logError:error];
+    }else{
+        [self logText:@"helper installed"];
+
+    }
+}
+
+- (IBAction)domainChanged:(NSMatrix *)sender {
+    domain = [[(NSButton*)sender.selectedCell identifier]intValue];
 }
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender{return YES;}
+
+
+#pragma mark - Logging
+- (void)logText:(NSString *)text
+{
+    assert(text != nil);
+    text = [text stringByAppendingString:@"\n\n"];
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        
+        BOOL scroll = (NSMaxY(self.logMessage.visibleRect) == NSMaxY(self.logMessage.bounds));
+        
+        [[self.logMessage textStorage] appendAttributedString:[[NSAttributedString alloc] initWithString:text]];
+        
+        if (scroll) // Scroll to end of the textview contents
+            [self.logMessage scrollRangeToVisible: NSMakeRange(self.logMessage.string.length, 0)];
+        
+    }];
+}
+
+- (void)logWithFormat:(NSString *)format, ...
+{
+    va_list ap;
+    assert(format != nil);
+    va_start(ap, format);
+    [self logText:[[NSString alloc] initWithFormat:format arguments:ap]];
+    va_end(ap);
+}
+
+- (void)logError:(NSError *)error
+{
+    assert(error != nil);
+    [self logWithFormat:@"error:[%@ - %d] %@ ", [error domain], (int) [error code],error.localizedDescription];
+}
 
 @end
 

@@ -9,19 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtlHelper.h"
 
-static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check whether to quit
-
 int main(int argc, const char * argv[])
 {
-    AHLaunchCtlXPCListener *helper = [[AHLaunchCtlXPCListener alloc]initConnection];
-    
-    NSRunLoop * helperLoop = [NSRunLoop currentRunLoop];
-    while (!helper.helperToolShouldQuit)
-    {
-        [helperLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:kHelperCheckInterval]];
+    @autoreleasepool {
+        AHLaunchCtlXPCListener *helper = [[AHLaunchCtlXPCListener alloc]init];
+        [helper run];
     }
-
-    return 0;
-
+	return 0;
 }
 

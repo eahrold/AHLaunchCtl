@@ -22,107 +22,71 @@
 
 #import "AHAuthorizedLaunchCtl.h"
 #import "AHLaunchCtlHelper.h"
-#import <syslog.h>
-
 
 #pragma mark Authorized LaunchCtl
-@interface AHAuthorizedLaunchCtl()
-@property NSInteger authorizedTimeRemaining;
+@interface AHAuthorizedLaunchCtl() <AHLaunchCtlProgress>
+@property (atomic, strong, readwrite) NSXPCConnection * connection;
 @property (copy) void (^timerReply)(NSInteger time);
+@property (copy) void (^statusMessage)(NSString *message);
+
 @end
 
-@implementation AHAuthorizedLaunchCtl
+@implementation AHAuthorizedLaunchCtl 
 
--(instancetype)initConnection{
-    self = [super initWithMachServiceName:kAHLaunchCtlHelperName options:NSXPCConnectionPrivileged];
-    if (self) {
-        self.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlHelper)];
-        self.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlProgress)];
-        self.exportedObject = self;
-        [self resume];
+-(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply{
+    self = [super init];
+    if(self){
+        self->_timerReply = timeReply;
     }
     return self;
 }
 
-
-#pragma mark Class Methods / Convience Accessors
-+(void)addJob:(AHLaunchJob *)job toDomain:(AHlaunchDomain)domain reply:(void (^)(NSError *))reply{
-    AHAuthorizedLaunchCtl *connection = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    NSData* authData = [ AHAuthorizer authorizeHelper];
-    assert(authData != nil);
-    
-    [[connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        reply(error);
-    }]addJob:job toDomain:domain authData:authData reply:^(NSError *error) {
-        reply(error);
-        [connection invalidate];
-    }];
+-(instancetype)initWithStatusMessageBlock:(void (^)(NSString *))statusMessage{
+    self = [super init];
+    if(self){
+        self->_statusMessage = statusMessage;
+    }
+    return self;
 }
 
-+(void)removeJob:(NSString *)label fromDomain:(AHlaunchDomain)domain reply:(void (^)(NSError *))reply{
-    AHAuthorizedLaunchCtl *connection = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    NSData* authData = [AHAuthorizer authorizeHelper];
-    assert(authData != nil);
+-(void)connectToHelper{
+    assert([NSThread isMainThread]);
+    if (self.connection == nil) {
+        self.connection = [[NSXPCConnection alloc] initWithMachServiceName:kAHLaunchCtlHelperTool
+                                                                   options:NSXPCConnectionPrivileged];
 
-    [[connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        reply(error);
-    }]removeJob:label fromDomain:domain authData:authData reply:^(NSError *error) {
-        reply(error);
-        [connection invalidate];
-    }];
-}
-
-
-+(void)authorizeSessionFor:(NSInteger)seconds
-                      error:(void (^)(NSError* error))error
-               timeRemaining:(void (^)(NSInteger time))timeRemaining
-
-{
-    AHAuthorizedLaunchCtl *connection = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    NSData* authData = [AHAuthorizer authorizeHelper];
-    assert(authData != nil);
-    connection.timerReply = timeRemaining;
-    
-    [[connection remoteObjectProxyWithErrorHandler:^(NSError *connectionError) {
-        error(connectionError);
-    }]authorizeSessionFor:seconds authData:authData reply:^(NSError *replyError) {
-        error(replyError);
-    }];
-}
-
-+(void)deAuthorizeSession:(void (^)(NSError *))reply{
-    AHAuthorizedLaunchCtl *connection = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    connection.authorizedTimeRemaining = 0;
-    [[connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        reply(error);
-    }]deAuthorizeSession:^(NSError *error) {
-        reply(error);
-        [connection invalidate];
-    }];
-}
-
-+(void)quitHelper{
-    AHAuthorizedLaunchCtl *connection = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    [[connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        NSLog(@"Error: %@ ",error.debugDescription);
-    }]quitHelper];
-}
-
-+(void)uninstallHelper:(NSString *)label reply:(void (^)(NSError* error))reply{
-    AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]initConnection];
-    NSData* authData = [AHAuthorizer authorizeHelper];
-    assert(authData != nil);
-    [[controller remoteObjectProxy] uninstallHelper:label authData:authData reply:^(NSError *error) {
-        reply(error);
-    }];
+        self.connection.remoteObjectInterface = [NSXPCInterface
+                                                 interfaceWithProtocol:@protocol(AHLaunchCtlHelper)];
+        
+        self.connection.exportedInterface = [NSXPCInterface
+                                             interfaceWithProtocol:@protocol(AHLaunchCtlProgress)];
+        
+        self.connection.invalidationHandler = ^{
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Warc-retain-cycles"
+            self.connection.invalidationHandler = nil;
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                self.connection = nil;
+            }];
+        #pragma clang diagnostic pop
+        };
+        self.connection.exportedObject = self;
+        
+        [self.connection resume];
+    }
 }
 
 #pragma mark  - AHLaunchCtlProgress
 -(void)countdown:(NSInteger)time{
     self.timerReply(time);
     if(time <= 0){
-        [self invalidate];
+        [self.connection invalidate];
     }
+}
+
+-(void)statusMessage:(NSString *)message{
+    assert(message != nil);
+    self.statusMessage(message);
 }
 
 @end

@@ -20,35 +20,53 @@
 // THE SOFTWARE.
 
 
-
-
 #import "AHLaunchCtlHelper.h"
 #import "AHAuthorizedLaunchCtl.h"
+#import "AHAuthorizer.h"
 
-#pragma mark - AHLaunchCtl Extensioin;
+static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check whether to quit
+
+#pragma mark - AHLaunchCtl Extension;
 @interface AHLaunchCtl ()
 -(BOOL)writeJobToFile:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError**)error;
 -(BOOL)removeJobFileWithLabel:(NSString*)label domain:(AHlaunchDomain)domain error:(NSError**)error;
 @end
 
 #pragma mark - AHLaunchCtlListener
-
-@implementation AHLaunchCtlXPCListener{
+@interface AHLaunchCtlXPCListener ()  <NSXPCListenerDelegate, AHLaunchCtlHelper>{
 @private
     __weak NSXPCConnection * _timerConnection;
+    __weak NSXPCConnection * _statusUpdateConnection;
+
     __strong AHAuthorizer *_timer;
     BOOL _authorizedForSession;
 }
 
--(instancetype)initConnection{
-    self = [super initWithMachServiceName:kAHLaunchCtlHelperName];
+@property (atomic, strong, readwrite) NSXPCListener *    listener;
+@property (nonatomic, assign) BOOL helperToolShouldQuit;
+@property (weak) NSXPCConnection *connection;
+@end
+
+@implementation AHLaunchCtlXPCListener
+
+-(instancetype)init{
+    self = [super init];
     if(self){
-        self.delegate = self;
-        [self resume];
+        self->_listener = [[NSXPCListener alloc] initWithMachServiceName:kAHLaunchCtlHelperTool];
+        self->_listener.delegate = self;
     }
     return self;
 }
 
+-(void)run{
+    [self.listener resume];
+    while (!self.helperToolShouldQuit)
+    {
+        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:kHelperCheckInterval]];
+    }
+}
+
+#pragma mark - AHLaunchCtlHelper Protocol
 -(void)addJob:(AHLaunchJob *)job toDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError *))reply{
     NSError *error;
     AHLaunchCtl *controller = [AHLaunchCtl new];
@@ -57,13 +75,13 @@
     if(!_authorizedForSession)
         error = [AHAuthorizer checkAuthorization:authData command:_cmd];
     
-    if(!error)
+    if(!error){
         [controller writeJobToFile:job inDomain:domain error:&error];
     
-    if(domain >= kAHSystemLaunchAgent && !error){
-        [controller load:job inDomain:domain error:&error];
+        if(domain >= kAHSystemLaunchAgent && !error){
+            [controller load:job inDomain:domain error:&error];
+        }
     }
-    
     reply(error);
 }
 
@@ -74,15 +92,59 @@
     if(!_authorizedForSession)
         error = [AHAuthorizer checkAuthorization:authData command:_cmd];
     
-    if(!error)
+    if(!error){
         [controller removeJobFileWithLabel:label domain:domain error:&error];
     
-    if(domain >= kAHSystemLaunchAgent){
-        [controller unload:label inDomain:domain error:&error];
+        if(domain >= kAHSystemLaunchAgent){
+            [controller unload:label inDomain:domain error:&error];
+        }
     }
+    reply(error);
+}
+
+-(void)startJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
+{
+    AHLaunchCtl *controller = [AHLaunchCtl new];
+    NSError *error;
+    
+    if(!_authorizedForSession)
+        error = [AHAuthorizer checkAuthorization:authData command:_cmd];
+    
+    if(!error)
+        [controller start:label inDomain:domain error:&error];
+
+    reply(error);
+    
+}
+
+-(void)stopJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
+
+{
+    AHLaunchCtl *controller = [AHLaunchCtl new];
+    NSError *error;
+    
+    if(!_authorizedForSession)
+        error = [AHAuthorizer checkAuthorization:authData command:_cmd];
+    
+    if(!error)
+        [controller stop:label inDomain:domain error:&error];
     
     reply(error);
 }
+
+-(void)restartJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply{
+    AHLaunchCtl *controller = [AHLaunchCtl new];
+    NSError *error;
+    
+    if(!_authorizedForSession)
+        error = [AHAuthorizer checkAuthorization:authData command:_cmd];
+    
+    if(!error)
+        [controller restart:label inDomain:domain error:&error];
+    
+    reply(error);
+}
+
 
 -(void)authorizeSessionFor:(NSInteger)seconds authData:(NSData *)authData reply:(void (^)(NSError *error))reply{
     NSError *error;
@@ -105,9 +167,8 @@
     NSOperationQueue *timerQueue = [NSOperationQueue new];
     [timerQueue addOperationWithBlock:^{
         [_timer countDownFrom:seconds timeRemaining:^(NSInteger timer) {
-            if(timer >= 0 ){
-                [[_timerConnection remoteObjectProxy]countdown:timer];
-            }else{
+            [[_timerConnection remoteObjectProxy]countdown:timer];
+            if(timer <= 0 ){
                 _authorizedForSession = NO;
                 [_timerConnection invalidate];
                 _timerConnection = nil;
@@ -132,9 +193,15 @@
     if(!error){
         NSString *helperTool = [NSString stringWithFormat:@"/Library/PrivilegedHelperTools/%@",label];
         [[NSFileManager defaultManager] removeItemAtPath:helperTool error:&error];
-        [[AHLaunchCtl sharedControler] remove:label fromDomain:kAHGlobalLaunchDaemon error:&error];
+        [self removeJob:label
+             fromDomain:kAHGlobalLaunchDaemon
+               authData:authData
+                  reply:^(NSError *error) {
+                      reply(error);
+                  }];
+    }else{
+        reply(error);
     }
-    reply(error);
 }
 
 -(void)quitHelper{
@@ -148,17 +215,16 @@
 // Set up the one method of NSXPClistener
 //----------------------------------------
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
+    assert(listener == self.listener);
+
     newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlHelper)];
-    newConnection.exportedObject = self;
-    
     newConnection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlProgress)];
-    self.connection = newConnection;
+    newConnection.exportedObject = self;
+
     [newConnection resume];
+
+    self.connection = newConnection;
     return YES;
 }
-
-#pragma mark  Listener Authorization
-
-
 
 @end

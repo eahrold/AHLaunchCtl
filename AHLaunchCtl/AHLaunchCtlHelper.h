@@ -24,26 +24,23 @@
 
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtl.h"
-@class AHLaunchJob;
 
 @protocol AHLaunchCtlHelper
-
 -(void)addJob:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
-
 -(void)removeJob:(NSString*)label fromDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
 
--(void)authorizeSessionFor:(NSInteger)seconds authData:(NSData *)authData reply:(void (^)(NSError *error))reply;
+-(void)startJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)stopJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)restartJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
 
+-(void)authorizeSessionFor:(NSInteger)seconds authData:(NSData *)authData reply:(void (^)(NSError *error))reply;
 -(void)deAuthorizeSession:(void (^)(NSError* error))reply;
 
 -(void)quitHelper;
 -(void)uninstallHelper:(NSString *)label authData:(NSData *)authData reply:(void (^)(NSError *))reply;
 @end
 
-@interface AHLaunchCtlXPCListener : NSXPCListener <NSXPCListenerDelegate,AHLaunchCtlHelper>
-@property (weak) NSXPCConnection *connection;
-@property (nonatomic, assign) BOOL helperToolShouldQuit;
-
--(instancetype)initConnection;
-
+@interface AHLaunchCtlXPCListener : NSObject
+-(void)run;
+-(instancetype)init;
 @end

@@ -15,16 +15,20 @@
 - (IBAction)removeJob:(id)sender;
 - (IBAction)authorize:(id)sender;
 - (IBAction)deauthorize:(id)sender;
+- (IBAction)unload:(id)sender;
+- (IBAction)load:(id)sender;
+- (IBAction)domainChanged:(NSMatrix *)sender;
 
 - (IBAction)uninstallHelper:(id)sender;
+- (IBAction)installHelperTool:(id)sender;
 
 @property (assign) IBOutlet NSWindow *window;
-
 @property (weak) IBOutlet NSTextField *label;
 @property (weak) IBOutlet NSTextField *command;
 @property (weak) IBOutlet NSTextField *timer;
-@property (weak) IBOutlet NSTextField *countdown;
+@property (weak) IBOutlet NSButton *overwrite;
 
 @property (weak) IBOutlet NSMatrix *JobType;
+@property (unsafe_unretained) IBOutlet NSTextView *logMessage;
 
 @end

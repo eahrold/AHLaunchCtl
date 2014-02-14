@@ -20,8 +20,6 @@
 // THE SOFTWARE.
 
 
-
-
 #import <Foundation/Foundation.h>
 
 @interface AHLaunchJob : NSObject <NSSecureCoding>
@@ -32,7 +30,10 @@
 @property (nonatomic)       NSInteger      StartInterval;
 @property (copy, nonatomic) NSDictionary * StartCalendarInterval;
 @property (copy, nonatomic) id             KeepAlive;
-@property (copy, nonatomic) NSDictionary * WatchPaths;
+
+@property (copy, nonatomic) NSArray        * WatchPaths;
+
+@property (nonatomic) BOOL             LaunchOnlyOnce;
 @property (nonatomic) BOOL  StartOnMount;
 @property (nonatomic) BOOL  RunAtLoad;
 @property (nonatomic) BOOL  OnDemand;
@@ -45,10 +46,12 @@
 @property (copy, nonatomic) NSString * WorkingDirectory;
 @property (copy, nonatomic) NSArray  * QueueDirectories;
 @property (nonatomic) BOOL  EnableGlobbing;
-@property (nonatomic) BOOL  InitGroups;
 @property (nonatomic) BOOL  EnableTransactions;
 @property (nonatomic) BOOL  Debug;
 @property (nonatomic) BOOL  WaitForDebugger;
+@property (nonatomic) BOOL  InitGroups;
+
+@property (nonatomic) NSInteger PID;
 @property (nonatomic) NSInteger Nice;
 @property (nonatomic) NSInteger Umask;
 @property (nonatomic) NSInteger TimeOut;
@@ -58,6 +61,15 @@
 @property (copy, nonatomic) NSString *StandardInPath;
 @property (copy, nonatomic) NSString *StandardOutPath;
 @property (copy, nonatomic) NSString *StandardErrorPath;
+
+// Specialized / Undocumented Apple Keys
+@property (copy, nonatomic) NSDictionary *inetdCompatibility;
+@property (copy, nonatomic) NSDictionary *Sockets;
+@property (copy, nonatomic) NSDictionary *MachServices;
+@property (copy, nonatomic) NSDictionary *PerJobMachServices;
+@property (copy, nonatomic) NSString     *POSIXSpawnType;
+@property (copy, nonatomic) NSDictionary *LaunchEvents;
+
 @property (copy, readonly) NSMutableDictionary *dictionary;
 
 

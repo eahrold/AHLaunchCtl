@@ -20,37 +20,41 @@
 // THE SOFTWARE.
 
 #import "AHLaunchCtl.h"
-#import "AHLaunchJob.h"
 #import "AHAuthorizedLaunchCtl.h"
+#import "AHLaunchCtlHelper.h"
+#import "AHAuthorizer.h"
 
 #import <ServiceManagement/ServiceManagement.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
-NSString* const kAHLaunchCtlHelperName = @"com.eeaapps.launchctl.helper";
+NSString* const kAHLaunchCtlHelperTool = @"com.eeaapps.launchctl.helper";
 
 static NSString * errorMsgFromCode(NSInteger code);
 static NSString * launchFileDirectory(AHlaunchDomain domain);
 static NSString * launchFile(NSString* label, AHlaunchDomain domain);
-//static AuthorizationFlags defaultFlags();
 static const CFStringRef SMDomain(AHlaunchDomain domain);
-//static BOOL authorizeSystemDaemon(NSString * prompt,AuthorizationRef* authRef);
 static BOOL jobIsRunning(NSString* label, AHlaunchDomain domain);
 static BOOL jobExists(NSString* label, AHlaunchDomain domain);
+static BOOL setToConsoleUser();
+static BOOL resetToOriginalUser(uid_t uid);
 
 enum LaunchControlErrorCodes
 {
-    kAHErrorJobNotLoaded       = 1001,
-    kAHErrorJobLabelNotValid,
+    kAHErrorJobLabelNotValid  = 1001,
+    kAHErrorJobMissingRequiredKeys,
+    
+    kAHErrorJobNotLoaded,
     kAHErrorJobAlreayExists,
-    kAHErrorFileNotFound,
-    kAHErrorCouldNotWriteFile,
+    kAHErrorJobAlreayLoaded,
     kAHErrorCouldNotLoadJob,
     kAHErrorCouldNotUnloadJob,
+    kAHErrorJobCouldNotReload,
+
+    kAHErrorFileNotFound,
+    kAHErrorCouldNotWriteFile,
     kAHErrorMultipleJobsMatching,
     kAHErrorInsufficentPriviledges,
-    kAHErrorMissingJobKeys,
-    kAHErrorCouldNotSetUid,
-    kAHErrorCouldNotResetUid,
+    kAHErrorExecutingAsIncorrectUser,
     kAHErrorProgramNotExecutable,
 };
 
@@ -67,18 +71,27 @@ enum LaunchControlErrorCodes
     return shared;
 }
 
-#pragma mark - Add Remove Jobs
--(void)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply{
+
+#pragma mark - Public Methods
+#pragma mark --- Add / Remove ---
+-(void)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain overwrite:(BOOL)overwrite reply:(void (^)(NSError* error))reply{
     NSError* error;
     
-    if(jobExists(job.Label,domain)){
+    if(!overwrite && jobExists(job.Label,domain)){
         [[self class]errorWithCode:kAHErrorJobAlreayExists error:&error];
         reply(error);
         return;
     }
        
     if(domain > kAHUserLaunchAgent){
-        [AHAuthorizedLaunchCtl addJob:job toDomain:domain reply:^(NSError *error) {
+        AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+        NSData* authData = [ AHAuthorizer authorizeHelper];
+        assert(authData != nil);
+        [controller connectToHelper];
+        [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+            reply(error);
+        }]addJob:job toDomain:domain authData:authData reply:^(NSError *error) {
+            [controller.connection invalidate];
             if(!error){
                 if(domain <= kAHSystemLaunchAgent){
                     [self load:job inDomain:domain error:&error];
@@ -94,7 +107,14 @@ enum LaunchControlErrorCodes
 
 -(void)remove:(NSString*)label fromDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply{
     if(domain > kAHUserLaunchAgent){
-        [AHAuthorizedLaunchCtl removeJob:label fromDomain:domain reply:^(NSError *error) {
+        AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+        NSData* authData = [AHAuthorizer authorizeHelper];
+        assert(authData != nil);
+        [controller connectToHelper];
+        [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+            reply(error);
+        }]removeJob:label fromDomain:domain authData:authData reply:^(NSError *error) {
+            [controller.connection invalidate];
             if(!error){
                 if(domain <= kAHSystemLaunchAgent){
                     [self unload:label inDomain:domain error:&error];
@@ -109,50 +129,144 @@ enum LaunchControlErrorCodes
     }
 }
 
+-(void)start:(NSString *)label inDomain:(AHlaunchDomain)domain reply:(void (^)(NSError *))reply{
+    if(jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent){
+        AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+        NSData* authData = [AHAuthorizer authorizeHelper];
+        [controller connectToHelper];
+        [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+            [self start:label inDomain:domain error:&error];
+            reply(error);
+        }]startJob:label inDomain:domain authData:authData reply:^(NSError *error) {
+            reply(error);
+        }];
+        
+    }else{
+        NSError *error;
+        [self start:label inDomain:domain error:&error];
+        reply(error);
+    }
+}
+
+-(void)stop:(NSString *)label inDomain:(AHlaunchDomain)domain reply:(void (^)(NSError *))reply{
+    if(jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent){
+        AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+        NSData* authData = [AHAuthorizer authorizeHelper];
+        [controller connectToHelper];
+        [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+            [self stop:label inDomain:domain error:&error];
+            reply(error);
+        }]stopJob:label inDomain:domain authData:authData reply:^(NSError *error) {
+            reply(error);
+        }];
+    }else{
+        NSError *error;
+        [self stop:label inDomain:domain error:&error];
+        reply(error);
+    }
+}
+
+-(void)restart:(NSString *)label inDomain:(AHlaunchDomain)domain status:(void (^)(NSString *))status reply:(void (^)(NSError *))reply{
+    if(jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent){
+        AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+        NSData* authData = [AHAuthorizer authorizeHelper];
+        [controller connectToHelper];
+        [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+            [self restart:label inDomain:domain error:&error];
+            reply(error);
+        }]restartJob:label inDomain:domain authData:authData reply:^(NSError *error) {
+            reply(error);
+        }];
+    }else{
+        NSError *error;
+        status(@"Stopping Job");
+        [self stop:label inDomain:domain error:&error];
+        if(error){
+            status(error.localizedDescription);
+        }
+        
+        status(@"Starting Job");
+        [self start:label inDomain:domain error:&error];
+        reply(error);
+    }
+}
+#pragma mark --- Authorization ---
+-(void)authorizeSessionForNumberOfSeconds:(NSInteger)seconds
+                            timeRemaining:(void (^)(NSInteger time))timeRemaining
+                                    reply:(void (^)(NSError *error))reply;
+{
+    AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]initWithTimeReplyBlock:timeRemaining];
+    
+    NSData* authData = [AHAuthorizer authorizeHelper];
+
+    assert(authData != nil);
+    [controller connectToHelper];
+    
+    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+        reply(error);
+    }]authorizeSessionFor:seconds authData:authData reply:^(NSError *error) {
+        reply(error);
+    }];
+}
+
+-(void)deAuthorizeSession:(void (^)(NSError *))reply{
+    AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+    [controller connectToHelper];
+    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+        reply(error);
+    }]deAuthorizeSession:^(NSError *error) {
+        reply(error);
+        [controller.connection invalidate];
+    }];
+}
+
+#pragma mark - Private Methods
+#pragma mark --- Add/Remove ---
+
+/** The Add and Remove methods here should only be used when developing a cli tool, since they set the euid. They will not function properly with a helper tool since the helper tool is managed by laucnhd. https://developer.apple.com/library/mac/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html */
+
 -(BOOL)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
+    uid_t uid = getuid();
+    BOOL rc = NO;
     if(domain > kAHUserLaunchAgent){
         job = [AHLaunchJob jobFromDictionary:job.dictionary];
     }
     
     if(!job.Label){
-        return [[self class] errorWithCode:kAHErrorMissingJobKeys error:error];
+        return [[self class] errorWithCode:kAHErrorJobMissingRequiredKeys error:error];
     }
     
     if([self writeJobToFile:job inDomain:domain error:error]){
-        return [self load:job inDomain:domain error:error];
+        if(domain < kAHGlobalLaunchDaemon){
+            if(!setToConsoleUser())
+                return [[self class]errorWithCode:kAHErrorExecutingAsIncorrectUser error:error];
+        }
+        rc = [self load:job inDomain:domain error:error];
+        resetToOriginalUser(uid);
     }
-    return NO;
+    return rc;
 }
 
 -(BOOL)remove:(NSString*)label fromDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
+    uid_t uid = getuid();
+    if(domain < kAHGlobalLaunchDaemon){
+        if(!setToConsoleUser())
+            return [[self class]errorWithCode:kAHErrorExecutingAsIncorrectUser error:error];
+    }
     [self unload:label inDomain:domain error:error];
+    resetToOriginalUser(uid);
     return [self removeJobFileWithLabel:label domain:domain error:error];
 }
 
-#pragma mark - Load / Unload Jobs
+
+#pragma mark --- Load / Unload Jobs ---
 -(BOOL)load:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
     BOOL rc;
-    CFErrorRef cfError;
-    int result;
-    uid_t effectiveUid;
-    uid_t originalUid;
-    uid_t currentUid;
-
-    originalUid = getuid();
-    CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, &effectiveUid, NULL));
-    
+    CFErrorRef cfError = NULL;
     AuthorizationRef authRef = NULL;
+    
     if(domain >= kAHSystemLaunchAgent)
         [AHAuthorizer authorizeSystemDaemon:@"Load Job?" authRef:&authRef];
-
-    if(domain < kAHSystemLaunchAgent){
-        result = seteuid(effectiveUid);
-        if (result != 0) {
-            return [[self class]errorWithCode:kAHErrorCouldNotSetUid error:error];
-        }
-    }
-
-    currentUid = geteuid();
 
     rc =  SMJobSubmit(SMDomain(domain),
                       (__bridge CFDictionaryRef)job.dictionary,
@@ -163,56 +277,59 @@ enum LaunchControlErrorCodes
         [[self class] errorWithCFError:cfError code:1 error:error];
     }
     
-    seteuid(originalUid);
     [AHAuthorizer authoriztionFree:authRef];
-    
+
     return rc;
 }
 
 -(BOOL)unload:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
+    
+    if(!jobIsRunning(label, domain)){
+        return [[self class]errorWithCode:kAHErrorJobNotLoaded error:error];
+    }
+    
     BOOL rc;
-    int result;
-    uid_t effectiveUid;
-    uid_t originalUid;
-    
-    originalUid = getuid();
-    CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, &effectiveUid, NULL));
-    
     AuthorizationRef authRef = NULL;
+    CFErrorRef cfError = NULL;
+
     if(domain >= kAHSystemLaunchAgent)
         [AHAuthorizer authorizeSystemDaemon:@"Unoad Job?" authRef:&authRef];
 
-    if(domain < kAHSystemLaunchAgent){
-        result = seteuid(effectiveUid);
-        if (result != errAuthorizationSuccess) {
-            return [[self class]errorWithCode:kAHErrorCouldNotSetUid error:error];
-        }
-    }
+    rc =  SMJobRemove(SMDomain(domain),
+                      (__bridge CFStringRef)label,
+                      authRef,
+                      YES,
+                      &cfError);
     
-    CFErrorRef cfError = NULL;
-    rc =  SMJobRemove(SMDomain(domain), (__bridge CFStringRef)label, authRef, YES, &cfError);
     [AHAuthorizer authoriztionFree:authRef];
     
     if(!rc){
         [[self class] errorWithCFError:cfError code:1 error:error];
     }
     
-    if(!effectiveUid == originalUid){
-        result = seteuid(originalUid);
-        if (!result == errAuthorizationSuccess) {
-            [[self class] errorWithCode:kAHErrorCouldNotResetUid error:error];
-        }
-    }
-    
     return rc;
 }
 
+-(BOOL)reload:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
+    if(jobIsRunning(job.Label, domain)){
+        if(![self unload:job.Label inDomain:domain error:error]){
+            return [[self class]errorWithCode:kAHErrorJobCouldNotReload error:error];
+        }
+    }
+    return [self load:job inDomain:domain error:error];
+}
+
+#pragma mark --- Start / Stop / Restart ---
 -(BOOL)start:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError*__autoreleasing*)error{
+    if(jobIsRunning(label, domain)){
+        return [[self class] errorWithCode:kAHErrorJobAlreayLoaded error:error];
+    }
+    
     AHLaunchJob* job = [[self class]jobFromFileNamed:label inDomain:domain];
     if(job){
         return [self load:job inDomain:domain error:error];
     }else{
-        return [[self class] errorWithCode:kAHErrorCouldNotLoadJob error:error];
+        return [[self class] errorWithCode:kAHErrorFileNotFound error:error];
     }
 }
 
@@ -221,18 +338,11 @@ enum LaunchControlErrorCodes
 }
 
 -(BOOL)restart:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error{
-    AHLaunchJob *job = [[self class]runningJobWithLabel:label inDomain:domain];
-    if(job){
-        if([self unload:job.Label inDomain:domain error:error]){
-            return [self load:job inDomain:domain error:error];
-        }else{
-            return NO;
-        }
-    }else{
+    AHLaunchJob *job = [[self class]jobFromRunningJobWithLabel:label inDomain:domain];
+    if(!job){
         return [[self class]errorWithCode:kAHErrorJobNotLoaded error:error];
     }
-    
-    return NO;
+    return [self reload:job inDomain:domain error:error];
 }
 
 -(BOOL)shouldLoadJob:(BOOL)load shouldStick:(BOOL)wKey label:(NSString*)label domain:(AHlaunchDomain)domain error:(NSError *__autoreleasing*)error{
@@ -259,25 +369,8 @@ enum LaunchControlErrorCodes
     return YES;
 }
 
-#pragma mark - Authorization
--(void)authorizeSessionFor:(NSInteger)seconds
-                     error:(void (^)(NSError *error))error
-             timeRemaining:(void (^)(NSInteger time))timeRemaining
-{
-    [AHAuthorizedLaunchCtl authorizeSessionFor:(NSInteger)seconds error:^(NSError *replyError) {
-        error(replyError);
-    }timeRemaining:^(NSInteger time) {
-        timeRemaining(time);
-    }];
-}
 
--(void)deAuthorizeSession:(void (^)(NSError *))reply{
-    [AHAuthorizedLaunchCtl deAuthorizeSession:^(NSError *error) {
-        reply(error);
-    }];
-}
-
-#pragma mark - File Writing
+#pragma mark --- File Writing ---
 -(BOOL)writeJobToFile:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError*__autoreleasing*)error{
     NSFileManager* fm = [NSFileManager new];
     
@@ -318,129 +411,12 @@ enum LaunchControlErrorCodes
     }
 }
 
-#pragma mark - Convience Accessors;
-+(BOOL)launchAtLogin:(NSString*)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError*__autoreleasing*)error
-{
-    NSBundle* appBundle = [NSBundle bundleWithPath:app];
-    NSString* appIdentifier = [NSString stringWithFormat:@"%@.launcher",appBundle.bundleIdentifier];
-    
-    AHLaunchCtl *controller = [AHLaunchCtl new];
-    AHLaunchJob* job = [AHLaunchJob new];
-    job.label = appIdentifier;
-    job.program = appBundle.executablePath;
-    job.runAtLoad = YES;
-    job.keepAlive = @{@"SuccessfulExit":[NSNumber numberWithBool:keepAlive]};
-    
-    AHlaunchDomain domain = global ? kAHGlobalLaunchAgent:kAHUserLaunchAgent;
-    return [controller load:job inDomain:domain error:error];
-}
-
-+(BOOL)scheduleJob:(NSString*)label program:(NSString*)program interval:(int)seconds domain:(AHlaunchDomain)domain error:(NSError**)error
-{
-    return [self scheduleJob:label program:program programArguments:nil interval:seconds domain:domain error:error];
-}
-
-+(BOOL)scheduleJob:(NSString*)label program:(NSString*)program programArguments:(NSArray*)programArguments interval:(int)seconds domain:(AHlaunchDomain)domain error:(NSError *__autoreleasing *)error
-{
-    AHLaunchCtl *controller = [AHLaunchCtl new];
-    AHLaunchJob* job = [AHLaunchJob new];
-    job.Label = label;
-    job.Program = program;
-    job.ProgramArguments = programArguments;
-    job.RunAtLoad = YES;
-    job.StartInterval = seconds;
-    return [controller add:job toDomain:domain error:error];
-}
-
-+(BOOL)removeJob:(NSString*)label type:(AHlaunchDomain)domain error:(NSError*__autoreleasing*)error{
-    AHLaunchCtl* controller = [AHLaunchCtl new];
-    return [controller remove:label fromDomain:domain error:error];
-}
-
-+(BOOL)restartJobWithLabel:(NSString *)label domain:(AHlaunchDomain)domain{
-    AHLaunchCtl* launchctl = [[AHLaunchCtl alloc]init];
-    return [launchctl restart:label inDomain:domain error:nil];
-}
-
-+(BOOL)restartJobMatching:(NSString *)match restartAll:(BOOL)restartAll{
-    AHLaunchCtl* launchctl = [[AHLaunchCtl alloc]init];
-    NSArray *jobList = [AHLaunchCtl allRunningJobsMatching:match];
-    if(!restartAll){
-        if(jobList.count > 0)
-            return [[self class] errorWithCode:kAHErrorMultipleJobsMatching error:nil];
-    }
-    
-    for(AHLaunchJob* job in jobList){
-        [launchctl restart:job.Label inDomain:kAHSearchDomain error:nil];
-    }
-    
-    return jobList.count > 0 ? YES:NO;
-}
-
-+(AHLaunchJob *)jobFromFileNamed:(NSString *)label inDomain:(AHlaunchDomain)domain
-{
-    AHLaunchJob* job;
-    NSFileManager  * fm         = [NSFileManager new];
-    
-    NSString * launchDirectory = launchFileDirectory(domain);
-    NSArray  * launchFiles = [fm contentsOfDirectoryAtPath:launchDirectory
-                                                         error:nil];
-    
-    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"SELF BEGINSWITH[c] %@",label];
-
-    for(NSString * file in launchFiles){
-        if([predicate evaluateWithObject:file]){
-            NSString * filePath = [NSString stringWithFormat:@"%@/%@",launchDirectory,file];
-            NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:filePath];
-            if(dict){
-                 job = [AHLaunchJob jobFromDictionary:dict];
-                break;
-            }
-        }
-    }
-    return job;
-}
-
-+(NSArray *)allJobsFromFilesMatching:(NSString*)match{
-    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
-    
-    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHSystemLaunchDaemon]];
-    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHSystemLaunchAgent]];
-    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHGlobalLaunchDaemon]];
-    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHGlobalLaunchAgent]];
-    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHUserLaunchAgent]];
-
-    return [NSArray arrayWithArray:jobs];
-}
-
-+(NSArray*)allRunningJobsMatching:(NSString*)match{
-    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
-
-    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
-                                               inDomain:kAHUserLaunchAgent]];
-    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
-                                               inDomain:kAHGlobalLaunchDaemon]];
-    
-    return [NSArray arrayWithArray:jobs];
-}
-
-+(AHLaunchJob *)runningJobWithLabel:(NSString *)label inDomain:(AHlaunchDomain)domain{
-    NSDictionary* dict =  (__bridge NSDictionary *)(SMJobCopyDictionary(SMDomain(domain),
-                                                                        (__bridge CFStringRef)(label)));
-    
-    return [AHLaunchJob jobFromDictionary:dict];
-}
-
-+(NSArray*)runningJobMatching:(NSString*)match inDomain:(AHlaunchDomain)domain{
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF.Label CONTAINS[c] %@ OR SELF.Program CONTAINS[c] %@",match,match];
-    return [self jobMatch:match domain:domain predicate:predicate];
-}
-
+#pragma mark - Helper Tool Installation / Removal
 +(BOOL)installHelper:(NSString *)label prompt:(NSString*)prompt error:(NSError *__autoreleasing *)error{
     AuthorizationRef authRef = NULL;
     OSStatus status;
     BOOL rc = YES;
-
+    
     rc = [AHAuthorizer authorizeSMJobBless:prompt authRef:&authRef];
     
     if (!rc) {
@@ -458,29 +434,185 @@ enum LaunchControlErrorCodes
 }
 
 +(void)uninstallHelper:(NSString *)label reply:(void (^)(NSError *))reply{
-    [AHAuthorizedLaunchCtl uninstallHelper:label reply:^(NSError *error) {
+    AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+    [controller connectToHelper];
+    
+    NSData* authData = [AHAuthorizer authorizeHelper];
+    assert(authData != nil);
+    [[controller.connection remoteObjectProxy] uninstallHelper:label authData:authData reply:^(NSError *error) {
         reply(error);
     }];
 }
 
-+(NSArray*)jobMatch:(NSString*)match domain:(AHlaunchDomain)domain predicate:(NSPredicate*)predicate{
-    NSArray* array = (__bridge NSArray *)(SMCopyAllJobDictionaries(SMDomain(domain)));
-    if(!array.count)return nil;
++(void)quitHelper{
+    AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
+    [controller connectToHelper];
     
+    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+        NSLog(@"Error: %@ ",error.debugDescription);
+    }]quitHelper];
+}
+
+#pragma mark - Convience Accessors;
++(BOOL)launchAtLogin:(NSString*)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError*__autoreleasing*)error
+{
+    NSBundle* appBundle = [NSBundle bundleWithPath:app];
+    NSString* appIdentifier = [NSString stringWithFormat:@"%@.launcher",appBundle.bundleIdentifier];
     
-    NSMutableArray *jobs = [[NSMutableArray alloc]initWithCapacity:array.count];
-    for(NSDictionary* dict in array){
-        if([predicate evaluateWithObject:dict]){
-            [jobs addObject:[AHLaunchJob jobFromDictionary:dict]];
+    AHLaunchCtl *controller = [AHLaunchCtl new];
+    AHLaunchJob* job = [AHLaunchJob new];
+    job.label = appIdentifier;
+    job.program = appBundle.executablePath;
+    job.runAtLoad = YES;
+    job.keepAlive = @{@"SuccessfulExit":[NSNumber numberWithBool:keepAlive]};
+    
+    AHlaunchDomain domain = global ? kAHGlobalLaunchAgent:kAHUserLaunchAgent;
+    return [controller load:job inDomain:domain error:error];
+}
+
++(void)scheduleJob:(NSString*)label program:(NSString*)program interval:(int)seconds domain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply
+{
+    [self scheduleJob:label program:program programArguments:nil interval:seconds domain:domain reply:^(NSError *error) {
+        reply(error);
+    }];
+}
+
++(void)scheduleJob:(NSString*)label program:(NSString*)program programArguments:(NSArray*)programArguments interval:(int)seconds domain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply
+{
+    AHLaunchCtl *controller = [AHLaunchCtl new];
+    AHLaunchJob* job = [AHLaunchJob new];
+    job.Label = label;
+    job.Program = program;
+    job.ProgramArguments = programArguments;
+    job.RunAtLoad = YES;
+    job.StartInterval = seconds;
+    
+    [controller add:job toDomain:domain overwrite:YES reply:^(NSError *error) {
+        reply(error);
+    }];
+}
+
+
++(BOOL)restartJobMatching:(NSString *)match restartAll:(BOOL)restartAll{
+    AHLaunchCtl* launchctl = [[AHLaunchCtl alloc]init];
+    NSArray *jobList = [AHLaunchCtl allRunningJobsMatching:match];
+    if(!restartAll){
+        if(jobList.count > 0)
+            return [[self class] errorWithCode:kAHErrorMultipleJobsMatching error:nil];
+    }
+    
+    for(AHLaunchJob* job in jobList){
+        [launchctl restart:job.Label inDomain:kAHSearchDomain error:nil];
+    }
+    
+    return jobList.count > 0 ? YES:NO;
+}
+#pragma mark -
+
++(AHLaunchJob *)jobFromFileNamed:(NSString *)label
+                        inDomain:(AHlaunchDomain)domain
+{
+    NSArray *jobs = [self allJobsFromFilesInDomain:domain];
+    if([label.pathExtension isEqualToString:@"plist"])
+        label = [label stringByDeletingPathExtension];
+    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"%@ == SELF.Label ",label];
+
+    for(AHLaunchJob *  job in jobs){
+        if([predicate evaluateWithObject:job]){
+            return job;
         }
     }
+    return nil;
+}
+
++(AHLaunchJob *)jobFromRunningJobWithLabel:(NSString *)label
+                                  inDomain:(AHlaunchDomain)domain
+{
+    NSDictionary* dict =  CFBridgingRelease(SMJobCopyDictionary(SMDomain(domain), (__bridge CFStringRef)(label)));
+    AHLaunchJob *job = [AHLaunchJob jobFromDictionary:dict];
+    return job;
+}
+
+#pragma mark -
++(NSArray*)allRunningJobsInDomain:(AHlaunchDomain)domain
+{
+    return [self jobMatch:nil domain:domain];
+}
+
++(NSArray*)runningJobMatching:(NSString*)match inDomain:(AHlaunchDomain)domain
+{
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF.Label CONTAINS[c] %@ OR SELF.Program CONTAINS[c] %@",match,match];
+    return [self jobMatch:predicate domain:domain];
+}
+
++(NSArray*)allRunningJobsMatching:(NSString*)match{
+    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
+    
+    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
+                                                      inDomain:kAHUserLaunchAgent]];
+    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
+                                                      inDomain:kAHGlobalLaunchDaemon]];
     
     return [NSArray arrayWithArray:jobs];
 }
 
-+(void)quitHelper{
-    [AHAuthorizedLaunchCtl quitHelper];
++(NSArray *)allJobsFromFilesMatching:(NSString*)match{
+    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
+    
+    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHSystemLaunchDaemon]];
+    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHSystemLaunchAgent]];
+    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHGlobalLaunchDaemon]];
+    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHGlobalLaunchAgent]];
+    [jobs addObject:[[self class] jobFromFileNamed:match inDomain:kAHUserLaunchAgent]];
+
+    return [NSArray arrayWithArray:jobs];
 }
+
++(NSArray*)allJobsFromFilesInDomain:(AHlaunchDomain)domain{
+    AHLaunchJob* job;
+    NSMutableArray *jobs;
+    NSString * launchDirectory = launchFileDirectory(domain);
+    NSArray  * launchFiles = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:launchDirectory
+                                                                                 error:nil];
+    
+    if(launchFiles.count){
+        jobs = [[NSMutableArray alloc]initWithCapacity:launchFiles.count];
+    }
+    
+    for(NSString * file in launchFiles){
+        NSString * filePath = [NSString stringWithFormat:@"%@/%@",launchDirectory,file];
+        NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:filePath];
+        if(dict){
+            job = [AHLaunchJob jobFromDictionary:dict];
+            if(job)
+                [jobs addObject:job];
+        }
+    }
+    return jobs;
+}
+
+
++(NSArray*)jobMatch:(NSPredicate*)predicate domain:(AHlaunchDomain)domain{
+    NSArray* array = CFBridgingRelease(SMCopyAllJobDictionaries(SMDomain(domain)));
+    if(!array.count)return nil;
+    
+    NSMutableArray *jobs = [[NSMutableArray alloc]initWithCapacity:array.count];
+    for(NSDictionary* dict in array){
+        AHLaunchJob* job;
+        if(predicate){
+            if([predicate evaluateWithObject:dict]){
+                job = [AHLaunchJob jobFromDictionary:dict];
+            }
+        }else{
+            job = [AHLaunchJob jobFromDictionary:dict];
+        }
+        if(job)
+            [jobs addObject:job];
+    }
+    return [NSArray arrayWithArray:jobs];
+}
+
 
 #pragma mark - Error Codes
 +(BOOL)errorWithCode:(NSInteger)code error:(NSError*__autoreleasing*)error{
@@ -508,21 +640,13 @@ enum LaunchControlErrorCodes
     return rc;
 }
 
-+(BOOL)labelIsValid:(NSString *)label forDomain:(AHlaunchDomain)domain{
-    
-    if([label length] > 150 || [self jobFromFileNamed:label inDomain:domain])
-        return NO;
-    else
-        return YES;
-}
-
 @end
 
 
 
 #pragma mark - Utility Functions
 static BOOL jobIsRunning(NSString* label, AHlaunchDomain domain){
-    NSDictionary* dict =  (__bridge NSDictionary *)(SMJobCopyDictionary(SMDomain(domain),
+    NSDictionary* dict =  CFBridgingRelease(SMJobCopyDictionary(SMDomain(domain),
                                                                         (__bridge CFStringRef)(label)));
     return dict ? YES:NO;
 }
@@ -535,7 +659,7 @@ static BOOL jobExists(NSString* label, AHlaunchDomain domain){
     
     BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:launchFile(label, domain)];
     if(fileExists || jobIsRunning(label, domain)){
-        alertHeader = [NSString stringWithFormat:@"Job Exists, would you like to overwright"];
+        alertHeader = [NSString stringWithFormat:@"A job with the same label exists in this domain, would you like to overwrite?"];
         
         CFOptionFlags flags = kCFUserNotificationPlainAlertLevel|
                                 CFUserNotificationSecureTextField(1);
@@ -559,7 +683,7 @@ static BOOL jobExists(NSString* label, AHlaunchDomain domain){
             CFRelease(authNotification);
             return YES;
         }
-
+        CFRelease(authNotification);
         return NO;
     }else{
         return NO;
@@ -571,11 +695,15 @@ static NSString * errorMsgFromCode(NSInteger code){
     switch (code) {
         case kAHErrorJobNotLoaded:msg = @"Job not loaded";
             break;
-        case kAHErrorFileNotFound: msg = @"Launchd.plist not found";
+        case kAHErrorFileNotFound: msg = @"we could not find the specified launchd.plist to load the job";
             break;
         case kAHErrorCouldNotLoadJob: msg = @"Could not load job";
             break;
         case kAHErrorJobAlreayExists: msg = @"The specified job alreay exists";
+            break;
+        case kAHErrorJobAlreayLoaded: msg = @"The specified job is already loaded";
+            break;
+        case kAHErrorJobCouldNotReload: msg = @"The specified job is already loaded";
             break;
         case kAHErrorJobLabelNotValid: msg = @"The label is not valid. please format as a unique reverse domain";
             break;
@@ -587,15 +715,12 @@ static NSString * errorMsgFromCode(NSInteger code){
             break;
         case kAHErrorInsufficentPriviledges: msg = @"There were problem writing to the file";
             break;
-        case kAHErrorMissingJobKeys: msg = @"The Submitted Job was missing some required keys";
+        case kAHErrorJobMissingRequiredKeys: msg = @"The Submitted Job was missing some required keys";
             break;
-        case kAHErrorCouldNotSetUid: msg = @"Could not set the Job to run in the proper context";
-            break;
-        case kAHErrorCouldNotResetUid: msg = @"Could not return the tool to the proper user";
+        case kAHErrorExecutingAsIncorrectUser: msg = @"Could not set the Job to run in the proper context";
             break;
         case kAHErrorProgramNotExecutable: msg = @"The path specified doesn’t appear to be executable.";
             break;
-            
         default:msg = @"unknown problem occured";
             break;
     }
@@ -637,4 +762,26 @@ static const CFStringRef SMDomain(AHlaunchDomain domain){
     }
 }
 
+
+static BOOL setToConsoleUser (){
+    uid_t effectiveUid;
+    int results;
+    
+    CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, &effectiveUid, NULL));
+    results = seteuid(effectiveUid);
+    
+    if( results != 0)
+        return NO;
+    else
+        return YES;
+}
+
+static BOOL resetToOriginalUser(uid_t uid){
+    int results;
+    results = seteuid(uid);
+    if( results != 0)
+        return NO;
+    else
+        return YES;
+}
 

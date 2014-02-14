@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		BE5B001118A48412000D8603 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
-		BE5B001418A54B46000D8603 /* AHAuthorizedLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE5B001218A54B46000D8603 /* AHAuthorizedLaunchCtl.h */; };
 		BE5B001518A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */; };
 		BE5B001618A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */; };
 		BE5B001D18A55BAA000D8603 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001C18A55BAA000D8603 /* Foundation.framework */; };
@@ -28,7 +27,6 @@
 		BE76C71E18A19B42003C94A0 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 		BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D7C18AA630E001548A8 /* AHLaunchCtlHelper.h */; };
 		BE854D7F18AA630E001548A8 /* AHLaunchCtlHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D7D18AA630E001548A8 /* AHLaunchCtlHelper.m */; };
-		BE854D8218AA71D6001548A8 /* AHAuthorizer.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D8018AA71D6001548A8 /* AHAuthorizer.h */; };
 		BE854D8318AA71D6001548A8 /* AHAuthorizer.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D8118AA71D6001548A8 /* AHAuthorizer.m */; };
 		BE91DC4518A586D5000FD8D7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F418A19369003C94A0 /* Cocoa.framework */; };
 		BE91DC4B18A586D5000FD8D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BE91DC4918A586D5000FD8D7 /* InfoPlist.strings */; };
@@ -42,6 +40,7 @@
 		BE91DC7818A58D0E000FD8D7 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
 		BE91DC7918A58D15000FD8D7 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 		BE91DC7A18A58D1C000FD8D7 /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
+		BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; };
 		BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; };
 		BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */ = {isa = PBXBuildFile; fileRef = BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */; };
 /* End PBXBuildFile section */
@@ -129,6 +128,8 @@
 		BE91DC5318A586D5000FD8D7 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		BE91DC5618A586D5000FD8D7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BE91DC5818A586D5000FD8D7 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		BEE9701618AE59F500C252B1 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
+		BEE9701718AE59F500C252B1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = SOURCE_ROOT; };
 		BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchJob.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AHLaunchJob.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 /* End PBXFileReference section */
@@ -198,6 +199,8 @@
 			isa = PBXGroup;
 			children = (
 				BE5B002218A55BAA000D8603 /* helper-Prefix.pch */,
+				BEE9701618AE59F500C252B1 /* LICENSE */,
+				BEE9701718AE59F500C252B1 /* README.md */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -254,14 +257,14 @@
 			children = (
 				BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */,
 				BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */,
+				BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */,
+				BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */,
 				BE5B001218A54B46000D8603 /* AHAuthorizedLaunchCtl.h */,
 				BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */,
 				BE854D7C18AA630E001548A8 /* AHLaunchCtlHelper.h */,
 				BE854D7D18AA630E001548A8 /* AHLaunchCtlHelper.m */,
 				BE854D8018AA71D6001548A8 /* AHAuthorizer.h */,
 				BE854D8118AA71D6001548A8 /* AHAuthorizer.m */,
-				BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */,
-				BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */,
 				BE76C6FB18A19369003C94A0 /* Supporting Files */,
 			);
 			path = AHLaunchCtl;
@@ -324,9 +327,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */,
 				BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */,
-				BE5B001418A54B46000D8603 /* AHAuthorizedLaunchCtl.h in Headers */,
-				BE854D8218AA71D6001548A8 /* AHAuthorizer.h in Headers */,
 				BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

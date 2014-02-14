@@ -22,33 +22,21 @@
 
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtl.h"
-#import "AHAuthorizer.h"
-
 
 @protocol AHLaunchCtlProgress
 -(void)countdown:(NSInteger)time;
+-(void)statusMessage:(NSString*)message;
 @end
 
-@interface AHAuthorizedLaunchCtl : NSXPCConnection
+@interface AHAuthorizedLaunchCtl : NSObject
 
--(instancetype)initConnection;
+@property (atomic, strong, readonly) NSXPCConnection * connection;
 
-+(void)addJob:(AHLaunchJob*)job
-     toDomain:(AHlaunchDomain)domain
-        reply:(void (^)(NSError* error))reply;
+-(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply;
+-(instancetype)initWithStatusMessageBlock:(void (^)(NSString *message))statusMessage;
 
-+(void)removeJob:(NSString*)label
-      fromDomain:(AHlaunchDomain)domain
-           reply:(void (^)(NSError* error))reply;
+-(void)connectToHelper;
 
-+(void)authorizeSessionFor:(NSInteger)seconds
-                     error:(void (^)(NSError* error))error
-             timeRemaining:(void (^)(NSInteger time))timeRemaining;
-
-+(void)deAuthorizeSession:(void (^)(NSError* error))reply;
-+(void)quitHelper;
-
-+(void)uninstallHelper:(NSString *)label reply:(void (^)(NSError* error))reply;
 @end
 
 

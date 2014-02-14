@@ -23,7 +23,7 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchJob.h"
 
-extern NSString* const kAHLaunchCtlHelperName;
+extern NSString* const kAHLaunchCtlHelperTool;
 
 typedef int AHlaunchDomain;
 
@@ -39,30 +39,15 @@ enum AHLaunchlDomains {
 @interface AHLaunchCtl : NSObject
 
 +(AHLaunchCtl *)sharedControler;
-
-/**
- Create an authorized session for a specified amount of time.  Calling this allows for multiple jobs that require Elevated Priviledges to
- @param seconds NSInterger in seconds that the session should be authorized for;
- @param error A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- @param timeExpired A block object to be executed when the authorization timer expires. This block has no return value and takes one argument: BOOL.
-*/
--(void)authorizeSessionFor:(NSInteger)seconds
-                     error:(void (^)(NSError *error))error
-             timeRemaining:(void (^)(NSInteger time))timeRemaining;
-
-/**
- Deauthorize an authorized session.
- @param error A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
-*/
--(void)deAuthorizeSession:(void (^)(NSError *error))reply;
-
+#pragma mark - Public Methods
 /**
  Creates a launchd.plist and loads the starts the Job
  @param job AHLaunchJob Object, Label and Program keys required.
  @param domain Cooresponding LCLaunchDomain
+ @param overwrite YES will automatically overwrite a job with the same label, NO will prompt for confirmation
  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
  */
--(void)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply;
+-(void)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain overwrite:(BOOL)overwright reply:(void (^)(NSError* error))reply;
 
 /**
  Unloads a launchd job and removes the associated launchd.plist
@@ -74,38 +59,66 @@ enum AHLaunchlDomains {
 -(void)remove:(NSString*)label fromDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply;
 
 /**
- Creates a launchd.plist and loads the starts the Job
- @param job AHLaunchJob Object, Label and Program keys required.
+ Starts a launchd job using a launchd.plist
+ @param label Name of the launchctl file.
  @param domain Cooresponding LCLaunchDomain
  @param error Populated should an error occur.
  
- @return Returns `YES` on success, or `NO` on failure.
+ @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
  */
--(BOOL)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain error:(NSError**)error;
+-(void)start:(NSString*)label inDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply;
 
 /**
- Removes a launchd job and the associated plist.
- This must be called as root, such as when used with a command line tool or helper.
- For general purposes user remove:fromDomain:reply:
- 
- @param job AHLaunchJob Object, Label and Program keys required.
+ unloads a running launchd job.  Identical to unload:inDomain:error, but exists for
+ to keep with naming conventions.
+ @param label Name of the running launchctl job.
  @param domain Cooresponding LCLaunchDomain
- @param error Populated should an error occur.
- @return Returns `YES` on success, or `NO` on failure.
+ @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
  */
--(BOOL)remove:(NSString*)label fromDomain:(AHlaunchDomain)domain error:(NSError**)error;
+-(void)stop:(NSString*)label inDomain:(AHlaunchDomain)domain reply:(void (^)(NSError* error))reply;
 
 /**
- enables a launchd job (equivelant to launchctl load -w)
+ Restarts a launchd job.  If it's not running will just start it.
+ @param label Name of the running launchctl job.
+ @param domain Cooresponding LCLaunchDomain
+ @param status A block object to be executed when the status of the request changes. This block has no return value and takes one argument: NSString.
+ @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
+ */
+-(void)restart:(NSString*)label
+      inDomain:(AHlaunchDomain)domain
+        status:(void (^)(NSString* message))status
+         reply:(void (^)(NSError* error))reply;
+
+/**
+ Create an authorized session for a specified amount of time.  Calling this allows for multiple jobs that require Elevated Priviledges to
+ @param seconds NSInterger in seconds that the session should be authorized for;
+ @param timeExpired A block object to be executed when the authorization timer expires. This block has no return value and takes one argument: BOOL.
+ @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
+ */
+-(void)authorizeSessionForNumberOfSeconds:(NSInteger)seconds
+                            timeRemaining:(void (^)(NSInteger time))timeRemaining
+                                    reply:(void (^)(NSError *error))reply;
+
+/**
+ Deauthorize an authorized session.
+ @param error A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
+ */
+-(void)deAuthorizeSession:(void (^)(NSError *error))reply;
+
+#pragma mark - For Use When No Helper Tool is avaliable;
+-(BOOL)add:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain error:(NSError **)error;
+-(BOOL)remove:(NSString*)label fromDomain:(AHlaunchDomain)domain error:(NSError **)error;
+
+/**
+ loads launchd job (Only User when not including helper tool)
  @param job AHLaunchJob Object, Label and Program keys required.
  @param domain Cooresponding LCLaunchDomain
-
  @return Returns `YES` on success, or `NO` on failure.
  */
 -(BOOL)load:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError**)error;
 
 /**
- disables a launchd job (equivelant to launchctl unload -w)
+ unloads a launchd job (Only User when not including helper tool)
  @param error Populated should an error occur.
  @param domain Cooresponding LCLaunchDomain
  @return Returns `YES` on success, or `NO` on failure.
@@ -113,7 +126,7 @@ enum AHLaunchlDomains {
 -(BOOL)unload:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError**)error;
 
 /**
- loads and existing launchd.plist
+ loads and existing launchd.plist (Only User when not including helper tool)
  @param label Name of the launchctl file.
  @param domain Cooresponding LCLaunchDomain
  @param error Populated should an error occur.
@@ -123,7 +136,7 @@ enum AHLaunchlDomains {
 -(BOOL)start:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError**)error;
 
 /**
- unloads a running launchd job
+ stops a running launchd job (Only User when not including helper tool)
  @param label Name of the running launchctl job.
  @param error Populated should an error occur.
  @param domain Cooresponding LCLaunchDomain
@@ -132,7 +145,7 @@ enum AHLaunchlDomains {
 -(BOOL)stop:(NSString*)label inDomain:(AHlaunchDomain)domain error:(NSError**)error;
 
 /**
- Restarts a launchd job.  If it's not running will just start it.
+ Restarts a launchd job. (Only User when not including helper tool)
  @param label Name of the running launchctl job.
  @param domain Cooresponding LCLaunchDomain
  @param error Populated should an error occur.
@@ -163,8 +176,11 @@ enum AHLaunchlDomains {
  
  @return Returns `YES` on success, or `NO` on failure.
  */
-+(BOOL)scheduleJob:(NSString*)label program:(NSString*)program interval:(int)seconds domain:(AHlaunchDomain)domain error:(NSError**)error;
-
++(void)scheduleJob:(NSString*)label
+           program:(NSString*)program
+          interval:(int)seconds
+            domain:(AHlaunchDomain)domain
+             reply:(void (^)(NSError* error))reply;
 /**
  Schedule a LaunchD Job to run at an interval.
  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
@@ -176,41 +192,45 @@ enum AHLaunchlDomains {
  
  @return Returns `YES` on success, or `NO` on failure.
  */
-+(BOOL)scheduleJob:(NSString*)label program:(NSString*)program programArguments:(NSArray*)programArguments interval:(int)seconds domain:(AHlaunchDomain)domain error:(NSError **)error;
++(void)scheduleJob:(NSString*)label
+           program:(NSString*)program
+  programArguments:(NSArray*)programArguments
+          interval:(int)seconds
+            domain:(AHlaunchDomain)domain
+             reply:(void (^)(NSError* error))reply;
 
-/**
- Unload a LaunchD Job and remove it's associated launchd.plist file.
- @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
- @param domain Cooresponding LCLaunchDomain  WARNING: you can pass NULL and all matching launchd jobs will be removed
- @param error Populated should an error occur.
- 
- @return Returns `YES` on success, or `NO` on failure.
- */
-+(BOOL)removeJob:(NSString*)label type:(AHlaunchDomain)type error:(NSError**)error;
-
-/**
- Restart a LaunchD Job with matching label
- @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
- @return Returns `YES` on success, or `NO` on failure.
- */
-+(BOOL)restartJobWithLabel:(NSString *)label domain:(AHlaunchDomain)domain;
 /**
  Restart a LaunchD Job with matching Label, or Program keys
  @param match Label or Program key to match
  @param restartAll Setting NO will cause failure if more than one match is found.  YES to restart all jobs that match.
  @return Returns `YES` on success, or `NO` on failure.
  */
-+(BOOL)restartJobMatching:(NSString*)match restartAll:(BOOL)restart;
++(BOOL)restartJobMatching:(NSString*)match
+               restartAll:(BOOL)restart;
 
-+(AHLaunchJob*)jobFromFileNamed:(NSString*)label inDomain:(AHlaunchDomain)domain;
++(AHLaunchJob*)jobFromFileNamed:(NSString*)label
+                       inDomain:(AHlaunchDomain)domain;
+
++(AHLaunchJob*)jobFromRunningJobWithLabel:(NSString*)label
+                                 inDomain:(AHlaunchDomain)domain;
+
 +(NSArray*)allJobsFromFilesMatching:(NSString*)match;
 
-+(NSArray*)allRunningJobsMatching:(NSString*)label;
-+(NSArray*)runningJobMatching:(NSString*)label inDomain:(AHlaunchDomain)domain;
-+(AHLaunchJob*)runningJobWithLabel:(NSString*)label inDomain:(AHlaunchDomain)domain;
 
-+(BOOL)installHelper:(NSString *)label prompt:(NSString*)prompt error:(NSError**)error;
-+(void)uninstallHelper:(NSString *)label reply:(void (^)(NSError *))reply;
++(NSArray*)allRunningJobsMatching:(NSString*)label;
+
++(NSArray*)allRunningJobsInDomain:(AHlaunchDomain)domain;
+
++(NSArray*)runningJobMatching:(NSString*)label
+                     inDomain:(AHlaunchDomain)domain;
+
+
++(BOOL)installHelper:(NSString *)label
+              prompt:(NSString*)prompt
+               error:(NSError**)error;
+
++(void)uninstallHelper:(NSString *)label
+                 reply:(void (^)(NSError *))reply;
 
 +(void)quitHelper;
 @end
