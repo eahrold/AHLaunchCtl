@@ -28,8 +28,8 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
 
 #pragma mark - AHLaunchCtl Extension;
 @interface AHLaunchCtl ()
--(BOOL)writeJobToFile:(AHLaunchJob*)job inDomain:(AHlaunchDomain)domain error:(NSError**)error;
--(BOOL)removeJobFileWithLabel:(NSString*)label domain:(AHlaunchDomain)domain error:(NSError**)error;
+-(BOOL)writeJobToFile:(AHLaunchJob*)job inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+-(BOOL)removeJobFileWithLabel:(NSString*)label domain:(AHLaunchDomain)domain error:(NSError**)error;
 @end
 
 #pragma mark - AHLaunchCtlListener
@@ -67,7 +67,7 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
 }
 
 #pragma mark - AHLaunchCtlHelper Protocol
--(void)addJob:(AHLaunchJob *)job toDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError *))reply{
+-(void)addJob:(AHLaunchJob *)job toDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError *))reply{
     NSError *error;
     AHLaunchCtl *controller = [AHLaunchCtl new];
     job = [AHLaunchJob jobFromDictionary:job.dictionary];
@@ -85,7 +85,7 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
     reply(error);
 }
 
--(void)removeJob:(NSString *)label fromDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError *))reply{
+-(void)removeJob:(NSString *)label fromDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError *))reply{
     AHLaunchCtl *controller = [AHLaunchCtl new];
     NSError *error;
     
@@ -102,7 +102,7 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
     reply(error);
 }
 
--(void)startJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
+-(void)startJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
 {
     AHLaunchCtl *controller = [AHLaunchCtl new];
     NSError *error;
@@ -117,7 +117,7 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
     
 }
 
--(void)stopJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
+-(void)stopJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply
 
 {
     AHLaunchCtl *controller = [AHLaunchCtl new];
@@ -132,7 +132,7 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
     reply(error);
 }
 
--(void)restartJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply{
+-(void)restartJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply{
     AHLaunchCtl *controller = [AHLaunchCtl new];
     NSError *error;
     

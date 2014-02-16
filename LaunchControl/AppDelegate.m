@@ -10,7 +10,7 @@
 #import "AHLaunchCtl.h"
 
 @implementation AppDelegate{
-    AHlaunchDomain domain;
+    AHLaunchDomain domain;
 }
 -(void)applicationWillTerminate:(NSNotification *)notification{
     [AHLaunchCtl quitHelper];
@@ -29,17 +29,19 @@
     NSArray* array = [_command.stringValue componentsSeparatedByString:@" "];
     assert(array != nil);
     
-//    job.Program = array[0];
     job.ProgramArguments = array;
+    job.OnDemand = YES;
+    job.RunAtLoad = YES;
+    
     job.StartInterval =  [_timer.stringValue integerValue];
     job.StandardOutPath = [NSString stringWithFormat:@"/tmp/%@.txt",_label.stringValue];
-    job.RunAtLoad = YES;
-
+    job.KeepAlive = @YES;
+    
     [[AHLaunchCtl sharedControler]add:job toDomain:domain overwrite:_overwrite.state reply:^(NSError *error) {
         if(error){
             [self logError:error];
         }else{
-            [self logText:@"added job"];
+            [self logWithFormat:@"Added Job: %@",job];
         }
     }];
 }

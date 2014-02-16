@@ -26,12 +26,12 @@
 #import "AHLaunchCtl.h"
 
 @protocol AHLaunchCtlHelper
--(void)addJob:(AHLaunchJob*)job toDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
--(void)removeJob:(NSString*)label fromDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)addJob:(AHLaunchJob*)job toDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)removeJob:(NSString*)label fromDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
 
--(void)startJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
--(void)stopJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
--(void)restartJob:(NSString*)label inDomain:(AHlaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)startJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)stopJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
+-(void)restartJob:(NSString*)label inDomain:(AHLaunchDomain)domain authData:(NSData*)authData reply:(void (^)(NSError* error))reply;
 
 -(void)authorizeSessionFor:(NSInteger)seconds authData:(NSData *)authData reply:(void (^)(NSError *error))reply;
 -(void)deAuthorizeSession:(void (^)(NSError* error))reply;
