@@ -23,8 +23,8 @@
 #import "AHAuthorizedLaunchCtl.h"
 #import "AHLaunchCtlHelper.h"
 #import "AHAuthorizer.h"
+#import "AHServiceManagement.h"
 
-#import <ServiceManagement/ServiceManagement.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
 NSString* const kAHLaunchCtlHelperTool = @"com.eeaapps.launchctl.helper";
@@ -57,13 +57,12 @@ enum LaunchControlErrorCodes
     kAHErrorProgramNotExecutable,
 };
 
-@interface AHLaunchJob () <NSSecureCoding>
+@interface AHLaunchJob ()
 @property (nonatomic, readwrite)     AHLaunchDomain  domain;//
 @end
 
 #pragma mark - Launch Controller
-@implementation AHLaunchCtl{
-}
+@implementation AHLaunchCtl
 
 +(AHLaunchCtl *)sharedControler{
     static dispatch_once_t onceToken;
@@ -264,25 +263,18 @@ enum LaunchControlErrorCodes
 #pragma mark --- Load / Unload Jobs ---
 -(BOOL)load:(AHLaunchJob*)job inDomain:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error{
     BOOL rc;
-    CFErrorRef cfError = NULL;
     AuthorizationRef authRef = NULL;
 
     if(domain >= kAHSystemLaunchAgent)
         [AHAuthorizer authorizeSystemDaemon:@"Load Job?" authRef:&authRef];
 
-    rc =  SMJobSubmit(SMDomain(domain),
-                      (__bridge CFDictionaryRef)job.dictionary,
-                      authRef,
-                      &cfError);
+    rc =  AHJobSubmit(domain, job.dictionary, authRef, error);
     
-    if(!rc){
-        [[self class] errorWithCFError:cfError code:1 error:error];
-    }else{
+    if(rc){
         job.domain = domain;
     }
     
     [AHAuthorizer authoriztionFree:authRef];
-
     return rc;
 }
 
@@ -294,23 +286,12 @@ enum LaunchControlErrorCodes
     
     BOOL rc;
     AuthorizationRef authRef = NULL;
-    CFErrorRef cfError = NULL;
 
     if(domain >= kAHSystemLaunchAgent)
         [AHAuthorizer authorizeSystemDaemon:@"Unoad Job?" authRef:&authRef];
 
-    rc =  SMJobRemove(SMDomain(domain),
-                      (__bridge CFStringRef)label,
-                      authRef,
-                      YES,
-                      &cfError);
-    
+    rc =  AHJobRemove(domain, label, authRef, error);
     [AHAuthorizer authoriztionFree:authRef];
-    
-    if(!rc){
-        [[self class] errorWithCFError:cfError code:1 error:error];
-    }
-    
     return rc;
 }
 
@@ -418,7 +399,6 @@ enum LaunchControlErrorCodes
 #pragma mark - Helper Tool Installation / Removal
 +(BOOL)installHelper:(NSString *)label prompt:(NSString*)prompt error:(NSError *__autoreleasing *)error{
     AuthorizationRef authRef = NULL;
-    OSStatus status;
     BOOL rc = YES;
     
     rc = [AHAuthorizer authorizeSMJobBless:prompt authRef:&authRef];
@@ -426,12 +406,7 @@ enum LaunchControlErrorCodes
     if (!rc) {
         [[self class]errorWithCode:kAHErrorCouldNotLoadJob error:error];
     }else {
-        CFErrorRef  cfError;
-        status = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)label, authRef, &cfError);
-        if (status != errAuthorizationSuccess) {
-            [[self class]errorWithCFError:cfError code:1 error:error];
-            rc = NO;
-        }
+        rc = AHJobBless(kAHSystemLaunchDaemon, label, authRef, error);
     }
     [AHAuthorizer authoriztionFree:authRef];
     return rc;
@@ -497,20 +472,6 @@ enum LaunchControlErrorCodes
 }
 
 
-+(BOOL)restartJobMatching:(NSString *)match restartAll:(BOOL)restartAll{
-    AHLaunchCtl* launchctl = [[AHLaunchCtl alloc]init];
-    NSArray *jobList = [AHLaunchCtl allRunningJobsMatching:match];
-    if(!restartAll){
-        if(jobList.count > 0)
-            return [[self class] errorWithCode:kAHErrorMultipleJobsMatching error:nil];
-    }
-    
-    for(AHLaunchJob* job in jobList){
-        [launchctl restart:job.Label inDomain:kAHSearchDomain error:nil];
-    }
-    
-    return jobList.count > 0 ? YES:NO;
-}
 
 #pragma mark --- Get Job ---
 +(AHLaunchJob *)jobFromFileNamed:(NSString *)label
@@ -557,28 +518,6 @@ enum LaunchControlErrorCodes
     return [self jobMatch:predicate domain:domain];
 }
 
-+(NSArray*)allRunningJobsMatching:(NSString*)match{
-    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
-    
-    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
-                                                      inDomain:kAHUserLaunchAgent]];
-    [jobs addObjectsFromArray:[[self class] runningJobMatching:match
-                                                      inDomain:kAHGlobalLaunchDaemon]];
-    
-    return [NSArray arrayWithArray:jobs];
-}
-
-+(NSArray *)allJobsFromFilesMatching:(NSString*)match{
-    NSMutableArray * jobs  = [[NSMutableArray alloc]init];
-    AHLaunchDomain i;
-    for (i=kAHUserLaunchAgent; i<=kAHSystemLaunchDaemon; i++){
-        AHLaunchJob *job = [[self class] jobFromFileNamed:match inDomain:i];
-        if(job)
-            [jobs addObject:job];
-    }
-   
-    return [NSArray arrayWithArray:jobs];
-}
 
 +(NSArray*)allJobsFromFilesInDomain:(AHLaunchDomain)domain{
     AHLaunchJob* job;
@@ -611,7 +550,7 @@ enum LaunchControlErrorCodes
 
 
 +(NSArray*)jobMatch:(NSPredicate*)predicate domain:(AHLaunchDomain)domain{
-    NSArray* array = CFBridgingRelease(SMCopyAllJobDictionaries(SMDomain(domain)));
+    NSArray* array = AHCopyAllJobDictionaries(domain);
     if(!array.count)return nil;
     
     NSMutableArray *jobs = [[NSMutableArray alloc]initWithCapacity:array.count];
@@ -649,7 +588,6 @@ enum LaunchControlErrorCodes
     BOOL rc = code > 0?NO:YES;
     
     NSError *err = CFBridgingRelease(cfError);
-
     if(error)
         *error = err;
     else

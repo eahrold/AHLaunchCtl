@@ -23,11 +23,10 @@
 
 #import "AHLaunchJob.h"
 #import <objc/runtime.h>
-#import <ServiceManagement/ServiceManagement.h>
-NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
+#import "AHServiceManagement.h"
 
-@interface AHLaunchJob ()
-@property (copy,readwrite)  NSMutableDictionary * jdictionary;
+@interface AHLaunchJob () <NSSecureCoding>
+@property (copy,readwrite)  NSMutableDictionary * internalDictionary;
 @property (nonatomic, readwrite)     AHLaunchDomain  domain;//
 @property (nonatomic, readwrite)     NSInteger LastExitStatus;//
 @property (nonatomic, readwrite)     NSInteger PID;//
@@ -49,7 +48,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 -(instancetype)initWithoutObservers{
     self = [super init];
     if(self){
-        _jdictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
+        _internalDictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
     }
     return [super init];
 }
@@ -58,9 +57,8 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     [self removeObservingOnAllProperties];
 }
 
-#pragma mark -
 -(NSDictionary *)dictionary{
-    return [NSDictionary dictionaryWithDictionary:_jdictionary];
+    return [NSDictionary dictionaryWithDictionary:_internalDictionary];
 }
 
 -(NSSet*)ignoredProperties{
@@ -68,7 +66,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     return ignoredProperties;
 }
 
-#pragma mark - Observing
+#pragma mark --- Observing ---
 -(void)startObservingOnAllProperties{
     unsigned int count;
     objc_property_t *properties = class_copyPropertyList([self class], &count);
@@ -101,8 +99,8 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if(!_jdictionary){
-        _jdictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
+    if(!_internalDictionary){
+        _internalDictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
     }
     
     id chng = change[@"new"];
@@ -118,7 +116,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     }
 }
 
-#pragma mark - Accessors
+#pragma mark --- Accessors ---
 -(NSInteger)LastExitStatus{
     if(_LastExitStatus){
         return _LastExitStatus;
@@ -148,7 +146,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 }
 
 -(NSString *)description{
-    if(!_jdictionary.count){
+    if(!_internalDictionary.count){
         return @"No Job Set";
     }else{
         NSInteger pid = self.PID;
@@ -172,7 +170,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     }
 }
 
-#pragma mark - Internal Methods
+#pragma mark --- Private Methods ---
 -(id)serviceManagementValueForKey:(NSString*)key{
     if(_Label && _domain != 0){
         NSDictionary* dict =  AHJobCopyDictionary(_domain, _Label);
@@ -184,9 +182,9 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 
 -(void)writeBoolValueToDict:(id)value forKey:(NSString*)keyPath{
     if([value  isEqual: @YES]){
-        [_jdictionary setValue:[NSNumber numberWithBool:(BOOL)value] forKey:keyPath];
+        [_internalDictionary setValue:[NSNumber numberWithBool:(BOOL)value] forKey:keyPath];
     }else{
-        [_jdictionary removeObjectForKey:keyPath];
+        [_internalDictionary removeObjectForKey:keyPath];
     }
 }
 
@@ -195,9 +193,9 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     if([value isKindOfClass:[NSString class]])
         stringValue = value;
     if([value isKindOfClass:[NSNull class]]|| [stringValue isEqualToString:@""]){
-        [_jdictionary removeObjectForKey:keyPath];
+        [_internalDictionary removeObjectForKey:keyPath];
     }else{
-        [_jdictionary setValue:value forKey:keyPath];
+        [_internalDictionary setValue:value forKey:keyPath];
     }
 }
 
@@ -207,7 +205,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
     NSSet* SAND = [NSSet setWithObjects:[NSArray class],[NSDictionary class],[NSString class],[NSNumber class], nil];
     
     if(self){
-        _jdictionary = [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
+        _internalDictionary = [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
         _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
         _Program = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
         _ProgramArguments = [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
@@ -217,7 +215,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 
 +(BOOL)supportsSecureCoding{return YES;}
 -(void)encodeWithCoder:(NSCoder *)aEncoder{
-    [aEncoder encodeObject:_jdictionary forKey:@"dictionary"];
+    [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
     [aEncoder encodeObject:_Label forKey:@"Label"];
     [aEncoder encodeObject:_Program forKey:@"Program"];
     [aEncoder encodeObject:_ProgramArguments forKey:@"ProgramArguments"];
@@ -235,7 +233,7 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
             @catch (NSException *exception) {
                 NSLog(@"Exception Raised: %@",exception);
             }
-            [job.jdictionary setValue:[dict valueForKey:key] forKey:key];
+            [job.internalDictionary setValue:[dict valueForKey:key] forKey:key];
         }
     }
     [job startObservingOnAllProperties];
@@ -249,21 +247,5 @@ NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 
 @end
 #pragma mark - Functions
-const CFStringRef SMDomain(AHLaunchDomain domain){
-    if(domain > kAHGlobalLaunchAgent){
-        return kSMDomainSystemLaunchd;
-    }else{
-        return kSMDomainUserLaunchd;
-    }
-}
 
-NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label){
-    NSDictionary *dict;
-    if(label && domain != 0){
-        dict =  CFBridgingRelease(SMJobCopyDictionary(SMDomain(domain),
-                                        (__bridge CFStringRef)(label)));
-        return dict;
-    }else{
-        return nil;
-    }
-}
+

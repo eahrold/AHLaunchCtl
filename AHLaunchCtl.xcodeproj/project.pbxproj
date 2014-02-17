@@ -16,7 +16,8 @@
 		BE5B002B18A58441000D8603 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
 		BE5B002C18A58452000D8603 /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
 		BE5B002F18A5847D000D8603 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
-		BE76C6F518A19369003C94A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F418A19369003C94A0 /* Cocoa.framework */; };
+		BE6F549A18B114CC00826656 /* AHServiceManagement.h in Headers */ = {isa = PBXBuildFile; fileRef = BE6F549818B114CC00826656 /* AHServiceManagement.h */; };
+		BE6F549B18B114CC00826656 /* AHServiceManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = BE6F549918B114CC00826656 /* AHServiceManagement.m */; };
 		BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */; };
 		BE76C70618A19369003C94A0 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C70518A19369003C94A0 /* XCTest.framework */; };
 		BE76C70718A19369003C94A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F418A19369003C94A0 /* Cocoa.framework */; };
@@ -40,8 +41,10 @@
 		BE91DC7818A58D0E000FD8D7 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
 		BE91DC7918A58D15000FD8D7 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 		BE91DC7A18A58D1C000FD8D7 /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
-		BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; };
-		BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; };
+		BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BEDDB53E18B1554700C16956 /* AHAuthorizer.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D8018AA71D6001548A8 /* AHAuthorizer.h */; };
+		BEDDB53F18B1554C00C16956 /* AHAuthorizedLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE5B001218A54B46000D8603 /* AHAuthorizedLaunchCtl.h */; };
+		BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */ = {isa = PBXBuildFile; fileRef = BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */; };
 /* End PBXBuildFile section */
 
@@ -99,6 +102,8 @@
 		BE5B002218A55BAA000D8603 /* helper-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "helper-Prefix.pch"; sourceTree = "<group>"; };
 		BE5B002818A58384000D8603 /* helper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "helper-Info.plist"; sourceTree = "<group>"; };
 		BE5B002918A583AF000D8603 /* helper-Launchd.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "helper-Launchd.plist"; sourceTree = "<group>"; };
+		BE6F549818B114CC00826656 /* AHServiceManagement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHServiceManagement.h; sourceTree = "<group>"; };
+		BE6F549918B114CC00826656 /* AHServiceManagement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHServiceManagement.m; sourceTree = "<group>"; };
 		BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAHLaunchCtl.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE76C6F418A19369003C94A0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		BE76C6F718A19369003C94A0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -151,7 +156,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE76C6F518A19369003C94A0 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,6 +259,8 @@
 		BE76C6FA18A19369003C94A0 /* AHLaunchCtl */ = {
 			isa = PBXGroup;
 			children = (
+				BE6F549818B114CC00826656 /* AHServiceManagement.h */,
+				BE6F549918B114CC00826656 /* AHServiceManagement.m */,
 				BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */,
 				BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */,
 				BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */,
@@ -328,8 +334,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */,
-				BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */,
 				BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */,
+				BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */,
+				BEDDB53E18B1554700C16956 /* AHAuthorizer.h in Headers */,
+				BE6F549A18B114CC00826656 /* AHServiceManagement.h in Headers */,
+				BEDDB53F18B1554C00C16956 /* AHAuthorizedLaunchCtl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -481,6 +490,7 @@
 				BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */,
 				BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */,
 				BE5B001518A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */,
+				BE6F549B18B114CC00826656 /* AHServiceManagement.m in Sources */,
 				BE854D7F18AA630E001548A8 /* AHLaunchCtlHelper.m in Sources */,
 				BE854D8318AA71D6001548A8 /* AHAuthorizer.m in Sources */,
 			);
@@ -682,10 +692,14 @@
 		BE76C71618A19369003C94A0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
+				INSTALL_PATH = /include;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRIVATE_HEADERS_FOLDER_PATH = /include/headers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /include/headers;
 				SDKROOT = macosx10.8;
 			};
 			name = Debug;
@@ -693,10 +707,14 @@
 		BE76C71718A19369003C94A0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
+				INSTALL_PATH = /include;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRIVATE_HEADERS_FOLDER_PATH = /include/headers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /include/headers;
 				SDKROOT = macosx10.8;
 			};
 			name = Release;

@@ -22,79 +22,80 @@
 
 #import <Foundation/Foundation.h>
 typedef int AHLaunchDomain;
-extern const CFStringRef SMDomain(AHLaunchDomain domain);
-extern NSDictionary * AHJobCopyDictionary(AHLaunchDomain domain, NSString* label);
 
 enum AHLaunchlDomains {
+    /** User Launch Agents ~/Library/LaunchAgents 
+        loaded by the Console user */
     kAHUserLaunchAgent = 1001,
-    kAHGlobalLaunchAgent, //1002
-    kAHSystemLaunchAgent, // 1003
-    kAHGlobalLaunchDaemon, // 1004
-    kAHSystemLaunchDaemon, // 1005
-    kAHSearchDomain,
+    
+    /** Administrator provided LaunchAgents /Library/LaunchAgents/ 
+        loaded by the console user */
+    kAHGlobalLaunchAgent,
+    
+    /** Apple provided LaunchDaemons /Library/LaunchAgents/
+        loaded by root user */
+    kAHSystemLaunchAgent,
+    
+    /** Administrator provided LaunchAgents /Library/LaunchDaemons/
+        loaded by root user */
+    kAHGlobalLaunchDaemon,
+    
+    /** Apple provided LaunchDaemons /Library/LaunchDaemons/
+        loaded by root user */
+    kAHSystemLaunchDaemon,
 };
 
-@interface AHLaunchJob : NSObject <NSSecureCoding>
+@interface AHLaunchJob : NSObject
 @property (copy, nonatomic) NSString        *Label;
 @property (nonatomic)       BOOL            Disabled;
 #pragma mark -
-
 @property (copy, nonatomic) NSString        *Program;
 @property (copy, nonatomic) NSArray         *ProgramArguments;
 @property (nonatomic)       NSInteger       StartInterval;
 @property (copy, nonatomic) NSString        *ServiceDescription;
 #pragma mark -
-
 @property (copy, nonatomic) NSString        *UserName;
 @property (copy, nonatomic) NSString        *GroupName;
 @property (copy, nonatomic) NSDictionary    *inetdCompatibility; //
 #pragma mark -
-
 @property (copy, nonatomic) NSArray         *LimitLoadToHosts;
 @property (copy, nonatomic) NSArray         *LimitLoadFromHosts;
 @property (copy, nonatomic) NSString        *LimitLoadToSessionType;
 #pragma mark -
-
 @property (nonatomic) BOOL                  EnableGlobbing;
 @property (nonatomic) BOOL                  EnableTransactions;
 @property (nonatomic) BOOL                  BeginTransactionAtShutdown; //
 #pragma mark -
-
+/* KeepAlive dictionary or Number user @YES and @NO **/
+@property (nonatomic) id                    KeepAlive;
 @property (nonatomic) BOOL                  OnDemand;
-@property (nonatomic) id                    KeepAlive; // dictionary or Number user @YES and @NO
 @property (nonatomic) BOOL                  RunAtLoad;
 #pragma mark -
-
-@property (copy, nonatomic) NSString     *  RootDirectory;
-@property (copy, nonatomic) NSString     *  WorkingDirectory;
+@property (copy, nonatomic) NSString        *RootDirectory;
+@property (copy, nonatomic) NSString        *WorkingDirectory;
 #pragma mark -
-
-@property (copy, nonatomic) NSDictionary *  EnvironmentVariables;
+@property (copy, nonatomic) NSDictionary    *EnvironmentVariables;
 @property (nonatomic)       NSInteger       Umask;
 @property (nonatomic)       NSInteger       TimeOut;
 @property (nonatomic)       NSInteger       ExitTimeOut;
 @property (nonatomic)       NSInteger       ThrottleInterval;
-
+#pragma mark -
 @property (nonatomic)       BOOL            InitGroups;
-@property (copy, nonatomic) NSArray      *  WatchPaths;
-@property (copy, nonatomic) NSArray      *  QueueDirectories;
+@property (copy, nonatomic) NSArray         *WatchPaths;
+@property (copy, nonatomic) NSArray         *QueueDirectories;
 @property (nonatomic)       BOOL            StartOnMount;
-
 //dictionary of integers or array of dictionary of integers
 @property (copy, nonatomic) id              StartCalendarInterval;
-
+#pragma mark -
 @property (copy, nonatomic) NSString        *StandardInPath;
 @property (copy, nonatomic) NSString        *StandardOutPath;
 @property (copy, nonatomic) NSString        *StandardErrorPath;
-
 @property (nonatomic) BOOL                  Debug;
 @property (nonatomic) BOOL                  WaitForDebugger;
 #pragma mark -
-
 @property (copy, nonatomic) NSDictionary    *SoftResourceLimits;//
 @property (copy, nonatomic) NSDictionary    *HardResourceLimits;//
 #pragma mark -
-
 @property (nonatomic)       NSInteger       Nice;
 @property (copy, nonatomic) NSString        *ProcessType;
 #pragma mark -
@@ -103,45 +104,38 @@ enum AHLaunchlDomains {
 @property (nonatomic)       BOOL            LowPriorityBackgroundIO;
 @property (nonatomic)       BOOL            LaunchOnlyOnce; ///
 #pragma mark -
-
 @property (copy, nonatomic) NSDictionary    *MachServices; //
 @property (copy, nonatomic) NSDictionary    *Sockets; //
-#pragma mark -
-
-@property (nonatomic) BOOL  HopefullyExitsLast; //
-
 #pragma mark - Specialized / Undocumented Apple Keys
-@property (copy, nonatomic) NSDictionary *PerJobMachServices;
+@property (copy, nonatomic) NSDictionary    *LaunchEvents;
+@property (copy, nonatomic) NSDictionary    *PerJobMachServices;
+@property (copy, nonatomic) NSString        *MachExceptionHandler;
 #pragma mark -
-@property (copy, nonatomic) NSString     *POSIXSpawnType;
-@property (copy, nonatomic) NSString     *PosixSpawnType;
+@property (copy, nonatomic) NSString        *POSIXSpawnType;
+@property (copy, nonatomic) NSString        *PosixSpawnType;
 #pragma mark -
-@property (nonatomic) BOOL               ServiceIPC;
-@property (copy, nonatomic) NSDictionary *LaunchEvents;
+@property (nonatomic)       BOOL            ServiceIPC;
+@property (nonatomic)       BOOL            XPCDomainBootstrapper;
 #pragma mark -
-@property (copy, nonatomic) NSString     *CFBundleIdentifier;
-@property (copy, nonatomic) NSString     *SHAuthorizationRight;
+@property (copy, nonatomic) NSString        *CFBundleIdentifier;
+@property (copy, nonatomic) NSString        *SHAuthorizationRight;
 #pragma mark -
-@property (copy, nonatomic) NSDictionary *JetsamProperties;
-@property (nonatomic) BOOL               SessionCreate;
-@property (nonatomic) BOOL               MultipleInstances;
+@property (copy, nonatomic) NSDictionary    *JetsamProperties;
+@property (copy, nonatomic) NSArray         *BinaryOrderPreference;
+@property (nonatomic)       BOOL            SessionCreate;
+@property (nonatomic)       BOOL            MultipleInstances;
 #pragma mark -
-@property (copy, nonatomic) NSString    *MachExceptionHandler;
-@property (nonatomic) BOOL              ShutdownMonitor;
-@property (nonatomic) BOOL              EventMonitor;
-@property (nonatomic) BOOL              XPCDomainBootstrapper;
-@property (nonatomic) BOOL              IgnoreProcessGroupAtShutdown;
-@property (copy, nonatomic) NSArray     *BinaryOrderPreference;
-
+@property (nonatomic)       BOOL            HopefullyExitsLast; //
+@property (nonatomic)       BOOL            ShutdownMonitor;
+@property (nonatomic)       BOOL            EventMonitor;
+@property (nonatomic)       BOOL            IgnoreProcessGroupAtShutdown;
 #pragma mark - Read only properties...
+@property (nonatomic, readonly) AHLaunchDomain  domain;//
 @property (nonatomic, readonly) NSInteger   PID;
 @property (nonatomic, readonly) NSInteger   LastExitStatus;//
 @property (nonatomic, readonly) BOOL        isCurrentlyLoaded;//
-
-@property (nonatomic, readonly) AHLaunchDomain  domain;//
-
+#pragma mark;
 -(NSDictionary*)dictionary;
-
 #pragma mark - Class Methods
 +(AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict;
 +(AHLaunchJob*)jobFromFile:(NSString*)file;

@@ -188,27 +188,15 @@ extern NSString* const kAHLaunchCtlHelperTool;
             domain:(AHLaunchDomain)domain
              reply:(void (^)(NSError* error))reply;
 
-/**
- Restart a LaunchD Job with matching Label, or Program keys
- @param match Label or Program key to match
- @param restartAll Setting NO will cause failure if more than one match is found.  YES to restart all jobs that match.
- @return Returns `YES` on success, or `NO` on failure.
- */
-+(BOOL)restartJobMatching:(NSString*)match
-               restartAll:(BOOL)restart;
 
+// TODO: Document this
 +(AHLaunchJob*)jobFromFileNamed:(NSString*)label
                        inDomain:(AHLaunchDomain)domain;
 
 +(AHLaunchJob*)jobFromRunningJobWithLabel:(NSString*)label
                                  inDomain:(AHLaunchDomain)domain;
 
-+(NSArray*)allJobsFromFilesMatching:(NSString*)match;
-
 +(NSArray*)allJobsFromFilesInDomain:(AHLaunchDomain)domain;
-
-+(NSArray*)allRunningJobsMatching:(NSString*)label;
-
 +(NSArray*)allRunningJobsInDomain:(AHLaunchDomain)domain;
 
 +(NSArray*)runningJobMatching:(NSString*)label
