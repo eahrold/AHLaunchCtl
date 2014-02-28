@@ -8,6 +8,9 @@
 
 #import "AppDelegate.h"
 #import "AHLaunchCtl.h"
+#import "NSFileManger+Privileged.h"
+
+
 
 @implementation AppDelegate{
     AHLaunchDomain domain;
@@ -19,6 +22,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     domain = [[(NSButton*)_JobType.selectedCell identifier]intValue];
+
 }
 
 - (IBAction)addJob:(id)sender {
@@ -47,7 +51,6 @@
 }
 
 - (IBAction)removeJob:(id)sender {
-    
     [[AHLaunchCtl sharedControler]remove:_label.stringValue fromDomain:domain reply:^(NSError *error) {
         if(error){
             [self logError:error];
@@ -57,6 +60,15 @@
         }
     }];
     
+}
+
+-(IBAction)privlidgedCopy:(id)sender{
+    NSError *error;
+    [[NSFileManager defaultManager]copyItemAtPath:@"/tmp/test.txt" toPrivilegedLocation:@"/usr/local/test/" overwrite:YES error:&error];
+    if(error)
+        [self logError:error];
+    else
+        [self logText:@"Copied item"];
 }
 
 - (IBAction)load:(id)sender {
@@ -108,7 +120,7 @@
 
 
 - (IBAction)uninstallHelper:(id)sender {
-    [AHLaunchCtl uninstallHelper:kAHLaunchCtlHelperTool reply:^(NSError *error) {
+    [AHLaunchCtl uninstallAHLaunchCtlHelper:^(NSError *error) {
         if(error){
             [self logError:error];
         }else{
@@ -124,7 +136,6 @@
         [self logError:error];
     }else{
         [self logText:@"helper installed"];
-
     }
 }
 

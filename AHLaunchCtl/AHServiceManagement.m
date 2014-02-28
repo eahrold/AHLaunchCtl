@@ -68,7 +68,7 @@ BOOL AHJobBless(AHLaunchDomain domain,NSString* label,AuthorizationRef authRef,N
     CFErrorRef cfError = NULL;
     BOOL rc = NO;
  
-    rc = SMJobBless(SMDomain(domain), (__bridge CFStringRef)(label), authRef, &cfError);
+    rc = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)(label), authRef, &cfError);
     if(!rc){
         NSError *err = CFBridgingRelease(cfError);
         if(error)*error = err;

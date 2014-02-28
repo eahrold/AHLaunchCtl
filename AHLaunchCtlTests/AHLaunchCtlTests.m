@@ -36,36 +36,43 @@
 
 -(void)testLoad
 {
-    NSError* error;
     AHLaunchJob* job = [AHLaunchJob new];
     job.Program = @"/bin/echo";
     job.Label = @"com.eeaapps.ls";
     job.ProgramArguments = @[@"hello"];
     job.StandardOutPath = @"/tmp/hello.txt";
     job.RunAtLoad = YES;
-    [[AHLaunchCtl controler] add:job toDomain:kLCUserLaunchAgent reply:^(NSError *error) {
+    [[AHLaunchCtl sharedControler] add:job
+                              toDomain:kAHUserLaunchAgent
+                             overwrite:YES
+                                 reply:^(NSError *error) {
+        
         XCTAssertNil(error, @"Error: %@",error.localizedDescription);
     }];
 }
 -(void)testUnload
 {
     NSError* error;
-
-    //XCTAssertTrue([[AHLaunchCtl controler]remove:@"com.eeaapps.ls" inDomain:kLCUserLaunchAgent error:&error], @"Error: %@",error.localizedDescription);
+    XCTAssertTrue([[AHLaunchCtl sharedControler] remove:@"com.eeaapps.ls"
+                                             fromDomain:kAHUserLaunchAgent
+                                                  error:&error], @"Error: %@",error.localizedDescription);
 }
 
 -(void)testClassLoad{
-    AHLaunchJob *job = [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.ls" inDomain:kLCUserLaunchAgent ];
+    AHLaunchJob *job = [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.ls"
+                                               inDomain:kAHUserLaunchAgent ];
     NSLog(@"%@",job);
     
 }
 
 -(void)testRestart{
     NSError* error;
-    XCTAssertTrue([[AHLaunchCtl controler]start:@"com.eeaapps.ls" inDomain:kLCUserLaunchAgent error:&error], @"Error: %@",error.localizedDescription);
+    XCTAssertTrue([[AHLaunchCtl sharedControler] start:@"com.eeaapps.ls"
+                                              inDomain:kAHUserLaunchAgent
+                                                 error:&error], @"Error: %@",error.localizedDescription);
     
-    XCTAssertTrue([[AHLaunchCtl controler] restart:@"com.eeaapps.ls"
-                                          inDomain:kLCUserLaunchAgent
+    XCTAssertTrue([[AHLaunchCtl sharedControler] restart:@"com.eeaapps.ls"
+                                          inDomain:kAHUserLaunchAgent
                                              error:&error],
                   @"Error: %@",error.localizedDescription);
 }

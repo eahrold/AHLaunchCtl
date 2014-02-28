@@ -28,7 +28,6 @@
 @property (atomic, strong, readwrite) NSXPCConnection * connection;
 @property (copy) void (^timerReply)(NSInteger time);
 @property (copy) void (^statusMessage)(NSString *message);
-
 @end
 
 @implementation AHAuthorizedLaunchCtl 

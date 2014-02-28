@@ -191,16 +191,8 @@ static const NSTimeInterval kHelperCheckInterval = 1.0; // how often to check wh
     NSError* error;
     error = [AHAuthorizer checkAuthorization:authData command:_cmd];
     if(!error){
-        NSString *helperTool = [NSString stringWithFormat:@"/Library/PrivilegedHelperTools/%@",label];
-        [[NSFileManager defaultManager] removeItemAtPath:helperTool error:&error];
-        [self removeJob:label
-             fromDomain:kAHGlobalLaunchDaemon
-               authData:authData
-                  reply:^(NSError *error) {
-                      reply(error);
-                  }];
-    }else{
         reply(error);
+        [AHLaunchCtl uninstallHelper:label error:&error];
     }
 }
 

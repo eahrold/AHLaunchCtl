@@ -23,18 +23,49 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtl.h"
 
+
 @protocol AHLaunchCtlProgress
+/**
+ *  countdown timer
+ *
+ *  @param time seconds remaining
+ */
 -(void)countdown:(NSInteger)time;
+/**
+ *  status message sent from helper tool
+ *
+ *  @param message status message
+ */
 -(void)statusMessage:(NSString*)message;
 @end
 
 @interface AHAuthorizedLaunchCtl : NSObject
-
+/**
+ *  connection Connection to the helper tool
+ */
 @property (atomic, strong, readonly) NSXPCConnection * connection;
 
+/**
+ *  <#Description#>
+ *
+ *  @param timeReply <#timeReply description#>
+ *
+ *  @return <#return value description#>
+ */
 -(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply;
+
+/**
+ *  <#Description#>
+ *
+ *  @param statusMessage <#statusMessage description#>
+ *
+ *  @return <#return value description#>
+ */
 -(instancetype)initWithStatusMessageBlock:(void (^)(NSString *message))statusMessage;
 
+/**
+ *  <#Description#>
+ */
 -(void)connectToHelper;
 
 @end

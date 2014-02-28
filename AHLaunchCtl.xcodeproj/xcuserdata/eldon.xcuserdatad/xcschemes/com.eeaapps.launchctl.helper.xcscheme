@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BE76C6F018A19369003C94A0"
-               BuildableName = "libAHLaunchCtl.a"
-               BlueprintName = "AHLaunchCtl"
+               BlueprintIdentifier = "BE5B001A18A55BAA000D8603"
+               BuildableName = "com.eeaapps.launchctl.helper"
+               BlueprintName = "com.eeaapps.launchctl.helper"
                ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,6 +29,15 @@
       buildConfiguration = "Debug">
       <Testables>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE5B001A18A55BAA000D8603"
+            BuildableName = "com.eeaapps.launchctl.helper"
+            BlueprintName = "com.eeaapps.launchctl.helper"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -39,6 +48,15 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE5B001A18A55BAA000D8603"
+            BuildableName = "com.eeaapps.launchctl.helper"
+            BlueprintName = "com.eeaapps.launchctl.helper"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -48,6 +66,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE5B001A18A55BAA000D8603"
+            BuildableName = "com.eeaapps.launchctl.helper"
+            BlueprintName = "com.eeaapps.launchctl.helper"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -24,47 +24,112 @@
 
 #import "AHAuthorizer.h"
 #import "AHLaunchCtlHelper.h"
+OSStatus SetupAuthorization(AuthorizationRef *gAuthorization);
 
-NSString  * kCommandKeyAuthRightName    = @"authRightName";
-NSString  * kCommandKeyAuthRightDefault = @"authRightDefault";
-NSString  * kCommandKeyAuthRightDesc    = @"authRightDescription";
-NSString  * kAHAuthorizationAdd         = @"com.eeaapps.launchctl.add";
-NSString  * kAHAuthorizationRemove      = @"com.eeaapps.launchctl.remove";
-NSString  * kAHAuthorizationStart       = @"com.eeaapps.launchctl.start";
-NSString  * kAHAuthorizationStop        = @"com.eeaapps.launchctl.stop";
-NSString  * kAHAuthorizationRestart     = @"com.eeaapps.launchctl.restart";
-NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
+static NSString  * kCommandKeyAuthRightName    = @"authRightName";
+static NSString  * kCommandKeyAuthRightDefault = @"authRightDefault";
+static NSString  * kCommandKeyAuthRightDesc    = @"authRightDescription";
+static NSString  * kAHAuthorizationAdd         = @"com.eeaapps.launchctl.add";
+static NSString  * kAHAuthorizationRemove      = @"com.eeaapps.launchctl.remove";
+static NSString  * kAHAuthorizationStart       = @"com.eeaapps.launchctl.start";
+static NSString  * kAHAuthorizationStop        = @"com.eeaapps.launchctl.stop";
+static NSString  * kAHAuthorizationRestart     = @"com.eeaapps.launchctl.restart";
+static NSString  * kAHAuthorizationRemoveHelper= @"com.eeaapps.launchctl.removehelper";
+static NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
+static NSString  * kAHAuthorizationSystemDaemon= @"com.eeaapps.launchctl.blesshelper";
+static NSString  * kAHAuthorizationJobBless    = @"com.eeaapps.launchctl.system.daemon.modify";
+
+static NSString  * kNSAuthorizationJobBless    = @"com.apple.ServiceManagement.blesshelper";
+static NSString  * kNSAuthorizationSystemDaemon= @"com.apple.ServiceManagement.daemons.modify";
 
 @implementation AHAuthorizer{
     NSInteger _authTime;
 }
-
-+(AHAuthorizer *)timer{
+#pragma mark - Rights dictionary
++ (NSDictionary *)commandInfo
+{
     static dispatch_once_t onceToken;
-    static AHAuthorizer *shared;
+    static NSDictionary *  commandInfo;
     dispatch_once(&onceToken, ^{
-        shared = [AHAuthorizer new];
+        commandInfo = @{
+                NSStringFromSelector(@selector(addJob:toDomain:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationAdd,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Add Launch Job To System/Global Domain?",
+                                                                        @"prompt shown when user is required to authorize to add job"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(removeJob:fromDomain:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationRemove,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Remove Launch Job from System/Global Domain?",
+                                                                        @"prompt shown when user is required to authorize to remove job"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(startJob:inDomain:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationStart,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Start Launch Job in System/Global Domain?",
+                                                                        @"prompt shown when user is required to authorize to start job"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(stopJob:inDomain:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationStop,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Stop Launch Job in System/Global Domain?",
+                                                                        @"prompt shown when user is required to authorize to stop job"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(restartJob:inDomain:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationRestart,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Restart Launch Job in System/Global Domain?",
+                                                                        @"prompt shown when user is required to authorize to restart job"
+                                                                        )
+                        },
+                
+                NSStringFromSelector(@selector(authorizeSessionFor:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationSessionAuth,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Authorize This entire session to manage Launch Jobs in the System Domain?",
+                                                                        @"prompt shown when user is required to authorize to for Authorized Session job"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(uninstallHelper:authData:reply:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationRemoveHelper,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Uninstall Helper Tool?",
+                                                                        @"prompt shown when user is required to authorize to remove helper tool"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(authorizeSystemDaemonWithPrompt:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationSystemDaemon,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Insert System Daemon?",
+                                                                        @"prompt shown when user is required to authorize to add system daemon"
+                                                                        )
+                        },
+                NSStringFromSelector(@selector(authorizeSMJobBlessWithPrompt:)) : @{
+                        kCommandKeyAuthRightName    : kAHAuthorizationJobBless,
+                        kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                        kCommandKeyAuthRightDesc    : NSLocalizedString(
+                                                                        @"Install the Helper Tool?",
+                                                                        @"prompt shown when user is required to authorize to install helper tool"
+                                                                        )
+                        },
+                };
     });
-    return shared;
+    return commandInfo;
 }
-
--(void)countDownFrom:(NSInteger)time timeRemaining:(void (^)(NSInteger))timeRemaining{
-    _authTime = time;
-    while (true){
-        if( _authTime >=0){
-            --_authTime;
-        }else{
-            break;
-        }
-        timeRemaining(_authTime);
-        sleep(1);
-    }
-}
-
--(void)stopTimer{
-    _authTime = 0;
-}
-
+#pragma mark - Authorization Methods
 + (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 // Check that the client denoted by authData is allowed to run the specified command.
 // authData is expected to be an NSData with an AuthorizationExternalForm embedded inside.
@@ -142,75 +207,6 @@ NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
     return authorization;
 }
 
-+ (NSDictionary *)commandInfo
-{
-    static dispatch_once_t onceToken;
-    static NSDictionary *  commandInfo;
-    dispatch_once(&onceToken, ^{
-        commandInfo = @{
-                         NSStringFromSelector(@selector(addJob:toDomain:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationAdd,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Add Launch Job To System/Global Domain?",
-                                                                                 @"prompt shown when user is required to authorize to add job"
-                                                                                 )
-                                 },
-                         NSStringFromSelector(@selector(removeJob:fromDomain:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationRemove,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Remove Launch Job from System/Global Domain?",
-                                                                                 @"prompt shown when user is required to authorize to remove job"
-                                                                                 )
-                                 },
-                         NSStringFromSelector(@selector(startJob:inDomain:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationStart,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Start Launch Job in System/Global Domain?",
-                                                                                 @"prompt shown when user is required to authorize to start job"
-                                                                                 )
-                                 },
-                         NSStringFromSelector(@selector(stopJob:inDomain:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationStop,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Stop Launch Job in System/Global Domain?",
-                                                                                 @"prompt shown when user is required to authorize to stop job"
-                                                                                 )
-                                 },
-                         NSStringFromSelector(@selector(restartJob:inDomain:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationRestart,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Restart Launch Job in System/Global Domain?",
-                                                                                 @"prompt shown when user is required to authorize to restart job"
-                                                                                 )
-                                 },
-
-                         NSStringFromSelector(@selector(authorizeSessionFor:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationSessionAuth,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Authorize This entire session to manage Launch Jobs in the System Domain?",
-                                                                                 @"prompt shown when user is required to authorize to for Authorized Session job"
-                                                                                 )
-                                 },
-                         NSStringFromSelector(@selector(uninstallHelper:authData:reply:)) : @{
-                                 kCommandKeyAuthRightName    : kAHAuthorizationSessionAuth,
-                                 kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                                 kCommandKeyAuthRightDesc    : NSLocalizedString(
-                                                                                 @"Uninstall Helper Tool?",
-                                                                                 @"prompt shown when user is required to authorize to remove helper tool"
-                                                                                 )
-                                 },
-                         
-                         };
-    });
-    return commandInfo;
-}
-
 + (NSString *)authorizationRightForCommand:(SEL)command
 // See comment in header.
 {
@@ -280,19 +276,20 @@ NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
     return authFlags;
 }
 
-+(BOOL)authorizeSystemDaemon:(NSString *)prompt authRef:(AuthorizationRef*)authRef{
-	AuthorizationItem authItem = { "com.apple.ServiceManagement.daemons.modify", 0, NULL, 0 };
-    
-    return [self authorizePrompt:prompt authRef:authRef authItems:authItem];
++(AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt{
+	AuthorizationItem authItem = { [kNSAuthorizationSystemDaemon UTF8String], 0, NULL, 0 };
+    return [self authorizePrompt:prompt authItems:authItem];
 }
 
-+(BOOL)authorizeSMJobBless:(NSString *)prompt authRef:(AuthorizationRef *)authRef{
-    AuthorizationItem authItem	= { "com.apple.ServiceManagement.blesshelper", 0, NULL, 0 };
-    return [self authorizePrompt:prompt authRef:authRef authItems:authItem];
++(AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt{
+    AuthorizationItem authItem	= { [kNSAuthorizationJobBless UTF8String], 0, NULL, 0 };
+    return [self authorizePrompt:prompt authItems:authItem];
 };
 
-+(BOOL)authorizePrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef authItems:(AuthorizationItem)authItem{
-	AuthorizationRights authRights	= { 1, &authItem };
++(AuthorizationRef)authorizePrompt:(NSString *)prompt authItems:(AuthorizationItem)authItem{
+	AuthorizationRef authRef;
+    
+    AuthorizationRights authRights	= { 1, &authItem };
     AuthorizationEnvironment environment = {0, NULL};
     
     if(prompt){
@@ -303,14 +300,15 @@ NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
         environment.items = &envItem;
     }
     
-    OSStatus status = AuthorizationCreate(&authRights, &environment, [[self class] defaultFlags], authRef);
+    OSStatus status = AuthorizationCreate(&authRights, &environment, [[self class] defaultFlags], &authRef);
     
 	if (status != errAuthorizationSuccess) {
-        return NO;
+        return NULL;
 	}
-    return YES;
+    return authRef;
 }
 
+#pragma mark - Authorization Timer
 +(void)authoriztionFree:(AuthorizationRef)authRef{
     if (authRef != NULL) {
         OSStatus junk = AuthorizationFree(authRef, kAuthorizationFlagDestroyRights);
@@ -318,5 +316,31 @@ NSString  * kAHAuthorizationSessionAuth = @"com.eeaapps.launchctl.authsession";
     }
 }
 
++(AHAuthorizer *)timer{
+    static dispatch_once_t onceToken;
+    static AHAuthorizer *shared;
+    dispatch_once(&onceToken, ^{
+        shared = [AHAuthorizer new];
+    });
+    return shared;
+}
+
+-(void)countDownFrom:(NSInteger)time timeRemaining:(void (^)(NSInteger))timeRemaining{
+    _authTime = time;
+    while (true){
+        if( _authTime >=0){
+            --_authTime;
+        }else{
+            break;
+        }
+        timeRemaining(_authTime);
+        sleep(1);
+    }
+}
+
+-(void)stopTimer{
+    _authTime = 0;
+}
 
 @end
+

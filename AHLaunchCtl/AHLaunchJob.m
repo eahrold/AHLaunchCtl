@@ -60,6 +60,16 @@
 -(NSDictionary *)dictionary{
     return [NSDictionary dictionaryWithDictionary:_internalDictionary];
 }
+-(NSString*)executableVersion{
+    NSString *helperVersion;
+    if(_ProgramArguments.count){
+        NSURL* execURL = [NSURL fileURLWithPath:[self.ProgramArguments objectAtIndex:0]];
+        NSDictionary* helperPlist = (NSDictionary*)CFBridgingRelease(CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(execURL)));
+        if(helperPlist)
+            helperVersion = helperPlist[@"CFBundleVersion"];
+    }
+    return helperVersion;
+};
 
 -(NSSet*)ignoredProperties{
     NSSet* ignoredProperties = [NSSet setWithObjects:@"PID",@"LastExitStatus",@"isCurrentlyLoaded",@"domain", nil];
@@ -203,7 +213,6 @@
 -(id)initWithCoder:(NSCoder *)aDecoder{
     self = [super init];
     NSSet* SAND = [NSSet setWithObjects:[NSArray class],[NSDictionary class],[NSString class],[NSNumber class], nil];
-    
     if(self){
         _internalDictionary = [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
         _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];

@@ -22,29 +22,73 @@
 
 
 #import <Foundation/Foundation.h>
-extern NSString  * kCommandKeyAuthRightName ;
-extern NSString  * kCommandKeyAuthRightDefault ;
-extern NSString  * kCommandKeyAuthRightDesc ;
-extern NSString  * kAHAuthorizationAdd  ;
-extern NSString  * kAHAuthorizationRemove;
-extern NSString  * kAHAuthorizationSessionAuth;
 
 @interface AHAuthorizer : NSObject
-@property (copy) void(^timeRemainingReply)(NSInteger timeRemaining);
+/**
+ *  reply A block object to be excuted every second for the duration of the  timer. This block has no return value and takes one argument: NSInteger.
+ */
+//@property (copy) void(^timeRemainingReply)(NSInteger timeRemaining);
 
+/**
+ *  Authorization timer Singleton
+ *
+ *  @return Allocated AHAuthorizer object
+ */
 +(AHAuthorizer *)timer;
+
+/**
+ *  Authorize a Session
+ *
+ *  @param time          Number of seconds to authorize session for
+ *  @param timeRemaining A block object to be excuted every second for the duration of the  timer. This block has no return value and takes one argument: NSInteger
+ */
 -(void)countDownFrom:(NSInteger)time timeRemaining:(void (^)(NSInteger))timeRemaining;
+
+/**
+ *  Stop authorization timer
+ */
 -(void)stopTimer;
 
+/**
+ *  create and external form for authorizing helper tool
+ *
+ *  @return NSData representation of external form
+ */
 + (NSData *)authorizeHelper;
+
+/**
+ *  <#Description#>
+ *
+ *  @param authData <#authData description#>
+ *  @param command  <#command description#>
+ *
+ *  @return <#return value description#>
+ */
 + (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command;
 
-+(AuthorizationFlags)defaultFlags;
-+(BOOL)authorizeSystemDaemon:(NSString *)prompt authRef:(AuthorizationRef*)authRef;
-+(BOOL)authorizeSMJobBless:(NSString *)prompt authRef:(AuthorizationRef*)authRef;
+/**
+ *  <#Description#>
+ *
+ *  @param prompt <#prompt description#>
+ *
+ *  @return <#return value description#>
+ */
++(AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt;
 
+/**
+ *  <#Description#>
+ *
+ *  @param prompt <#prompt description#>
+ *
+ *  @return <#return value description#>
+ */
++(AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt;
+
+/**
+ *  <#Description#>
+ *
+ *  @param authRef <#authRef description#>
+ */
 +(void)authoriztionFree:(AuthorizationRef)authRef;
-
-
 
 @end

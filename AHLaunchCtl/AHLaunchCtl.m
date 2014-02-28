@@ -25,6 +25,7 @@
 #import "AHAuthorizer.h"
 #import "AHServiceManagement.h"
 
+
 #import <SystemConfiguration/SystemConfiguration.h>
 
 NSString* const kAHLaunchCtlHelperTool = @"com.eeaapps.launchctl.helper";
@@ -37,7 +38,7 @@ static BOOL jobExists(NSString* label, AHLaunchDomain domain);
 static BOOL setToConsoleUser();
 static BOOL resetToOriginalUser(uid_t uid);
 
-enum LaunchControlErrorCodes
+typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
 {
     kAHErrorJobLabelNotValid  = 1001,
     kAHErrorJobMissingRequiredKeys,
@@ -265,9 +266,10 @@ enum LaunchControlErrorCodes
     BOOL rc;
     AuthorizationRef authRef = NULL;
 
-    if(domain >= kAHSystemLaunchAgent)
-        [AHAuthorizer authorizeSystemDaemon:@"Load Job?" authRef:&authRef];
-
+    if(domain >= kAHSystemLaunchAgent){
+        authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@"Load Job?"];
+    }
+    
     rc =  AHJobSubmit(domain, job.dictionary, authRef, error);
     
     if(rc){
@@ -279,7 +281,6 @@ enum LaunchControlErrorCodes
 }
 
 -(BOOL)unload:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error{
-    
     if(!jobIsRunning(label, domain)){
         return [[self class]errorWithCode:kAHErrorJobNotLoaded error:error];
     }
@@ -288,7 +289,7 @@ enum LaunchControlErrorCodes
     AuthorizationRef authRef = NULL;
 
     if(domain >= kAHSystemLaunchAgent)
-        [AHAuthorizer authorizeSystemDaemon:@"Unoad Job?" authRef:&authRef];
+        authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:nil];
 
     rc =  AHJobRemove(domain, label, authRef, error);
     [AHAuthorizer authoriztionFree:authRef];
@@ -323,7 +324,7 @@ enum LaunchControlErrorCodes
 }
 
 -(BOOL)restart:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error{
-    AHLaunchJob *job = [[self class]jobFromRunningJobWithLabel:label inDomain:domain];
+    AHLaunchJob *job = [[self class] runningJobWithLabel:label inDomain:domain];
     if(!job){
         return [[self class]errorWithCode:kAHErrorJobNotLoaded error:error];
     }
@@ -398,13 +399,33 @@ enum LaunchControlErrorCodes
 
 #pragma mark - Helper Tool Installation / Removal
 +(BOOL)installHelper:(NSString *)label prompt:(NSString*)prompt error:(NSError *__autoreleasing *)error{
-    AuthorizationRef authRef = NULL;
-    BOOL rc = YES;
+    NSString *currentVersion;
+    NSString *avaliableVersion;
     
-    rc = [AHAuthorizer authorizeSMJobBless:prompt authRef:&authRef];
+    AHLaunchJob *job = [[self class] runningJobWithLabel:label
+                                                inDomain:kAHGlobalLaunchDaemon];
+    if(job){
+        currentVersion = job.executableVersion;
+        
+        NSString * xpcToolPath = [NSString stringWithFormat:@"Contents/Library/LaunchServices/%@",label];
+        NSURL* appBundleURL	= [[NSBundle mainBundle] bundleURL];
+        NSURL* helperTool	= [appBundleURL URLByAppendingPathComponent:xpcToolPath];
+        NSDictionary* helperPlist = (NSDictionary*)CFBridgingRelease(CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(helperTool)));
+        
+        avaliableVersion = helperPlist[@"CFBundleVersion"];
+        
+        if(![self version:avaliableVersion isGreaterThanVersion:currentVersion]){
+            NSLog(@"Version %@ is the current helper version",currentVersion);
+            return YES;
+        }
+    }
     
-    if (!rc) {
-        [[self class]errorWithCode:kAHErrorCouldNotLoadJob error:error];
+    BOOL rc;
+    AuthorizationRef authRef;
+    
+    authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt ];
+    if (authRef == NULL) {
+        rc = [[self class]errorWithCode:kAHErrorCouldNotLoadJob error:error];
     }else {
         rc = AHJobBless(kAHSystemLaunchDaemon, label, authRef, error);
     }
@@ -412,13 +433,51 @@ enum LaunchControlErrorCodes
     return rc;
 }
 
-+(void)uninstallHelper:(NSString *)label reply:(void (^)(NSError *))reply{
++(BOOL)uninstallHelper:(NSString *)label error:(NSError *__autoreleasing *)error{
+    BOOL rc = NO;
+    NSString *helperLaunchFile = [NSString stringWithFormat:@"/Library/LaunchDaemons/%@.plist",label];
+    NSString *helperTool = [NSString stringWithFormat:@"/Library/PrivilegedHelperTools/%@",label];
+    rc = [[NSFileManager defaultManager] removeItemAtPath:helperLaunchFile error:error];
+    if(!rc)
+        NSLog(@"Couldn't remove helper launchctl file");
+    
+    rc = [[NSFileManager defaultManager] removeItemAtPath:helperTool error:error];
+    if(!rc)
+        NSLog(@"Couldn't remove helper tool");
+
+    return [[AHLaunchCtl sharedControler]unload:label inDomain:kAHGlobalLaunchDaemon error:error];
+}
+
++(BOOL)version:(NSString*)versionA isGreaterThanVersion:(NSString*)versionB{
+    NSMutableArray *bVer = [[NSMutableArray alloc] initWithArray:[NSArray arrayWithArray:[versionB componentsSeparatedByString:@"."]]];
+    
+    NSMutableArray *aVer = [[NSMutableArray alloc] initWithArray:[NSArray arrayWithArray:[versionA componentsSeparatedByString:@"."]]];
+    
+    NSInteger max = 3;
+    
+    while(aVer.count < max){
+        [aVer addObject:@"0"];
+    }
+    
+    while(bVer.count < max){
+        [bVer addObject:@"0"];
+    }
+    
+    for (NSInteger i=0; i<max; i++) {
+        if ([[aVer objectAtIndex:i] integerValue]>[[bVer objectAtIndex:i] integerValue]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
++(void)uninstallAHLaunchCtlHelper:(void (^)(NSError *))reply{
     AHAuthorizedLaunchCtl *controller = [[AHAuthorizedLaunchCtl alloc]init];
     [controller connectToHelper];
     
     NSData* authData = [AHAuthorizer authorizeHelper];
     assert(authData != nil);
-    [[controller.connection remoteObjectProxy] uninstallHelper:label authData:authData reply:^(NSError *error) {
+    [[controller.connection remoteObjectProxy] uninstallHelper:kAHLaunchCtlHelperTool authData:authData reply:^(NSError *error) {
         reply(error);
     }];
 }
@@ -471,8 +530,6 @@ enum LaunchControlErrorCodes
     }];
 }
 
-
-
 #pragma mark --- Get Job ---
 +(AHLaunchJob *)jobFromFileNamed:(NSString *)label
                         inDomain:(AHLaunchDomain)domain
@@ -491,8 +548,8 @@ enum LaunchControlErrorCodes
     return nil;
 }
 
-+(AHLaunchJob *)jobFromRunningJobWithLabel:(NSString *)label
-                                  inDomain:(AHLaunchDomain)domain
++(AHLaunchJob *)runningJobWithLabel:(NSString *)label
+                           inDomain:(AHLaunchDomain)domain
 {
     AHLaunchJob *job;
     NSDictionary* dict =  AHJobCopyDictionary(domain, label);
@@ -500,7 +557,7 @@ enum LaunchControlErrorCodes
     if(dict.count){
         job = [AHLaunchJob jobFromDictionary:dict];
     }else{
-        job = [[[self class]runningJobMatching:label inDomain:domain] lastObject];
+        job = [[[self class]runningJobsMatching:label inDomain:domain] lastObject];
     }
     
     return job;
@@ -512,7 +569,7 @@ enum LaunchControlErrorCodes
     return [self jobMatch:nil domain:domain];
 }
 
-+(NSArray*)runningJobMatching:(NSString*)match inDomain:(AHLaunchDomain)domain
++(NSArray*)runningJobsMatching:(NSString*)match inDomain:(AHLaunchDomain)domain
 {
     NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF.Label CONTAINS[c] %@ OR SELF.Program CONTAINS[c] %@",match,match];
     return [self jobMatch:predicate domain:domain];
@@ -563,9 +620,10 @@ enum LaunchControlErrorCodes
         }else{
             job = [AHLaunchJob jobFromDictionary:dict];
         }
-        if(job)
+        if(job){
             job.domain = domain;
             [jobs addObject:job];
+        }
     }
     return [NSArray arrayWithArray:jobs];
 }
@@ -581,6 +639,16 @@ enum LaunchControlErrorCodes
     else
         NSLog(@"Error: %@",msg);
     
+    return rc;
+}
+
++(BOOL)errorWithMessage:(NSString*)message andCode:(NSInteger)code error:(NSError*__autoreleasing*)error{
+    BOOL rc = code > 0?NO:YES;
+    NSError *err = [NSError errorWithDomain:@"com.eeaapps.launchctl" code:code userInfo:@{NSLocalizedDescriptionKey:message}];
+    if(error)
+        *error = err;
+    else
+        NSLog(@"Error: %@",message);
     return rc;
 }
 
@@ -732,4 +800,5 @@ static BOOL resetToOriginalUser(uid_t uid){
     else
         return YES;
 }
+
 

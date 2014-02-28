@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BE76C6F018A19369003C94A0"
-               BuildableName = "libAHLaunchCtl.a"
-               BlueprintName = "AHLaunchCtl"
+               BlueprintIdentifier = "BE91DC4318A586D5000FD8D7"
+               BuildableName = "LaunchControl.app"
+               BlueprintName = "LaunchControl"
                ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,7 +28,26 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       buildConfiguration = "Debug">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BE76C70318A19369003C94A0"
+               BuildableName = "AHLaunchCtlTests.xctest"
+               BlueprintName = "AHLaunchCtlTests"
+               ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE91DC4318A586D5000FD8D7"
+            BuildableName = "LaunchControl.app"
+            BlueprintName = "LaunchControl"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -39,6 +58,15 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE91DC4318A586D5000FD8D7"
+            BuildableName = "LaunchControl.app"
+            BlueprintName = "LaunchControl"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -48,6 +76,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "BE91DC4318A586D5000FD8D7"
+            BuildableName = "LaunchControl.app"
+            BlueprintName = "LaunchControl"
+            ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

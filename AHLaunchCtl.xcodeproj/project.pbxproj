@@ -29,6 +29,7 @@
 		BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D7C18AA630E001548A8 /* AHLaunchCtlHelper.h */; };
 		BE854D7F18AA630E001548A8 /* AHLaunchCtlHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D7D18AA630E001548A8 /* AHLaunchCtlHelper.m */; };
 		BE854D8318AA71D6001548A8 /* AHAuthorizer.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D8118AA71D6001548A8 /* AHAuthorizer.m */; };
+		BE8EA57318B7ABC9008BEE58 /* NSFileManger+Privileged.m in Sources */ = {isa = PBXBuildFile; fileRef = BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */; };
 		BE91DC4518A586D5000FD8D7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F418A19369003C94A0 /* Cocoa.framework */; };
 		BE91DC4B18A586D5000FD8D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BE91DC4918A586D5000FD8D7 /* InfoPlist.strings */; };
 		BE91DC4D18A586D5000FD8D7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BE91DC4C18A586D5000FD8D7 /* main.m */; };
@@ -133,6 +134,8 @@
 		BE91DC5318A586D5000FD8D7 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		BE91DC5618A586D5000FD8D7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BE91DC5818A586D5000FD8D7 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		BEA75B3F18B531D700CA2672 /* NSFileManger+Privileged.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManger+Privileged.h"; sourceTree = "<group>"; };
+		BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManger+Privileged.m"; sourceTree = "<group>"; };
 		BEE9701618AE59F500C252B1 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
 		BEE9701718AE59F500C252B1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = SOURCE_ROOT; };
 		BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchJob.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -212,8 +215,8 @@
 		BE76C6E818A19369003C94A0 = {
 			isa = PBXGroup;
 			children = (
-				BE76C70B18A19369003C94A0 /* AHLaunchCtlTests */,
 				BE76C6FA18A19369003C94A0 /* AHLaunchCtl */,
+				BE76C70B18A19369003C94A0 /* AHLaunchCtlTests */,
 				BE5B001E18A55BAA000D8603 /* LaunchCtl Helper Example */,
 				BE91DC4618A586D5000FD8D7 /* LaunchControl */,
 				BE76C6F318A19369003C94A0 /* Frameworks */,
@@ -259,8 +262,6 @@
 		BE76C6FA18A19369003C94A0 /* AHLaunchCtl */ = {
 			isa = PBXGroup;
 			children = (
-				BE6F549818B114CC00826656 /* AHServiceManagement.h */,
-				BE6F549918B114CC00826656 /* AHServiceManagement.m */,
 				BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */,
 				BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */,
 				BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */,
@@ -271,6 +272,8 @@
 				BE854D7D18AA630E001548A8 /* AHLaunchCtlHelper.m */,
 				BE854D8018AA71D6001548A8 /* AHAuthorizer.h */,
 				BE854D8118AA71D6001548A8 /* AHAuthorizer.m */,
+				BE6F549818B114CC00826656 /* AHServiceManagement.h */,
+				BE6F549918B114CC00826656 /* AHServiceManagement.m */,
 				BE76C6FB18A19369003C94A0 /* Supporting Files */,
 			);
 			path = AHLaunchCtl;
@@ -279,6 +282,7 @@
 		BE76C6FB18A19369003C94A0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				BE8EA57218B7A286008BEE58 /* Catagories */,
 				BE76C6FC18A19369003C94A0 /* AHLaunchCtl-Prefix.pch */,
 			);
 			name = "Supporting Files";
@@ -300,6 +304,15 @@
 				BE76C70E18A19369003C94A0 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BE8EA57218B7A286008BEE58 /* Catagories */ = {
+			isa = PBXGroup;
+			children = (
+				BEA75B3F18B531D700CA2672 /* NSFileManger+Privileged.h */,
+				BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */,
+			);
+			name = Catagories;
 			sourceTree = "<group>";
 		};
 		BE91DC4618A586D5000FD8D7 /* LaunchControl */ = {
@@ -487,6 +500,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE8EA57318B7ABC9008BEE58 /* NSFileManger+Privileged.m in Sources */,
 				BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */,
 				BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */,
 				BE5B001518A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */,
@@ -695,11 +709,12 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
-				INSTALL_PATH = /include;
+				INSTALL_PATH = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				PRIVATE_HEADERS_FOLDER_PATH = /include/headers;
+				OTHER_LDFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = /include/headers;
+				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include;
 				SDKROOT = macosx10.8;
 			};
 			name = Debug;
@@ -710,11 +725,12 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
-				INSTALL_PATH = /include;
+				INSTALL_PATH = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				PRIVATE_HEADERS_FOLDER_PATH = /include/headers;
+				OTHER_LDFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = /include/headers;
+				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include;
 				SDKROOT = macosx10.8;
 			};
 			name = Release;
@@ -773,6 +789,7 @@
 				);
 				INFOPLIST_FILE = "LaunchControl/LaunchControl-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.8;
 				WRAPPER_EXTENSION = app;
@@ -789,6 +806,7 @@
 				GCC_PREFIX_HEADER = "LaunchControl/LaunchControl-Prefix.pch";
 				INFOPLIST_FILE = "LaunchControl/LaunchControl-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.8;
 				WRAPPER_EXTENSION = app;
