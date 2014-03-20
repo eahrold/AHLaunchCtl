@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
@@ -651,7 +651,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="516" height="410"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1130"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="778"/>
             <view key="contentView" id="372">
                 <rect key="frame" x="0.0" y="0.0" width="516" height="410"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -816,28 +816,28 @@
                         <rect key="frame" x="20" y="31" width="476" height="111"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <clipView key="contentView" id="Qlp-c9-YOR">
-                            <rect key="frame" x="1" y="1" width="459" height="94"/>
+                            <rect key="frame" x="1" y="1" width="474" height="109"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <textView editable="NO" importsGraphics="NO" richText="NO" findStyle="panel" verticallyResizable="YES" spellingCorrection="YES" id="4k8-nB-2I1">
-                                    <rect key="frame" x="0.0" y="0.0" width="459" height="94"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="474" height="109"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="459" height="94"/>
+                                    <size key="minSize" width="474" height="109"/>
                                     <size key="maxSize" width="476" height="10000000"/>
                                     <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="459" height="94"/>
+                                    <size key="minSize" width="474" height="109"/>
                                     <size key="maxSize" width="476" height="10000000"/>
                                 </textView>
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </clipView>
                         <scroller key="horizontalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="xGx-hk-ntf">
-                            <rect key="frame" x="1" y="95" width="459" height="15"/>
+                            <rect key="frame" x="1" y="94" width="474" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="Obi-EH-jH5">
-                            <rect key="frame" x="460" y="1" width="15" height="94"/>
+                            <rect key="frame" x="459" y="1" width="16" height="109"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
