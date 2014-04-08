@@ -265,7 +265,17 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
 -(BOOL)load:(AHLaunchJob*)job inDomain:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error{
     BOOL rc;
     AuthorizationRef authRef = NULL;
-
+    
+    // If this is a launch agent and no user is logged in no reason to load;
+    if(domain <= kAHSystemLaunchAgent){
+        NSString *result = CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
+        if([result isEqualToString:@"loginwindow"]|| !result){
+            NSLog(@"No User Logged in");
+            return YES;
+        }
+    }
+    
+    
     if(domain >= kAHSystemLaunchAgent){
         authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@"Load Job?"];
     }
@@ -288,6 +298,15 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
     BOOL rc;
     AuthorizationRef authRef = NULL;
 
+    // If this is a launch agent and no user is logged in no reason to load;
+    if(domain <= kAHSystemLaunchAgent){
+        NSString *result = CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
+        if([result isEqualToString:@"loginwindow"]|| !result){
+            NSLog(@"No User Logged in");
+            return YES;
+        }
+    }
+    
     if(domain >= kAHSystemLaunchAgent)
         authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:nil];
 
@@ -499,13 +518,17 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
     
     AHLaunchCtl *controller = [AHLaunchCtl new];
     AHLaunchJob* job = [AHLaunchJob new];
-    job.label = appIdentifier;
-    job.program = appBundle.executablePath;
-    job.runAtLoad = YES;
-    job.keepAlive = @{@"SuccessfulExit":[NSNumber numberWithBool:keepAlive]};
+    job.Label = appIdentifier;
+    job.Program = appBundle.executablePath;
+    job.RunAtLoad = YES;
+    job.KeepAlive = @{@"SuccessfulExit":[NSNumber numberWithBool:keepAlive]};
     
     AHLaunchDomain domain = global ? kAHGlobalLaunchAgent:kAHUserLaunchAgent;
-    return [controller load:job inDomain:domain error:error];
+    if(launch)
+        return [controller add:job toDomain:domain error:error];
+    else
+        return [controller remove:job.Label fromDomain:domain error:error];
+
 }
 
 +(void)scheduleJob:(NSString*)label program:(NSString*)program interval:(int)seconds domain:(AHLaunchDomain)domain reply:(void (^)(NSError* error))reply
@@ -779,7 +802,7 @@ static NSString * launchFile(NSString* label, AHLaunchDomain domain){
 }
 
 
-static BOOL setToConsoleUser (){
+static BOOL setToConsoleUser(){
     uid_t effectiveUid;
     int results;
     
