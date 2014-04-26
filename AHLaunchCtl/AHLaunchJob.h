@@ -21,6 +21,7 @@
 
 
 #import <Foundation/Foundation.h>
+#import "AHLaunchJobSchedule.h"
 
 typedef NS_ENUM(int, AHLaunchDomain){
     /** User Launch Agents ~/Library/LaunchAgents
@@ -77,7 +78,7 @@ typedef NS_ENUM(int, AHLaunchDomain){
 
 /**
  *  see man launchd.plist  
- */@property (copy, nonatomic) NSString        *ServiceDescription;
+ */@property (copy, nonatomic) NSString     *ServiceDescription;
 #pragma mark -
 /**
  *  see man launchd.plist  
@@ -177,11 +178,18 @@ typedef NS_ENUM(int, AHLaunchDomain){
  *  see man launchd.plist  
  */
 @property (nonatomic)       BOOL            StartOnMount;
+
+#pragma mark - Schedule
 /**
  *  StartCalendarInterval dictionary of integers or array of dictionary of integers
  */
-@property (copy, nonatomic) id              StartCalendarInterval;
-#pragma mark -
+@property (copy, nonatomic) AHLaunchJobSchedule *StartCalendarInterval;
+/**
+ *  Array Of AHLaunchJobSchedule for scheduling mulitple runs with the same Launch Job
+ */
+@property (copy, nonatomic) NSArray             *StartCalendarIntervalArray;
+
+#pragma mark - In/Out
 /**
  *  see man launchd.plist  
  */
@@ -346,12 +354,14 @@ typedef NS_ENUM(int, AHLaunchDomain){
  *  @return The dictionary that will be submitted to launchd
  */
 -(NSDictionary*)dictionary;
+
 /**
- *  The version number of the executable if it was compiled with an embedded Info.plist  This is primairly used for determining the version on an Priviledged helper application
+ *  The version number of the executable if it was compiled with an embedded Info.plist  This is primairly used for determining the version on a priviledged helper application
  *
  *  @return Version String Value
  */
 -(NSString*)executableVersion;
+
 #pragma mark - Class Methods
 /**
  *  Create a job from a dictionary

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BE190A51190C3A7300607787 /* AHLaunchJobSchedule.h in Headers */ = {isa = PBXBuildFile; fileRef = BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BE190A52190C3A7300607787 /* AHLaunchJobSchedule.m in Sources */ = {isa = PBXBuildFile; fileRef = BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */; };
 		BE5B001118A48412000D8603 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
 		BE5B001518A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */; };
 		BE5B001618A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */; };
@@ -94,6 +96,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHLaunchJobSchedule.h; sourceTree = "<group>"; };
+		BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHLaunchJobSchedule.m; sourceTree = "<group>"; };
 		BE5B001018A48412000D8603 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		BE5B001218A54B46000D8603 /* AHAuthorizedLaunchCtl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AHAuthorizedLaunchCtl.h; path = AHLaunchCtl/AHAuthorizedLaunchCtl.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AHAuthorizedLaunchCtl.m; path = AHLaunchCtl/AHAuthorizedLaunchCtl.m; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -266,6 +270,8 @@
 				BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */,
 				BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */,
 				BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */,
+				BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */,
+				BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */,
 				BE5B001218A54B46000D8603 /* AHAuthorizedLaunchCtl.h */,
 				BE5B001318A54B46000D8603 /* AHAuthorizedLaunchCtl.m */,
 				BE854D7C18AA630E001548A8 /* AHLaunchCtlHelper.h */,
@@ -348,6 +354,7 @@
 			files = (
 				BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */,
 				BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */,
+				BE190A51190C3A7300607787 /* AHLaunchJobSchedule.h in Headers */,
 				BE854D7E18AA630E001548A8 /* AHLaunchCtlHelper.h in Headers */,
 				BEDDB53E18B1554700C16956 /* AHAuthorizer.h in Headers */,
 				BE6F549A18B114CC00826656 /* AHServiceManagement.h in Headers */,
@@ -501,6 +508,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BE8EA57318B7ABC9008BEE58 /* NSFileManger+Privileged.m in Sources */,
+				BE190A52190C3A7300607787 /* AHLaunchJobSchedule.m in Sources */,
 				BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */,
 				BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */,
 				BE5B001518A54B46000D8603 /* AHAuthorizedLaunchCtl.m in Sources */,

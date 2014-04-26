@@ -60,6 +60,7 @@
 -(NSDictionary *)dictionary{
     return [NSDictionary dictionaryWithDictionary:_internalDictionary];
 }
+
 -(NSString*)executableVersion{
     NSString *helperVersion;
     if(_ProgramArguments.count){
@@ -114,6 +115,12 @@
     }
     
     id chng = change[@"new"];
+    
+    if([keyPath isEqualToString:@"StartCalendarInterval"]||
+       [keyPath isEqualToString:@"StartCalendarIntervalArray"]){
+        return [self handleStartCalendarInterval:keyPath change:chng];
+    }
+    
     objc_property_t property = class_getProperty([self class], keyPath.UTF8String);
     const char *p = property_getAttributes(property);
     
@@ -123,6 +130,19 @@
         }
         else
             [self writeObjectValueToDict:chng forKey:keyPath];
+    }
+}
+
+-(void)handleStartCalendarInterval:(NSString*)key change:(id)change{
+    if([change isKindOfClass:[AHLaunchJobSchedule class]]){
+        [_internalDictionary setObject:[change dictionary] forKey:@"StartCalendarInterval"];
+
+    }else if ([change isKindOfClass:[NSArray class]]){
+        NSMutableArray *sci = [[NSMutableArray alloc]initWithCapacity:[change count]];
+        for(AHLaunchJobSchedule *schedule in change){
+            [sci addObject:schedule.dictionary];
+        }
+        [_internalDictionary setObject:sci forKey:@"StartCalendarInterval"];
     }
 }
 
@@ -202,7 +222,7 @@
     NSString* stringValue;
     if([value isKindOfClass:[NSString class]])
         stringValue = value;
-    if([value isKindOfClass:[NSNull class]]|| [stringValue isEqualToString:@""]){
+    if([value isKindOfClass:[NSNull class]] || [stringValue isEqualToString:@""]){
         [_internalDictionary removeObjectForKey:keyPath];
     }else{
         [_internalDictionary setValue:value forKey:keyPath];
