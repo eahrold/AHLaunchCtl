@@ -47,6 +47,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
     kAHErrorJobAlreayExists,
     kAHErrorJobAlreayLoaded,
     kAHErrorCouldNotLoadJob,
+    kAHErrorCouldNotLoadHelperTool,
     kAHErrorCouldNotUnloadJob,
     kAHErrorJobCouldNotReload,
 
@@ -433,20 +434,22 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
         
         avaliableVersion = helperPlist[@"CFBundleVersion"];
         
-        if(![self version:avaliableVersion isGreaterThanVersion:currentVersion]){
-            NSLog(@"Version %@ is the current helper version",currentVersion);
+        if(![[self class] version:avaliableVersion isGreaterThanVersion:currentVersion]){
+//            NSLog(@"%@ is the current version of %@ ",currentVersion,label);
             return YES;
         }
     }
     
-    BOOL rc;
+    BOOL rc = YES;
     AuthorizationRef authRef;
     
     authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt ];
     if (authRef == NULL) {
-        rc = [[self class]errorWithCode:kAHErrorCouldNotLoadJob error:error];
+        rc = [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
     }else {
-        rc = AHJobBless(kAHSystemLaunchDaemon, label, authRef, error);
+        if(!AHJobBless(kAHSystemLaunchDaemon, label, authRef, error)){
+            rc = [[self class] errorWithCode:kAHErrorCouldNotLoadHelperTool error:error];
+        }
     }
     [AHAuthorizer authoriztionFree:authRef];
     return rc;
@@ -745,6 +748,8 @@ static NSString * errorMsgFromCode(NSInteger code){
         case kAHErrorFileNotFound: msg = @"we could not find the specified launchd.plist to load the job";
             break;
         case kAHErrorCouldNotLoadJob: msg = @"Could not load job";
+            break;
+        case kAHErrorCouldNotLoadHelperTool: msg = @"Unable to install the priviledged helper tool";
             break;
         case kAHErrorJobAlreayExists: msg = @"The specified job alreay exists";
             break;

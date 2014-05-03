@@ -292,7 +292,10 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *  quit the AHLaunchCtl Helper tool.
  */
 +(void)quitHelper;
-#pragma mark -- Domain Error 
+
+#pragma mark - Utility
++(BOOL)version:(NSString*)versionA isGreaterThanVersion:(NSString*)versionB;
+#pragma mark - Domain Error
 /**
  *  Convience Method for populating an NSError using message and code.  It also can be used to provide a return value for escaping another method. eg on filure of a previous condition you could do "return [AHLaunchCtl errorWithMessage:@"your message" andCode:1 error:error]" and you'll get escaped out, if method return you're using on has BOOL return and error is alreay an __autoreleasing error pointer
  *
