@@ -755,7 +755,7 @@ static NSString * errorMsgFromCode(NSInteger code){
             break;
         case kAHErrorJobAlreayLoaded: msg = @"The specified job is already loaded";
             break;
-        case kAHErrorJobCouldNotReload: msg = @"The specified job is already loaded";
+        case kAHErrorJobCouldNotReload: msg = @"There were problems reloading the job";
             break;
         case kAHErrorJobLabelNotValid: msg = @"The label is not valid. please format as a unique reverse domain";
             break;
@@ -765,7 +765,7 @@ static NSString * errorMsgFromCode(NSInteger code){
             break;
         case kAHErrorCouldNotWriteFile: msg = @"There were problem writing to the file";
             break;
-        case kAHErrorInsufficentPriviledges: msg = @"There were problem writing to the file";
+        case kAHErrorInsufficentPriviledges: msg = @"You are not authorized to to perform this action";
             break;
         case kAHErrorJobMissingRequiredKeys: msg = @"The Submitted Job was missing some required keys";
             break;
