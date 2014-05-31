@@ -435,7 +435,6 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes)
         avaliableVersion = helperPlist[@"CFBundleVersion"];
         
         if(![[self class] version:avaliableVersion isGreaterThanVersion:currentVersion]){
-//            NSLog(@"%@ is the current version of %@ ",currentVersion,label);
             return YES;
         }
     }
