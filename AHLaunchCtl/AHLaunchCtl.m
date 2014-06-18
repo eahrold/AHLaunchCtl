@@ -800,7 +800,7 @@ static NSString * launchFileDirectory(AHLaunchDomain domain){
 
 static NSString * launchFile(NSString* label, AHLaunchDomain domain){
     NSString* file;
-    if(!domain || !label)return nil;
+    if( domain != 0 || !label)return nil;
     file = [NSString stringWithFormat:@"%@/%@.plist",launchFileDirectory(domain),label];
     return file;
 }

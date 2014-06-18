@@ -27,7 +27,7 @@ typedef NS_ENUM(int, AHLaunchDomain){
     /** User Launch Agents ~/Library/LaunchAgents
      *  loaded by the Console user
      */
-    kAHUserLaunchAgent,
+    kAHUserLaunchAgent = 1,
     /** Administrator provided LaunchAgents /Library/LaunchAgents/
      *  loaded by the console user
      */
