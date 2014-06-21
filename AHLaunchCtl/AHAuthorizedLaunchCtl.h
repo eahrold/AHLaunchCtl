@@ -46,25 +46,25 @@
 @property (atomic, strong, readonly) NSXPCConnection * connection;
 
 /**
- *  <#Description#>
+ *  initialize a AuthorizedLaunchCTL object
  *
- *  @param timeReply <#timeReply description#>
+ *  @param timeReply block object that takes one argument time representing the remaining time of the authorized session
  *
- *  @return <#return value description#>
+ *  @return initialized AuthorizedLaunchCTL object
  */
 -(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply;
 
 /**
- *  <#Description#>
+ *  initialize a AuthorizedLaunchCTL object
  *
- *  @param statusMessage <#statusMessage description#>
+ *  @param statusMessage block object that takes one argument message which is sent back from the helper tool.
  *
- *  @return <#return value description#>
+ *  @return initialized AuthorizedLaunchCTL object
  */
 -(instancetype)initWithStatusMessageBlock:(void (^)(NSString *message))statusMessage;
 
 /**
- *  <#Description#>
+ *  make the NSXPC connection to the helper app
  */
 -(void)connectToHelper;
 

@@ -57,37 +57,37 @@
 + (NSData *)authorizeHelper;
 
 /**
- *  <#Description#>
+ *  Used by the helpertool to check the authorization data against the command dictionary
  *
- *  @param authData <#authData description#>
- *  @param command  <#command description#>
+ *  @param authData authorization data
+ *  @param command  the selector requested by the main app
  *
- *  @return <#return value description#>
+ *  @return Populated NSError object on failure.
  */
 + (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command;
 
 /**
- *  <#Description#>
+ *  Prompt for authorization to the System Daemon
  *
- *  @param prompt <#prompt description#>
+ *  @param prompt string to include in the prompt dialog
  *
- *  @return <#return value description#>
+ *  @return AuthorizationRef
  */
 +(AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt;
 
 /**
- *  <#Description#>
+ *  Prompt for authorization to the Service Management system
  *
- *  @param prompt <#prompt description#>
+ *  @param prompt string to include in the prompt dialog
  *
- *  @return <#return value description#>
+ *  @return AuthorizationRef
  */
 +(AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt;
 
 /**
- *  <#Description#>
+ *  Free the AuthorizationRef object
  *
- *  @param authRef <#authRef description#>
+ *  @param authRef the AuthorizationRef to be freed
  */
 +(void)authoriztionFree:(AuthorizationRef)authRef;
 
