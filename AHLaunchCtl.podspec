@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.summary = 'An LaunchD framework for OSX Cocoa apps'
   s.homepage = 'https://github.com/eahrold/AHLaunchCtl'
   s.authors  = { 'Eldon Ahrold' => 'eldonahrold@gmail.com' }
-  s.source   = { :git => 'https://github.com/eahrold/AHLaunchCtl.git', :tag => "0.1", :submodules => true }
+  s.source   = { :git => 'https://github.com/eahrold/AHLaunchCtl.git', :tag => "0.1.1", :submodules => true }
   s.requires_arc = true
 
   s.osx.deployment_target = '10.8'

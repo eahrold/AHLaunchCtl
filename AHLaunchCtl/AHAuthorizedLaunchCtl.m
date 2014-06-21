@@ -19,71 +19,75 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 #import "AHAuthorizedLaunchCtl.h"
 #import "AHLaunchCtlHelper.h"
 
 #pragma mark Authorized LaunchCtl
-@interface AHAuthorizedLaunchCtl() <AHLaunchCtlProgress>
-@property (atomic, strong, readwrite) NSXPCConnection * connection;
+@interface AHAuthorizedLaunchCtl () <AHLaunchCtlProgress>
+@property (atomic, strong, readwrite) NSXPCConnection* connection;
 @property (copy) void (^timerReply)(NSInteger time);
-@property (copy) void (^statusMessage)(NSString *message);
+@property (copy) void (^statusMessage)(NSString* message);
 @end
 
-@implementation AHAuthorizedLaunchCtl 
+@implementation AHAuthorizedLaunchCtl
 
--(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply{
+- (instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply
+{
     self = [super init];
-    if(self){
+    if (self) {
         self->_timerReply = timeReply;
     }
     return self;
 }
 
--(instancetype)initWithStatusMessageBlock:(void (^)(NSString *))statusMessage{
+- (instancetype)initWithStatusMessageBlock:(void (^)(NSString*))statusMessage
+{
     self = [super init];
-    if(self){
+    if (self) {
         self->_statusMessage = statusMessage;
     }
     return self;
 }
 
--(void)connectToHelper{
+- (void)connectToHelper
+{
     assert([NSThread isMainThread]);
     if (self.connection == nil) {
-        self.connection = [[NSXPCConnection alloc] initWithMachServiceName:kAHLaunchCtlHelperTool
-                                                                   options:NSXPCConnectionPrivileged];
+        self.connection = [[NSXPCConnection alloc]
+            initWithMachServiceName:kAHLaunchCtlHelperTool
+                            options:NSXPCConnectionPrivileged];
 
-        self.connection.remoteObjectInterface = [NSXPCInterface
-                                                 interfaceWithProtocol:@protocol(AHLaunchCtlHelper)];
-        
-        self.connection.exportedInterface = [NSXPCInterface
-                                             interfaceWithProtocol:@protocol(AHLaunchCtlProgress)];
-        
+        self.connection.remoteObjectInterface =
+            [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlHelper)];
+
+        self.connection.exportedInterface =
+            [NSXPCInterface interfaceWithProtocol:@protocol(AHLaunchCtlProgress)];
+
         self.connection.invalidationHandler = ^{
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Warc-retain-cycles"
-            self.connection.invalidationHandler = nil;
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                self.connection = nil;
-            }];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-retain-cycles"
+        self.connection.invalidationHandler = nil;
+        [[NSOperationQueue mainQueue]
+            addOperationWithBlock:^{ self.connection = nil; }];
         #pragma clang diagnostic pop
         };
         self.connection.exportedObject = self;
-        
+
         [self.connection resume];
     }
 }
 
-#pragma mark  - AHLaunchCtlProgress
--(void)countdown:(NSInteger)time{
+#pragma mark - AHLaunchCtlProgress
+- (void)countdown:(NSInteger)time
+{
     self.timerReply(time);
-    if(time <= 0){
+    if (time <= 0) {
         [self.connection invalidate];
     }
 }
 
--(void)statusMessage:(NSString *)message{
+- (void)statusMessage:(NSString*)message
+{
     assert(message != nil);
     self.statusMessage(message);
 }

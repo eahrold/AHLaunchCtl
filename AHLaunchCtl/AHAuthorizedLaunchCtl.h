@@ -19,10 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 #import <Foundation/Foundation.h>
 #import "AHLaunchCtl.h"
-
 
 @protocol AHLaunchCtlProgress
 /**
@@ -30,45 +28,45 @@
  *
  *  @param time seconds remaining
  */
--(void)countdown:(NSInteger)time;
+- (void)countdown:(NSInteger)time;
 /**
  *  status message sent from helper tool
  *
  *  @param message status message
  */
--(void)statusMessage:(NSString*)message;
+- (void)statusMessage:(NSString*)message;
 @end
 
 @interface AHAuthorizedLaunchCtl : NSObject
 /**
  *  connection Connection to the helper tool
  */
-@property (atomic, strong, readonly) NSXPCConnection * connection;
+@property (atomic, strong, readonly) NSXPCConnection* connection;
 
 /**
  *  initialize a AuthorizedLaunchCTL object
  *
- *  @param timeReply block object that takes one argument time representing the remaining time of the authorized session
+ *  @param timeReply block object that takes one argument time representing the
+ *remaining time of the authorized session
  *
  *  @return initialized AuthorizedLaunchCTL object
  */
--(instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply;
+- (instancetype)initWithTimeReplyBlock:(void (^)(NSInteger time))timeReply;
 
 /**
  *  initialize a AuthorizedLaunchCTL object
  *
- *  @param statusMessage block object that takes one argument message which is sent back from the helper tool.
+ *  @param statusMessage block object that takes one argument message which is
+ *sent back from the helper tool.
  *
  *  @return initialized AuthorizedLaunchCTL object
  */
--(instancetype)initWithStatusMessageBlock:(void (^)(NSString *message))statusMessage;
+- (instancetype)initWithStatusMessageBlock:
+        (void (^)(NSString* message))statusMessage;
 
 /**
  *  make the NSXPC connection to the helper app
  */
--(void)connectToHelper;
+- (void)connectToHelper;
 
 @end
-
-
-

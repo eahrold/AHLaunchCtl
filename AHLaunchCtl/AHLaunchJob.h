@@ -19,332 +19,334 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 #import <Foundation/Foundation.h>
 #import "AHLaunchJobSchedule.h"
 
-typedef NS_ENUM(int, AHLaunchDomain){
+typedef NS_ENUM(int, AHLaunchDomain) {
     /** User Launch Agents ~/Library/LaunchAgents
-     *  loaded by the Console user
-     */
+   *  loaded by the Console user
+   */
     kAHUserLaunchAgent = 1,
     /** Administrator provided LaunchAgents /Library/LaunchAgents/
-     *  loaded by the console user
-     */
+   *  loaded by the console user
+   */
     kAHGlobalLaunchAgent,
-    
+
     /** Apple provided LaunchDaemons /Library/LaunchAgents/
-     *  loaded by root user
-     */
+   *  loaded by root user
+   */
     kAHSystemLaunchAgent,
 
     /** Administrator provided LaunchAgents /Library/LaunchDaemons/
-     * loaded by root user
-     */
+   * loaded by root user
+   */
     kAHGlobalLaunchDaemon,
-    
+
     /** Apple provided LaunchDaemons /Library/LaunchDaemons/
-     *  loaded by root user
-     */
+   *  loaded by root user
+   */
     kAHSystemLaunchDaemon,
 };
 
 /**
- *  Job Object to loaded by AHLaunchCtl.  Conforms to the keys of launchd.plist.  See the Apple documentation for more info
+ *  Job Object to loaded by AHLaunchCtl.  Conforms to the keys of launchd.plist.
+ * See the Apple documentation for more info
  */
 @interface AHLaunchJob : NSObject
 /**
  *  Label
  */
-@property (copy, nonatomic) NSString        *Label;
+@property (copy, nonatomic) NSString* Label;
 /**
  *  Disabled
  */
-@property (nonatomic)       BOOL            Disabled;
+@property (nonatomic) BOOL Disabled;
 #pragma mark -
 /**
  *  Program
  */
-@property (copy, nonatomic) NSString        *Program;
+@property (copy, nonatomic) NSString* Program;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *ProgramArguments;
+@property (copy, nonatomic) NSArray* ProgramArguments;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       StartInterval;
+@property (nonatomic) NSInteger StartInterval;
 
 /**
  *  see man launchd.plist  
- */@property (copy, nonatomic) NSString     *ServiceDescription;
+ */ @property(copy, nonatomic) NSString* ServiceDescription;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *UserName;
+@property (copy, nonatomic) NSString* UserName;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *GroupName;
+@property (copy, nonatomic) NSString* GroupName;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *inetdCompatibility; //
+@property (copy, nonatomic) NSDictionary* inetdCompatibility;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *LimitLoadToHosts;
+@property (copy, nonatomic) NSArray* LimitLoadToHosts;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *LimitLoadFromHosts;
+@property (copy, nonatomic) NSArray* LimitLoadFromHosts;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *LimitLoadToSessionType;
+@property (copy, nonatomic) NSString* LimitLoadToSessionType;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  EnableGlobbing;
+@property (nonatomic) BOOL EnableGlobbing;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  EnableTransactions;
+@property (nonatomic) BOOL EnableTransactions;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  BeginTransactionAtShutdown; //
+@property (nonatomic) BOOL BeginTransactionAtShutdown;
 #pragma mark -
 /**
- *  KeepAlive dictionary or Number user @YES and @NO 
+ *  KeepAlive dictionary or Number user @YES and @NO
  */
-@property (nonatomic) id                    KeepAlive;
+@property (nonatomic) id KeepAlive;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  OnDemand;
+@property (nonatomic) BOOL OnDemand;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  RunAtLoad;
+@property (nonatomic) BOOL RunAtLoad;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *RootDirectory;
+@property (copy, nonatomic) NSString* RootDirectory;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *WorkingDirectory;
+@property (copy, nonatomic) NSString* WorkingDirectory;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *EnvironmentVariables;
+@property (copy, nonatomic) NSDictionary* EnvironmentVariables;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       Umask;
+@property (nonatomic) NSInteger Umask;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       TimeOut;
+@property (nonatomic) NSInteger TimeOut;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       ExitTimeOut;
+@property (nonatomic) NSInteger ExitTimeOut;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       ThrottleInterval;
+@property (nonatomic) NSInteger ThrottleInterval;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            InitGroups;
+@property (nonatomic) BOOL InitGroups;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *WatchPaths;
+@property (copy, nonatomic) NSArray* WatchPaths;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *QueueDirectories;
+@property (copy, nonatomic) NSArray* QueueDirectories;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            StartOnMount;
+@property (nonatomic) BOOL StartOnMount;
 
 #pragma mark - Schedule
 /**
- *  StartCalendarInterval dictionary of integers or array of dictionary of integers
+ * StartCalendarInterval dictionary of integers or array of dictionary of
+ * integers
  */
-@property (copy, nonatomic) AHLaunchJobSchedule *StartCalendarInterval;
+@property (copy, nonatomic) AHLaunchJobSchedule* StartCalendarInterval;
 /**
- *  Array Of AHLaunchJobSchedule for scheduling mulitple runs with the same Launch Job
+ * Array Of AHLaunchJobSchedule for scheduling mulitple runs with the same
+ * Launch Job
  */
-@property (copy, nonatomic) NSArray             *StartCalendarIntervalArray;
+@property (copy, nonatomic) NSArray* StartCalendarIntervalArray;
 
 #pragma mark - In/Out
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *StandardInPath;
+@property (copy, nonatomic) NSString* StandardInPath;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *StandardOutPath;
+@property (copy, nonatomic) NSString* StandardOutPath;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *StandardErrorPath;
+@property (copy, nonatomic) NSString* StandardErrorPath;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  Debug;
+@property (nonatomic) BOOL Debug;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic) BOOL                  WaitForDebugger;
+@property (nonatomic) BOOL WaitForDebugger;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *SoftResourceLimits;//
+@property (copy, nonatomic) NSDictionary* SoftResourceLimits;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *HardResourceLimits;//
+@property (copy, nonatomic) NSDictionary* HardResourceLimits;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       NSInteger       Nice;
+@property (nonatomic) NSInteger Nice;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *ProcessType;
+@property (copy, nonatomic) NSString* ProcessType;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            AbandonProcessGroup;//
+@property (nonatomic) BOOL AbandonProcessGroup;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            LowPriorityIO;
+@property (nonatomic) BOOL LowPriorityIO;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            LowPriorityBackgroundIO;
+@property (nonatomic) BOOL LowPriorityBackgroundIO;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            LaunchOnlyOnce; ///
+@property (nonatomic) BOOL LaunchOnlyOnce;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *MachServices; //
+@property (copy, nonatomic) NSDictionary* MachServices;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *Sockets; //
+@property (copy, nonatomic) NSDictionary* Sockets;
 #pragma mark - Specialized / Undocumented Apple Keys
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *LaunchEvents;
+@property (copy, nonatomic) NSDictionary* LaunchEvents;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *PerJobMachServices;
+@property (copy, nonatomic) NSDictionary* PerJobMachServices;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *MachExceptionHandler;
+@property (copy, nonatomic) NSString* MachExceptionHandler;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *POSIXSpawnType;
+@property (copy, nonatomic) NSString* POSIXSpawnType;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *PosixSpawnType;
+@property (copy, nonatomic) NSString* PosixSpawnType;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            ServiceIPC;
+@property (nonatomic) BOOL ServiceIPC;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            XPCDomainBootstrapper;
+@property (nonatomic) BOOL XPCDomainBootstrapper;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *CFBundleIdentifier;
+@property (copy, nonatomic) NSString* CFBundleIdentifier;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString        *SHAuthorizationRight;
+@property (copy, nonatomic) NSString* SHAuthorizationRight;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary    *JetsamProperties;
+@property (copy, nonatomic) NSDictionary* JetsamProperties;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray         *BinaryOrderPreference;
+@property (copy, nonatomic) NSArray* BinaryOrderPreference;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            SessionCreate;
+@property (nonatomic) BOOL SessionCreate;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            MultipleInstances;
+@property (nonatomic) BOOL MultipleInstances;
 #pragma mark -
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            HopefullyExitsLast; //
+@property (nonatomic) BOOL HopefullyExitsLast;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            ShutdownMonitor;
+@property (nonatomic) BOOL ShutdownMonitor;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            EventMonitor;
+@property (nonatomic) BOOL EventMonitor;
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property (nonatomic)       BOOL            IgnoreProcessGroupAtShutdown;
+@property (nonatomic) BOOL IgnoreProcessGroupAtShutdown;
 
 #pragma mark - Read only properties...
 /**
  *  Associated Launch Domain
  */
-@property (nonatomic, readonly) AHLaunchDomain  domain;//
+@property (nonatomic, readonly) AHLaunchDomain domain;
 /**
  *  Process ID for the managed executable
  */
-@property (nonatomic, readonly) NSInteger   PID;
+@property (nonatomic, readonly) NSInteger PID;
 /**
  *  Last exit status of the managed executable
  */
-@property (nonatomic, readonly) NSInteger   LastExitStatus;//
+@property (nonatomic, readonly) NSInteger LastExitStatus;
 /**
  *  wether or not the curent job is loaded
  */
-@property (nonatomic, readonly) BOOL        isCurrentlyLoaded;//
+@property (nonatomic, readonly) BOOL isCurrentlyLoaded;
 
 #pragma mark;
 /**
@@ -352,14 +354,16 @@ typedef NS_ENUM(int, AHLaunchDomain){
  *
  *  @return The dictionary that will be submitted to launchd
  */
--(NSDictionary*)dictionary;
+- (NSDictionary*)dictionary;
 
 /**
- *  The version number of the executable if it was compiled with an embedded Info.plist  This is primairly used for determining the version on a priviledged helper application
+ *  The version number of the executable if it was compiled with an embedded
+ *  Info.plist  This is primairly used for determining the version on a
+ *  priviledged helper application
  *
  *  @return Version String Value
  */
--(NSString*)executableVersion;
+- (NSString*)executableVersion;
 
 #pragma mark - Class Methods
 /**
@@ -369,7 +373,7 @@ typedef NS_ENUM(int, AHLaunchDomain){
  *
  *  @return allocated AHLaunchJob with cooresponding keys
  */
-+(AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict;
++ (AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict;
 
 /**
  *  Create a job from a launchd.plist
@@ -378,8 +382,6 @@ typedef NS_ENUM(int, AHLaunchDomain){
  *
  *  @return allocated AHLaunchJob with cooresponding keys
  */
-+(AHLaunchJob*)jobFromFile:(NSString*)file;
-
++ (AHLaunchJob*)jobFromFile:(NSString*)file;
 
 @end
-

@@ -10,7 +10,7 @@
 extern NSInteger AHUndefinedSchedulComponent;
 
 @interface AHLaunchJobSchedule : NSDateComponents
--(NSDictionary*)dictionary;
+- (NSDictionary*)dictionary;
 
 /**
  *  Set up a custom AHLaunchCtl Schedule
@@ -24,11 +24,11 @@ extern NSInteger AHUndefinedSchedulComponent;
  *
  *  @return Initialized AHLaunchJobSchedule object
  */
-+(instancetype)scheduleWithMinute:(NSInteger)minute
-                                      hour:(NSInteger)hour
-                                       day:(NSInteger)day
-                                   weekday:(NSInteger)weekday
-                                     month:(NSInteger)month;
++ (instancetype)scheduleWithMinute:(NSInteger)minute
+                              hour:(NSInteger)hour
+                               day:(NSInteger)day
+                           weekday:(NSInteger)weekday
+                             month:(NSInteger)month;
 /**
  *  setup a daily run
  *
@@ -37,8 +37,7 @@ extern NSInteger AHUndefinedSchedulComponent;
  *
  *  @return Initialized AHLaunchJobSchedule object
  */
-+(instancetype)dailyRunAtHour:(NSInteger)hour
-                       minute:(NSInteger)minute;
++ (instancetype)dailyRunAtHour:(NSInteger)hour minute:(NSInteger)minute;
 
 /**
  *  setup a weekly run
@@ -48,8 +47,7 @@ extern NSInteger AHUndefinedSchedulComponent;
  *
  *  @return Initialized AHLaunchJobSchedule object
  */
-+(instancetype)weeklyRunOnWeekday:(NSInteger)weekday
-                             hour:(NSInteger)hour;
++ (instancetype)weeklyRunOnWeekday:(NSInteger)weekday hour:(NSInteger)hour;
 
 /**
  *  setup a monthly run
@@ -59,8 +57,6 @@ extern NSInteger AHUndefinedSchedulComponent;
  *
  *  @return Initialized AHLaunchJobSchedule object
  */
-+(instancetype)monthlyRunOnDay:(NSInteger)day
-                          hour:(NSInteger)hour;
-
++ (instancetype)monthlyRunOnDay:(NSInteger)day hour:(NSInteger)hour;
 
 @end

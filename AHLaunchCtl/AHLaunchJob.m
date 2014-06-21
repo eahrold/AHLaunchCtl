@@ -19,72 +19,81 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-
 #import "AHLaunchJob.h"
 #import <objc/runtime.h>
 #import "AHServiceManagement.h"
 
 @interface AHLaunchJob () <NSSecureCoding>
-@property (copy,readwrite)  NSMutableDictionary * internalDictionary;
-@property (nonatomic, readwrite)     AHLaunchDomain  domain;//
-@property (nonatomic, readwrite)     NSInteger LastExitStatus;//
-@property (nonatomic, readwrite)     NSInteger PID;//
-@property (nonatomic, readwrite)     BOOL      isCurrentlyLoaded;//
+@property (copy, readwrite) NSMutableDictionary* internalDictionary;
+@property (nonatomic, readwrite) AHLaunchDomain domain; //
+@property (nonatomic, readwrite) NSInteger LastExitStatus; //
+@property (nonatomic, readwrite) NSInteger PID; //
+@property (nonatomic, readwrite) BOOL isCurrentlyLoaded; //
 @end
 
 #pragma mark - AHLaunchJob
-@implementation AHLaunchJob{
+@implementation AHLaunchJob {
 }
 
--(instancetype)init{
+- (instancetype)init
+{
     self = [super init];
-    if(self){
+    if (self) {
         [self startObservingOnAllProperties];
     }
     return self;
 }
 
--(instancetype)initWithoutObservers{
+- (instancetype)initWithoutObservers
+{
     self = [super init];
-    if(self){
-        _internalDictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
+    if (self) {
+        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:31];
     }
     return [super init];
 }
 
--(void)dealloc{
+- (void)dealloc
+{
     [self removeObservingOnAllProperties];
 }
 
--(NSDictionary *)dictionary{
+- (NSDictionary*)dictionary
+{
     return [NSDictionary dictionaryWithDictionary:_internalDictionary];
 }
 
--(NSString*)executableVersion{
-    NSString *helperVersion;
-    if(_ProgramArguments.count){
-        NSURL* execURL = [NSURL fileURLWithPath:[self.ProgramArguments objectAtIndex:0]];
-        NSDictionary* helperPlist = (NSDictionary*)CFBridgingRelease(CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(execURL)));
-        if(helperPlist)
+- (NSString*)executableVersion
+{
+    NSString* helperVersion;
+    if (_ProgramArguments.count) {
+        NSURL* execURL =
+            [NSURL fileURLWithPath:[self.ProgramArguments objectAtIndex:0]];
+        NSDictionary* helperPlist = (NSDictionary*)CFBridgingRelease(
+            CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(execURL)));
+        if (helperPlist)
             helperVersion = helperPlist[@"CFBundleVersion"];
     }
     return helperVersion;
 };
 
--(NSSet*)ignoredProperties{
-    NSSet* ignoredProperties = [NSSet setWithObjects:@"PID",@"LastExitStatus",@"isCurrentlyLoaded",@"domain", nil];
+- (NSSet*)ignoredProperties
+{
+    NSSet* ignoredProperties =
+        [NSSet setWithObjects:@"PID", @"LastExitStatus", @"isCurrentlyLoaded",
+                              @"domain", nil];
     return ignoredProperties;
 }
 
-#pragma mark --- Observing ---
--(void)startObservingOnAllProperties{
+#pragma mark--- Observing ---
+- (void)startObservingOnAllProperties
+{
     unsigned int count;
-    objc_property_t *properties = class_copyPropertyList([self class], &count);
-    for (int i = 0; i < count; ++i){
-        const char *property = property_getName(properties[i]);
+    objc_property_t* properties = class_copyPropertyList([self class], &count);
+    for (int i = 0; i < count; ++i) {
+        const char* property = property_getName(properties[i]);
         NSString* keyPath = [NSString stringWithUTF8String:property];
-        if(![[self ignoredProperties] member:keyPath]){
+        if (![[self ignoredProperties] member:keyPath]) {
             [self addObserver:self
                    forKeyPath:keyPath
                       options:NSKeyValueObservingOptionNew
@@ -93,157 +102,187 @@
     }
     free(properties);
 }
--(void)removeObservingOnAllProperties{
+- (void)removeObservingOnAllProperties
+{
     unsigned int count;
-    objc_property_t *properties = class_copyPropertyList([self class], &count);
-    for (int i = 0; i < count; ++i){
-        const char *property = property_getName(properties[i]);
+    objc_property_t* properties = class_copyPropertyList([self class], &count);
+    for (int i = 0; i < count; ++i) {
+        const char* property = property_getName(properties[i]);
         NSString* keyPath = [NSString stringWithUTF8String:property];
         @try {
-            if(![[self ignoredProperties] member:keyPath]){
+            if (![[self ignoredProperties] member:keyPath]) {
                 [self removeObserver:self forKeyPath:keyPath];
             }
         }
-        @catch (NSException *exception) {}
+        @catch (NSException* exception)
+        {
+        }
     }
     free(properties);
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if(!_internalDictionary){
-        _internalDictionary = [[NSMutableDictionary alloc]initWithCapacity:31];
+- (void)observeValueForKeyPath:(NSString*)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary*)change
+                       context:(void*)context
+{
+    if (!_internalDictionary) {
+        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:31];
     }
-    
+
     id chng = change[@"new"];
-    
-    if([keyPath isEqualToString:@"StartCalendarInterval"]||
-       [keyPath isEqualToString:@"StartCalendarIntervalArray"]){
+
+    if ([keyPath isEqualToString:@"StartCalendarInterval"] ||
+        [keyPath isEqualToString:@"StartCalendarIntervalArray"]) {
         return [self handleStartCalendarInterval:keyPath change:chng];
     }
-    
+
     objc_property_t property = class_getProperty([self class], keyPath.UTF8String);
-    const char *p = property_getAttributes(property);
-    
-    if(p != NULL){
-        if(!strncmp("Tc", p, 2)){
+    const char* p = property_getAttributes(property);
+
+    if (p != NULL) {
+        if (!strncmp("Tc", p, 2)) {
             [self writeBoolValueToDict:chng forKey:keyPath];
-        }
-        else
+        } else
             [self writeObjectValueToDict:chng forKey:keyPath];
     }
 }
 
--(void)handleStartCalendarInterval:(NSString*)key change:(id)change{
-    if([change isKindOfClass:[AHLaunchJobSchedule class]]){
-        [_internalDictionary setObject:[change dictionary] forKey:@"StartCalendarInterval"];
+- (void)handleStartCalendarInterval:(NSString*)key change:(id)change
+{
+    if ([change isKindOfClass:[AHLaunchJobSchedule class]]) {
+        [_internalDictionary setObject:[change dictionary]
+                                forKey:@"StartCalendarInterval"];
 
-    }else if ([change isKindOfClass:[NSArray class]]){
-        NSMutableArray *sci = [[NSMutableArray alloc]initWithCapacity:[change count]];
-        for(AHLaunchJobSchedule *schedule in change){
+    } else if ([change isKindOfClass:[NSArray class]]) {
+        NSMutableArray* sci =
+            [[NSMutableArray alloc] initWithCapacity:[change count]];
+        for (AHLaunchJobSchedule* schedule in change) {
             [sci addObject:schedule.dictionary];
         }
         [_internalDictionary setObject:sci forKey:@"StartCalendarInterval"];
     }
 }
 
-#pragma mark --- Accessors ---
--(NSInteger)LastExitStatus{
-    if(_LastExitStatus){
+#pragma mark--- Accessors ---
+- (NSInteger)LastExitStatus
+{
+    if (_LastExitStatus) {
         return _LastExitStatus;
     }
     id value = [self serviceManagementValueForKey:@"LastExitStatus"];
-    if(!value || ![value isKindOfClass:[NSNumber class]]){
+    if (!value || ![value isKindOfClass:[NSNumber class]]) {
         return -1;
     }
     return [value integerValue];
 }
 
--(NSInteger)PID{
-    if(_PID){
+- (NSInteger)PID
+{
+    if (_PID) {
         return _PID;
     }
     id value = [self serviceManagementValueForKey:@"PID"];
-    if(!value || ![value isKindOfClass:[NSNumber class]]){
+    if (!value || ![value isKindOfClass:[NSNumber class]]) {
         return -1;
     }
     return [value integerValue];
 }
 
--(BOOL)isCurrentlyLoaded{
+- (BOOL)isCurrentlyLoaded
+{
     id test = [self serviceManagementValueForKey:@"Label"];
-    if(test)return YES;
+    if (test)
+        return YES;
     return NO;
 }
 
--(NSString *)description{
-    if(!_internalDictionary.count){
+- (NSString*)description
+{
+    if (!_internalDictionary.count) {
         return @"No Job Set";
-    }else{
+    } else {
         NSInteger pid = self.PID;
         NSString* pidStr;
-        if(pid == -1){
+        if (pid == -1) {
             pidStr = @"--";
-        }else{
-            pidStr = [NSString stringWithFormat:@"%ld",pid];
+        } else {
+            pidStr = [NSString stringWithFormat:@"%ld", pid];
         }
         NSInteger les = self.LastExitStatus;
-        NSString *lesStr;
-        if(les == -1){
+        NSString* lesStr;
+        if (les == -1) {
             lesStr = @"--";
-        }else{
-            lesStr = [NSString stringWithFormat:@"%ld",les];
+        } else {
+            lesStr = [NSString stringWithFormat:@"%ld", les];
         }
-        NSString* loaded = self.isCurrentlyLoaded ? @"YES":@"NO";
+        NSString* loaded = self.isCurrentlyLoaded ? @"YES" : @"NO";
 
-        NSString *format = [NSString stringWithFormat:@"Loaded:%@\t LastExit:%@\t PID:%@\t Label:%@",loaded,lesStr,pidStr,_Label ];
+        NSString* format = [NSString
+            stringWithFormat:@"Loaded:%@\t LastExit:%@\t PID:%@\t Label:%@", loaded,
+                             lesStr, pidStr, _Label];
         return format;
     }
 }
 
-#pragma mark --- Private Methods ---
--(id)serviceManagementValueForKey:(NSString*)key{
-    if(_Label && _domain != 0){
-        NSDictionary* dict =  AHJobCopyDictionary(_domain, _Label);
+#pragma mark--- Private Methods ---
+- (id)serviceManagementValueForKey:(NSString*)key
+{
+    if (_Label && _domain != 0) {
+        NSDictionary* dict = AHJobCopyDictionary(_domain, _Label);
         return [dict objectForKey:key];
-    }else{
+    } else {
         return nil;
     }
 }
 
--(void)writeBoolValueToDict:(id)value forKey:(NSString*)keyPath{
-    if([value  isEqual: @YES]){
-        [_internalDictionary setValue:[NSNumber numberWithBool:(BOOL)value] forKey:keyPath];
-    }else{
+- (void)writeBoolValueToDict:(id)value forKey:(NSString*)keyPath
+{
+    if ([value isEqual:@YES]) {
+        [_internalDictionary setValue:[NSNumber numberWithBool:(BOOL)value]
+                               forKey:keyPath];
+    } else {
         [_internalDictionary removeObjectForKey:keyPath];
     }
 }
 
--(void)writeObjectValueToDict:(id)value forKey:(NSString *)keyPath{
+- (void)writeObjectValueToDict:(id)value forKey:(NSString*)keyPath
+{
     NSString* stringValue;
-    if([value isKindOfClass:[NSString class]])
+    if ([value isKindOfClass:[NSString class]])
         stringValue = value;
-    if([value isKindOfClass:[NSNull class]] || [stringValue isEqualToString:@""]){
+    if ([value isKindOfClass:[NSNull class]] ||
+        [stringValue isEqualToString:@""]) {
         [_internalDictionary removeObjectForKey:keyPath];
-    }else{
+    } else {
         [_internalDictionary setValue:value forKey:keyPath];
     }
 }
 
 #pragma mark - Secure Coding
--(id)initWithCoder:(NSCoder *)aDecoder{
+- (id)initWithCoder:(NSCoder*)aDecoder
+{
     self = [super init];
-    NSSet* SAND = [NSSet setWithObjects:[NSArray class],[NSDictionary class],[NSString class],[NSNumber class], nil];
-    if(self){
-        _internalDictionary = [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
+    NSSet* SAND = [NSSet setWithObjects:[NSArray class], [NSDictionary class],
+                                        [NSString class], [NSNumber class], nil];
+    if (self) {
+        _internalDictionary =
+            [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
         _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
-        _Program = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
-        _ProgramArguments = [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
+        _Program =
+            [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
+        _ProgramArguments =
+            [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
     }
     return self;
 }
 
-+(BOOL)supportsSecureCoding{return YES;}
--(void)encodeWithCoder:(NSCoder *)aEncoder{
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+- (void)encodeWithCoder:(NSCoder*)aEncoder
+{
     [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
     [aEncoder encodeObject:_Label forKey:@"Label"];
     [aEncoder encodeObject:_Program forKey:@"Program"];
@@ -251,16 +290,18 @@
 }
 
 #pragma mark - Class Methods
-+(AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict{
++ (AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict
+{
     assert(dict != nil);
-    AHLaunchJob* job = [[AHLaunchJob alloc]initWithoutObservers];
-    for (id key in dict){
-        if([key isKindOfClass:[NSString class]]){
+    AHLaunchJob* job = [[AHLaunchJob alloc] initWithoutObservers];
+    for (id key in dict) {
+        if ([key isKindOfClass:[NSString class]]) {
             @try {
                 [job setValue:[dict valueForKey:key] forKey:key];
             }
-            @catch (NSException *exception) {
-                NSLog(@"Exception Raised: %@",exception);
+            @catch (NSException* exception)
+            {
+                NSLog(@"Exception Raised: %@", exception);
             }
             [job.internalDictionary setValue:[dict valueForKey:key] forKey:key];
         }
@@ -269,12 +310,11 @@
     return job;
 }
 
-+(AHLaunchJob *)jobFromFile:(NSString *)file{
++ (AHLaunchJob*)jobFromFile:(NSString*)file
+{
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:file];
     return [self jobFromDictionary:dict];
 }
 
 @end
 #pragma mark - Functions
-
-

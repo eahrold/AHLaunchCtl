@@ -19,13 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-
 #import <Foundation/Foundation.h>
 
 @interface AHAuthorizer : NSObject
 /**
- *  reply A block object to be excuted every second for the duration of the  timer. This block has no return value and takes one argument: NSInteger.
+ *  reply A block object to be excuted every second for the duration of the
+ * timer. This block has no return value and takes one argument: NSInteger.
  */
 //@property (copy) void(^timeRemainingReply)(NSInteger timeRemaining);
 
@@ -34,37 +33,41 @@
  *
  *  @return Allocated AHAuthorizer object
  */
-+(AHAuthorizer *)timer;
++ (AHAuthorizer*)timer;
 
 /**
  *  Authorize a Session
  *
  *  @param time          Number of seconds to authorize session for
- *  @param timeRemaining A block object to be excuted every second for the duration of the  timer. This block has no return value and takes one argument: NSInteger
+ *  @param timeRemaining A block object to be excuted every second for the
+ *duration of the  timer. This block has no return value and takes one argument:
+ *NSInteger
  */
--(void)countDownFrom:(NSInteger)time timeRemaining:(void (^)(NSInteger))timeRemaining;
+- (void)countDownFrom:(NSInteger)time
+        timeRemaining:(void (^)(NSInteger))timeRemaining;
 
 /**
  *  Stop authorization timer
  */
--(void)stopTimer;
+- (void)stopTimer;
 
 /**
  *  create and external form for authorizing helper tool
  *
  *  @return NSData representation of external form
  */
-+ (NSData *)authorizeHelper;
++ (NSData*)authorizeHelper;
 
 /**
- *  Used by the helpertool to check the authorization data against the command dictionary
+ *  Used by the helpertool to check the authorization data against the command
+ *dictionary
  *
  *  @param authData authorization data
  *  @param command  the selector requested by the main app
  *
  *  @return Populated NSError object on failure.
  */
-+ (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command;
++ (NSError*)checkAuthorization:(NSData*)authData command:(SEL)command;
 
 /**
  *  Prompt for authorization to the System Daemon
@@ -73,7 +76,7 @@
  *
  *  @return AuthorizationRef
  */
-+(AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt;
++ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString*)prompt;
 
 /**
  *  Prompt for authorization to the Service Management system
@@ -82,13 +85,13 @@
  *
  *  @return AuthorizationRef
  */
-+(AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt;
++ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString*)prompt;
 
 /**
  *  Free the AuthorizationRef object
  *
  *  @param authRef the AuthorizationRef to be freed
  */
-+(void)authoriztionFree:(AuthorizationRef)authRef;
++ (void)authoriztionFree:(AuthorizationRef)authRef;
 
 @end
