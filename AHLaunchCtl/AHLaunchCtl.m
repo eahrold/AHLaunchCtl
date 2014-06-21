@@ -779,8 +779,8 @@ static NSString * errorMsgFromCode(NSInteger code){
 }
 
 static NSString * launchFileDirectory(AHLaunchDomain domain){
-    NSString* type = @"";
-    NSString* fallback = [NSString stringWithFormat:@"%@/Library/LaunchAgents/",NSHomeDirectory()];
+    NSString* type;
+    NSString* fallback = [NSHomeDirectory() stringByAppendingPathComponent:@"%@/Library/LaunchAgents/"];
     switch(domain){
         case kAHGlobalLaunchAgent:type = @"/Library/LaunchAgents/";
             break;
