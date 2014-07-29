@@ -22,34 +22,6 @@
 #import <Foundation/Foundation.h>
 
 @interface AHAuthorizer : NSObject
-/**
- *  reply A block object to be excuted every second for the duration of the
- * timer. This block has no return value and takes one argument: NSInteger.
- */
-//@property (copy) void(^timeRemainingReply)(NSInteger timeRemaining);
-
-/**
- *  Authorization timer Singleton
- *
- *  @return Allocated AHAuthorizer object
- */
-+ (AHAuthorizer*)timer;
-
-/**
- *  Authorize a Session
- *
- *  @param time          Number of seconds to authorize session for
- *  @param timeRemaining A block object to be excuted every second for the
- *duration of the  timer. This block has no return value and takes one argument:
- *NSInteger
- */
-- (void)countDownFrom:(NSInteger)time
-        timeRemaining:(void (^)(NSInteger))timeRemaining;
-
-/**
- *  Stop authorization timer
- */
-- (void)stopTimer;
 
 /**
  *  create and external form for authorizing helper tool

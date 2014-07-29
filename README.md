@@ -1,10 +1,11 @@
 #AHLaunchCtl 
 Objective-C library for managing launchd
-Daemons / Agents. It's coded for easy implamentation of an NSXPC Helper
-Tool to handel management of LaunchD's that run in a priviledged context.
+Daemons / Agents.  
+It has some simple methods built in 
 
-##Usage 
-####Add Job
+#Usage 
+##Add Job
+this will load a job and create the launchd.plist file in the approperiate location
 
 ```objective-c
 AHLaunchJob* job = [AHLaunchJob new];
@@ -17,92 +18,51 @@ job.StartCalendarInterval = [AHLaunchJobSchedule dailyRunAtHour:2 minute:00];
 
 [[AHLaunchCtl sharedControler] add:job
                           toDomain:kAHUserLaunchAgent
-                         overwrite:YES
-                             reply:^(NSError *error) {
-                                 if(error)
-                                    NSLog(@"%@",error);
-                                 else
-                                 	NSLog(@"Added Job %@",job)
+                             error:&error];
+
                                    
 }];  
 ```
 
-####Remove Job
-
+##Remove Job
+this will unload a job and remove associated launchd.plist file
 ```Objective-C
 [[AHLaunchCtl sharedControler] remove:@"com.eeaapps.echo"
-						   fromDomain:kAHGlobalLaunchDaemon 
-                          	    reply:^(NSError *error){
-                                	if(error)
-                                    	NSLog(@"%@",error);
-                                 	else
-                                 		NSLog(@"Added Job %@",job)
+                           fromDomain:kAHUserLaunchAgent
+                                error:&error];
 }]; 	 
 ```
 
-####Load Job
-
+##Load Job
+simply load a job, this is good for one off jobs you need executed. 
+It will not create a launchd file, but run the specified launchd job as long as the user in logged in (for LaunchAgents) or until the system is rebooted (LaunchDaemons)
 ```objective-c
+AHLaunchJob* job = [AHLaunchJob new];
+...(build the job as you would for adding one)...
+[[AHLaunchCtl sharedControler] load:job inDomain:kAHGlobalLaunchDaemon error:&error];
 
 ```
 
-####Unload Job
-
+##Unload Job
+Unload a job temporairly, this will not remove the launchd.plist file
 ```objective-c
-
+[[AHLaunchCtl sharedControler]unload:@"com.eeaapps.echo.helloworld"
+                            inDomain:kAHGlobalLaunchDaemon
+                               error:&error];
 ```
 
-####Install Helper This uses the SMJobBless to install a helper tool.
-
+##Install PriviledgedHelperTool (Uses SMJobBless)
+your helper tool must be properly code signed, and have an embedded Info.plist and Launchd.plist file.** 
 ```objective-c
 	NSError *error;
-    [AHLaunchCtl installHelper:kAHLaunchCtlHelperTool
+    [AHLaunchCtl installHelper:kYourHelperToolReverseDomain
     					prompt:@"Install Helper?"
    						 error:&error]; 
     if(error)
     	NSLog(@"error: %@",error);
-    
 ```
+  
+**_See the HelperTool_\__CodeSign_\__RunScript.py at the root of this repo, for more details, it's extremely helpfull for getting the proper certificate name and .plists created._ 
+ 
 
-####Remove Helper this uses the helper tool to uninstall itself;
-
-```objective-c
-[AHLaunchCtl uninstallHelper:kAHLaunchCtlHelperTool
-                     reply:^(NSError *error){
-                         if(error){
-                             NSLog(@"error: %@",error); }
-                         else{
-                             NSLog(@"Helper And Associated files removed");
-                         }
-                     }];
-
-```
-
-####It also comes bundled with an Session Authorizer for the Helper
-
-```objective-c
-AHLaunchCtl *controller = [AHLaunchCtl new];
-[controller authorizeSessionForNumberOfSeconds:10
-                                 timeRemaining:^(NSInteger time) {
-                                     NSLog(@"Time Remaining: %ld",time);}
-                                         reply:^(NSError *error) {
-                                             NSLog(@"error:%@",error);
-                                         }];
-```
-
-####The helper tool can be implemented in just a few lines of code
-
-```objective-c
-#import <Foundation/Foundation.h>
-#import "AHLaunchCtlHelper.h"
-
-int main(int argc, const char * argv[])
-{
-    @autoreleasepool {
-        AHLaunchCtlXPCListener *helper = [[AHLaunchCtlXPCListener alloc]init];
-        [helper run];
-    }
-	return 0;
-}
-
-```
+###There are many more convience methods, see the AHLaunchCtl.h for what's avaliabvle.

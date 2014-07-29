@@ -34,32 +34,53 @@
     XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
 }
 
--(void)testLoad
+-(void)testAdd
 {
+    NSError *error;
     AHLaunchJob* job = [AHLaunchJob new];
     job.Program = @"/bin/echo";
-    job.Label = @"com.eeaapps.ls";
-    job.ProgramArguments = @[@"hello"];
+    job.Label = @"com.eeaapps.echo.helloworld";
+    job.ProgramArguments = @[@"/bin/echo",@"hello world"];
     job.StandardOutPath = @"/tmp/hello.txt";
     job.RunAtLoad = YES;
     [[AHLaunchCtl sharedControler] add:job
                               toDomain:kAHUserLaunchAgent
-                             overwrite:YES
-                                 reply:^(NSError *error) {
-        
-        XCTAssertNil(error, @"Error: %@",error.localizedDescription);
-    }];
+                                 error:&error];
 }
+
+
+-(void)testLoad
+{
+    NSError *error;
+    AHLaunchJob* job = [AHLaunchJob new];
+    job.Program = @"/bin/echo";
+    job.Label = @"com.eeaapps.echo.helloworld";
+    job.ProgramArguments = @[@"/bin/echo",@"hello world"];
+    job.StandardOutPath = @"/tmp/hello.txt";
+    
+    [[AHLaunchCtl sharedControler] load:job
+                               inDomain:kAHGlobalLaunchDaemon
+                                  error:&error];
+}
+
 -(void)testUnload
 {
+    NSError *error;
+
+[[AHLaunchCtl sharedControler]unload:@"com.eeaapps.echo.helloworld"
+                            inDomain:kAHGlobalLaunchDaemon
+                               error:&error];
+}
+-(void)testRemove
+{
     NSError* error;
-    XCTAssertTrue([[AHLaunchCtl sharedControler] remove:@"com.eeaapps.ls"
+    XCTAssertTrue([[AHLaunchCtl sharedControler] remove:@"com.eeaapps.echo.helloworld"
                                              fromDomain:kAHUserLaunchAgent
                                                   error:&error], @"Error: %@",error.localizedDescription);
 }
 
--(void)testClassLoad{
-    AHLaunchJob *job = [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.ls"
+-(void)testGetJob{
+    AHLaunchJob *job = [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.echo.helloworld"
                                                inDomain:kAHUserLaunchAgent ];
     NSLog(@"%@",job);
     
@@ -67,11 +88,11 @@
 
 -(void)testRestart{
     NSError* error;
-    XCTAssertTrue([[AHLaunchCtl sharedControler] start:@"com.eeaapps.ls"
+    XCTAssertTrue([[AHLaunchCtl sharedControler] start:@"com.eeaapps.echo.helloworld"
                                               inDomain:kAHUserLaunchAgent
                                                  error:&error], @"Error: %@",error.localizedDescription);
     
-    XCTAssertTrue([[AHLaunchCtl sharedControler] restart:@"com.eeaapps.ls"
+    XCTAssertTrue([[AHLaunchCtl sharedControler] restart:@"com.eeaapps.echo.helloworld"
                                           inDomain:kAHUserLaunchAgent
                                              error:&error],
                   @"Error: %@",error.localizedDescription);

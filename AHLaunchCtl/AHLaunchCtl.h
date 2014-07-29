@@ -30,70 +30,6 @@ extern NSString* const kAHLaunchCtlHelperTool;
 + (AHLaunchCtl*)sharedControler;
 #pragma mark - Public Methods
 /**
- *  Creates a launchd.plist and loads the starts the Job
- *  @param job AHLaunchJob Object, Label and either Program or Program Arguments keys required.
- *  @param domain Cooresponding AHLaunchDomain
- *  @param overwrite YES will automatically overwrite a job with the same label, NO will prompt for confirmation
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)add:(AHLaunchJob*)job toDomain:(AHLaunchDomain)domain overwrite:(BOOL)overwright reply:(void (^)(NSError* error))reply;
-
-/**
- *  Unloads a launchd job and removes the associated launchd.plist
- *  @param label Name of the running launchctl job.
- *  @param error Populated should an error occur.
- *  @param domain Cooresponding LCLaunchDomain
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)remove:(NSString*)label fromDomain:(AHLaunchDomain)domain reply:(void (^)(NSError* error))reply;
-
-/**
- *  Starts a launchd job using a launchd.plist
- *  @param label Name of the launchctl file.
- *  @param domain Cooresponding LCLaunchDomain
- *  @param error Populated should an error occur.
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)start:(NSString*)label inDomain:(AHLaunchDomain)domain reply:(void (^)(NSError* error))reply;
-
-/**
- *  unloads a running launchd job.  Identical to unload:inDomain:error, but exists for to keep with naming conventions.
- *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding LCLaunchDomain
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)stop:(NSString*)label inDomain:(AHLaunchDomain)domain reply:(void (^)(NSError* error))reply;
-
-/**
- *  Restarts a launchd job.  If it's not running will just start it.
- *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding LCLaunchDomain
- *  @param status A block object to be executed when the status of the request changes. This block has no return value and takes one argument: NSString.
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)restart:(NSString*)label
-       inDomain:(AHLaunchDomain)domain
-         status:(void (^)(NSString* message))status
-          reply:(void (^)(NSError* error))reply;
-
-/**
- *  Create an authorized session for a specified amount of time.  Calling this allows for multiple jobs that require Elevated Priviledges to
- *  @param seconds NSInterger in seconds that the session should be authorized for;
- *  @param timeExpired A block object to be executed when the authorization timer expires. This block has no return value and takes one argument: BOOL.
- *  @param reply A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)authorizeSessionForNumberOfSeconds:(NSInteger)seconds
-                             timeRemaining:(void (^)(NSInteger time))timeRemaining
-                                     reply:(void (^)(NSError* error))reply;
-
-/**
- *  Deauthorize an authorized session.
- *  @param error A block object to be executed when the request operation finishes. This block has no return value and takes one argument: NSError.
- */
-- (void)deAuthorizeSession:(void (^)(NSError* error))reply;
-
-#pragma mark - For Use When No Helper Tool is avaliable;
-/**
  *  Write the launchd.plist and load the job into context
  *
  *  @param label Name of the running launchctl job.
@@ -116,7 +52,7 @@ extern NSString* const kAHLaunchCtlHelperTool;
 - (BOOL)remove:(NSString*)label fromDomain:(AHLaunchDomain)domain error:(NSError**)error;
 
 /**
- *  Loads launchd job (Only User when not including helper tool)
+ *  Loads launchd job
  *  @param job AHLaunchJob Object, Label and Program keys required.
  *  @param domain Cooresponding LCLaunchDomain
  *
@@ -125,7 +61,7 @@ extern NSString* const kAHLaunchCtlHelperTool;
 - (BOOL)load:(AHLaunchJob*)job inDomain:(AHLaunchDomain)domain error:(NSError**)error;
 
 /**
- *  Unloads a launchd job (Only User when not including helper tool)
+ *  Unloads a launchd job
  *  @param error Populated should an error occur.
  *  @param domain Cooresponding LCLaunchDomain
  *
@@ -264,7 +200,7 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *  @param error  populated should error occur
  *
  *  @return YES for success NO on failure;
- *  @warning Must be code singed properly, and located in the applications MainBundle/Library/LaunchServices
+ *  @warning Must be code singed properly, and have an embedded Info.plist and Launchd.plist, and located in the applications MainBundle/Library/LaunchServices
  */
 + (BOOL)installHelper:(NSString*)label
                prompt:(NSString*)prompt
@@ -276,21 +212,9 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *  @param label  label of the Helper Tool
  *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
  */
-
 + (BOOL)uninstallHelper:(NSString*)label
                   error:(NSError* __autoreleasing*)error;
 
-/**
- *  uninstalls The AHLaunchCtl HelperTool with specified label.
- *
- *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
- */
-+ (void)uninstallAHLaunchCtlHelper:(void (^)(NSError*))reply;
-
-/**
- *  quit the AHLaunchCtl Helper tool.
- */
-+ (void)quitHelper;
 
 #pragma mark - Utility
 + (BOOL)version:(NSString*)versionA isGreaterThanVersion:(NSString*)versionB;

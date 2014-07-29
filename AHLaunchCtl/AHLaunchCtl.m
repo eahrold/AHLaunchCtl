@@ -20,8 +20,6 @@
 // THE SOFTWARE.
 
 #import "AHLaunchCtl.h"
-#import "AHAuthorizedLaunchCtl.h"
-#import "AHLaunchCtlHelper.h"
 #import "AHAuthorizer.h"
 #import "AHServiceManagement.h"
 
@@ -70,198 +68,17 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     return shared;
 }
 
-#pragma mark - Public Methods
-#pragma mark--- Add / Remove ---
-- (void)add:(AHLaunchJob*)job
-     toDomain:(AHLaunchDomain)domain
-    overwrite:(BOOL)overwrite
-        reply:(void (^)(NSError* error))reply
-{
-    NSError* error;
-    if (!overwrite && jobExists(job.Label, domain)) {
-        [[self class] errorWithCode:kAHErrorJobAlreayExists error:&error];
-        reply(error);
-        return;
-    }
-
-    if (domain > kAHUserLaunchAgent) {
-        AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-        NSData* authData = [AHAuthorizer authorizeHelper];
-        assert(authData != nil);
-        [controller connectToHelper];
-        [[controller.connection
-            remoteObjectProxyWithErrorHandler:^(NSError* error) { reply(error); }]
-              addJob:job
-            toDomain:domain
-            authData:authData
-               reply:^(NSError* error) {
-               [controller.connection invalidate];
-               if (!error) {
-                 if (domain <= kAHSystemLaunchAgent) {
-                   [self load:job inDomain:domain error:&error];
-                 }
-               }
-               reply(error);
-               }];
-    } else {
-        [self add:job toDomain:domain error:&error];
-        reply(error);
-    }
-}
-
-- (void)remove:(NSString*)label
-    fromDomain:(AHLaunchDomain)domain
-         reply:(void (^)(NSError* error))reply
-{
-    if (domain > kAHUserLaunchAgent) {
-        AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-        NSData* authData = [AHAuthorizer authorizeHelper];
-        assert(authData != nil);
-        [controller connectToHelper];
-        [[controller.connection
-            remoteObjectProxyWithErrorHandler:^(NSError* error) { reply(error); }]
-             removeJob:label
-            fromDomain:domain
-              authData:authData
-                 reply:^(NSError* error) {
-                 [controller.connection invalidate];
-                 if (!error) {
-                   if (domain <= kAHSystemLaunchAgent) {
-                     [self unload:label inDomain:domain error:&error];
-                   }
-                 }
-                 reply(error);
-                 }];
-    } else {
-        NSError* error;
-        [self remove:label fromDomain:domain error:&error];
-        reply(error);
-    }
-}
-
-- (void)start:(NSString*)label
-     inDomain:(AHLaunchDomain)domain
-        reply:(void (^)(NSError*))reply
-{
-    if (jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent) {
-        AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-        NSData* authData = [AHAuthorizer authorizeHelper];
-        [controller connectToHelper];
-        [[controller.connection
-            remoteObjectProxyWithErrorHandler:^(NSError* error) {
-            [self start:label inDomain:domain error:&error];
-            reply(error);
-            }] startJob:label
-               inDomain:domain
-               authData:authData
-                  reply:^(NSError* error) { reply(error); }];
-
-    } else {
-        NSError* error;
-        [self start:label inDomain:domain error:&error];
-        reply(error);
-    }
-}
-
-- (void)stop:(NSString*)label
-    inDomain:(AHLaunchDomain)domain
-       reply:(void (^)(NSError*))reply
-{
-    if (jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent) {
-        AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-        NSData* authData = [AHAuthorizer authorizeHelper];
-        [controller connectToHelper];
-        [[controller.connection
-            remoteObjectProxyWithErrorHandler:^(NSError* error) {
-            [self stop:label inDomain:domain error:&error];
-            reply(error);
-            }] stopJob:label
-              inDomain:domain
-              authData:authData
-                 reply:^(NSError* error) { reply(error); }];
-    } else {
-        NSError* error;
-        [self stop:label inDomain:domain error:&error];
-        reply(error);
-    }
-}
-
-- (void)restart:(NSString*)label
-       inDomain:(AHLaunchDomain)domain
-         status:(void (^)(NSString*))status
-          reply:(void (^)(NSError*))reply
-{
-    if (jobIsRunning(kAHLaunchCtlHelperTool, kAHGlobalLaunchDaemon) && domain > kAHGlobalLaunchAgent) {
-        AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-        NSData* authData = [AHAuthorizer authorizeHelper];
-        [controller connectToHelper];
-        [[controller.connection
-            remoteObjectProxyWithErrorHandler:^(NSError* error) {
-            [self restart:label inDomain:domain error:&error];
-            reply(error);
-            }] restartJob:label
-                 inDomain:domain
-                 authData:authData
-                    reply:^(NSError* error) { reply(error); }];
-    } else {
-        NSError* error;
-        status(@"Stopping Job");
-        [self stop:label inDomain:domain error:&error];
-        if (error) {
-            status(error.localizedDescription);
-        }
-
-        status(@"Starting Job");
-        [self start:label inDomain:domain error:&error];
-        reply(error);
-    }
-}
-#pragma mark--- Authorization ---
-- (void)authorizeSessionForNumberOfSeconds:(NSInteger)seconds
-                             timeRemaining:
-                                 (void (^)(NSInteger time))timeRemaining
-                                     reply:(void (^)(NSError* error))reply;
-{
-    AHAuthorizedLaunchCtl* controller =
-        [[AHAuthorizedLaunchCtl alloc] initWithTimeReplyBlock:timeRemaining];
-
-    NSData* authData = [AHAuthorizer authorizeHelper];
-
-    assert(authData != nil);
-    [controller connectToHelper];
-
-    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError* error) {
-      reply(error);
-    }] authorizeSessionFor:seconds
-                   authData:authData
-                      reply:^(NSError* error) { reply(error); }];
-}
-
-- (void)deAuthorizeSession:(void (^)(NSError*))reply
-{
-    AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-    [controller connectToHelper];
-    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError* error) {
-      reply(error);
-    }] deAuthorizeSession:^(NSError* error) {
-      reply(error);
-      [controller.connection invalidate];
-    }];
-}
-
-#pragma mark - Private Methods
 #pragma mark--- Add/Remove ---
-
-/** The Add and Remove methods here should only be used when developing a cli
- * tool, since they set the euid. They will not function properly with a helper
- * tool since the helper tool is managed by laucnhd.
- * https://developer.apple.com/library/mac/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html
- */
 
 - (BOOL)add:(AHLaunchJob*)job
     toDomain:(AHLaunchDomain)domain
        error:(NSError* __autoreleasing*)error
 {
+    if(![self hasProperPriviledgeLevel:domain]){
+        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges
+                                     error:error];
+    }
+    
     uid_t uid = getuid();
     BOOL rc = NO;
     if (domain > kAHUserLaunchAgent) {
@@ -269,8 +86,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     }
 
     if (!job.Label) {
-        return
-            [[self class] errorWithCode:kAHErrorJobMissingRequiredKeys error:error];
+        return [[self class] errorWithCode:kAHErrorJobMissingRequiredKeys error:error];
     }
 
     if ([self writeJobToFile:job inDomain:domain error:error]) {
@@ -289,6 +105,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     fromDomain:(AHLaunchDomain)domain
          error:(NSError* __autoreleasing*)error
 {
+    if(![self hasProperPriviledgeLevel:domain]){
+        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges
+                                     error:error];
+    }
+
     uid_t uid = getuid();
     if (domain < kAHGlobalLaunchDaemon) {
         if (!setToConsoleUser())
@@ -305,6 +126,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     inDomain:(AHLaunchDomain)domain
        error:(NSError* __autoreleasing*)error
 {
+    if(![self hasProperPriviledgeLevel:domain]){
+        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges
+                                     error:error];
+    }
+
     BOOL rc;
     AuthorizationRef authRef = NULL;
 
@@ -335,6 +161,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
       inDomain:(AHLaunchDomain)domain
          error:(NSError* __autoreleasing*)error
 {
+    if(![self hasProperPriviledgeLevel:domain]){
+        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges
+                                     error:error];
+    }
+
     if (!jobIsRunning(label, domain)) {
         return [[self class] errorWithCode:kAHErrorJobNotLoaded error:error];
     }
@@ -485,6 +316,15 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     }
 }
 
+#pragma mark - util
+- (BOOL)hasProperPriviledgeLevel:(AHLaunchDomain)domain{
+    uid_t uid = getuid();
+    if (domain > kAHUserLaunchAgent && uid != 0){
+        return NO;
+    }
+    return YES;
+}
+
 #pragma mark - Helper Tool Installation / Removal
 + (BOOL)installHelper:(NSString*)label
                prompt:(NSString*)prompt
@@ -581,28 +421,6 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     return NO;
 }
 
-+ (void)uninstallAHLaunchCtlHelper:(void (^)(NSError*))reply
-{
-    AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-    [controller connectToHelper];
-
-    NSData* authData = [AHAuthorizer authorizeHelper];
-    assert(authData != nil);
-    [[controller.connection remoteObjectProxy]
-        uninstallHelper:kAHLaunchCtlHelperTool
-               authData:authData
-                  reply:^(NSError* error) { reply(error); }];
-}
-
-+ (void)quitHelper
-{
-    AHAuthorizedLaunchCtl* controller = [[AHAuthorizedLaunchCtl alloc] init];
-    [controller connectToHelper];
-
-    [[controller.connection remoteObjectProxyWithErrorHandler:^(NSError* error) {
-      NSLog(@"Error: %@ ", error.debugDescription);
-    }] quitHelper];
-}
 
 #pragma mark - Convience Accessors
 + (BOOL)launchAtLogin:(NSString*)app
@@ -658,11 +476,10 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     job.ProgramArguments = programArguments;
     job.RunAtLoad = YES;
     job.StartInterval = seconds;
-
-    [controller add:job
-           toDomain:domain
-          overwrite:YES
-              reply:^(NSError* error) { reply(error); }];
+    
+    NSError *error;
+    [controller add:job toDomain:domain error:&error];
+    reply(error);
 }
 
 #pragma mark--- Get Job ---

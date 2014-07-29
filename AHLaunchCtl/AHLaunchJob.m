@@ -32,7 +32,11 @@
 @end
 
 #pragma mark - AHLaunchJob
-@implementation AHLaunchJob {
+@implementation AHLaunchJob
+
+- (void)dealloc
+{
+    [self removeObservingOnAllProperties];
 }
 
 - (instancetype)init
@@ -48,16 +52,43 @@
 {
     self = [super init];
     if (self) {
-        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:31];
+        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:33];
     }
     return [super init];
 }
 
-- (void)dealloc
+#pragma mark - Secure Coding
+- (id)initWithCoder:(NSCoder*)aDecoder
 {
-    [self removeObservingOnAllProperties];
+    self = [super init];
+    NSSet* SAND = [NSSet setWithObjects:[NSArray class], [NSDictionary class],
+                   [NSString class], [NSNumber class], nil];
+    if (self) {
+        _internalDictionary =
+        [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
+        _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
+        _Program =
+        [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
+        _ProgramArguments =
+        [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
+    }
+    return self;
 }
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+- (void)encodeWithCoder:(NSCoder*)aEncoder
+{
+    [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
+    [aEncoder encodeObject:_Label forKey:@"Label"];
+    [aEncoder encodeObject:_Program forKey:@"Program"];
+    [aEncoder encodeObject:_ProgramArguments forKey:@"ProgramArguments"];
+}
+
+#pragma mark - Instance Methods
 - (NSDictionary*)dictionary
 {
     return [NSDictionary dictionaryWithDictionary:_internalDictionary];
@@ -259,35 +290,6 @@
     }
 }
 
-#pragma mark - Secure Coding
-- (id)initWithCoder:(NSCoder*)aDecoder
-{
-    self = [super init];
-    NSSet* SAND = [NSSet setWithObjects:[NSArray class], [NSDictionary class],
-                                        [NSString class], [NSNumber class], nil];
-    if (self) {
-        _internalDictionary =
-            [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
-        _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
-        _Program =
-            [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
-        _ProgramArguments =
-            [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
-    }
-    return self;
-}
-
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-- (void)encodeWithCoder:(NSCoder*)aEncoder
-{
-    [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
-    [aEncoder encodeObject:_Label forKey:@"Label"];
-    [aEncoder encodeObject:_Program forKey:@"Program"];
-    [aEncoder encodeObject:_ProgramArguments forKey:@"ProgramArguments"];
-}
 
 #pragma mark - Class Methods
 + (AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict

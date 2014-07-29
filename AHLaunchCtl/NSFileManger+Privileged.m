@@ -36,14 +36,18 @@ static NSString* kNSFileManagerErrNoDirectoryAtLocation =
     AHLaunchJob* job;
     if (![self testSource:path andDest:location error:error]) {
     }
-
+    
+    AuthorizationRef authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@""];
+    if (authRef == NULL) {
+        return NO;
+    };
+    
     job = [self FileManagerJob];
     job.Label = kNSFileManagerMoveFile;
     job.ProgramArguments = @[ @"/bin/mv", path, location ];
 
-    return [[AHLaunchCtl sharedControler] load:job
-                                      inDomain:kAHGlobalLaunchDaemon
-                                         error:error];
+    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error) == 0 ? YES:NO;
+
 }
 
 - (BOOL)copyItemAtPath:(NSString*)path
@@ -65,9 +69,7 @@ static NSString* kNSFileManagerErrNoDirectoryAtLocation =
     job.Label = kNSFileManagerCopyFile;
     job.ProgramArguments = @[ @"/bin/cp", @"-a", path, location ];
 
-    return [[AHLaunchCtl sharedControler] load:job
-                                      inDomain:kAHGlobalLaunchDaemon
-                                         error:error];
+    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
 }
 
 - (BOOL)deleteItemAtPrivilegedPath:(NSString*)path
@@ -87,9 +89,7 @@ static NSString* kNSFileManagerErrNoDirectoryAtLocation =
     job.Label = kNSFileManagerCopyFile;
     job.ProgramArguments = @[ @"/bin/rm", path ];
 
-    return [[AHLaunchCtl sharedControler] load:job
-                                      inDomain:kAHGlobalLaunchDaemon
-                                         error:error];
+    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
 }
 
 - (BOOL)setAttributes:(NSDictionary*)attributes
