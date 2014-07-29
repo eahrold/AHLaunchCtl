@@ -22,7 +22,6 @@
 #import "AHLaunchCtl.h"
 #import "AHAuthorizer.h"
 #import "AHServiceManagement.h"
-
 #import <SystemConfiguration/SystemConfiguration.h>
 
 NSString* const kAHLaunchCtlHelperTool = @"com.eeaapps.launchctl.helper";
