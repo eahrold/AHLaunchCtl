@@ -19,9 +19,9 @@ const CFStringRef SMDomain(AHLaunchDomain domain)
     }
 }
 
-NSDictionary* AHJobCopyDictionary(AHLaunchDomain domain, NSString* label)
+NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label)
 {
-    NSDictionary* dict;
+    NSDictionary *dict;
     if (label && domain != 0) {
         dict = CFBridgingRelease(
             SMJobCopyDictionary(SMDomain(domain), (__bridge CFStringRef)(label)));
@@ -31,8 +31,8 @@ NSDictionary* AHJobCopyDictionary(AHLaunchDomain domain, NSString* label)
     }
 }
 
-BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary* dictionary,
-                 AuthorizationRef authRef, NSError* __autoreleasing* error)
+BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
+                 AuthorizationRef authRef, NSError *__autoreleasing *error)
 {
     CFErrorRef cfError;
     if (domain == 0)
@@ -43,7 +43,7 @@ BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary* dictionary,
                           authRef, &cfError);
 
     if (!rc) {
-        NSError* err = CFBridgingRelease(cfError);
+        NSError *err = CFBridgingRelease(cfError);
         if (error)
             *error = err;
     }
@@ -51,8 +51,8 @@ BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary* dictionary,
     return rc;
 }
 
-BOOL AHJobRemove(AHLaunchDomain domain, NSString* label,
-                 AuthorizationRef authRef, NSError* __autoreleasing* error)
+BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
+                 AuthorizationRef authRef, NSError *__autoreleasing *error)
 {
     CFErrorRef cfError;
     if (domain == 0)
@@ -63,15 +63,15 @@ BOOL AHJobRemove(AHLaunchDomain domain, NSString* label,
                           authRef, YES, &cfError);
 
     if (!rc) {
-        NSError* err = CFBridgingRelease(cfError);
+        NSError *err = CFBridgingRelease(cfError);
         if (error)
             *error = err;
     }
     return rc;
 }
 
-BOOL AHJobBless(AHLaunchDomain domain, NSString* label,
-                AuthorizationRef authRef, NSError* __autoreleasing* error)
+BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
+                AuthorizationRef authRef, NSError *__autoreleasing *error)
 {
     if (domain == 0)
         return NO;
@@ -82,14 +82,14 @@ BOOL AHJobBless(AHLaunchDomain domain, NSString* label,
     rc = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)(label),
                     authRef, &cfError);
     if (!rc) {
-        NSError* err = CFBridgingRelease(cfError);
+        NSError *err = CFBridgingRelease(cfError);
         if (error)
             *error = err;
     }
     return rc;
 }
 
-NSArray* AHCopyAllJobDictionaries(AHLaunchDomain domain)
+NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain)
 {
     return CFBridgingRelease(SMCopyAllJobDictionaries(SMDomain(domain)));
 }

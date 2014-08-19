@@ -24,10 +24,10 @@
  *
  *  @return YES on success NO on failure
  */
-- (BOOL)moveItemAtPath:(NSString*)path
-    toPrivilegedLocation:(NSString*)location
+- (BOOL)moveItemAtPath:(NSString *)path
+    toPrivilegedLocation:(NSString *)location
                overwrite:(BOOL)overwrite
-                   error:(NSError**)error;
+                   error:(NSError **)error;
 
 /**
  *  Move a file to an protected path
@@ -39,10 +39,10 @@
  *
  *  @return YES on success NO on failure
  */
-- (BOOL)copyItemAtPath:(NSString*)path
-    toPrivilegedLocation:(NSString*)location
+- (BOOL)copyItemAtPath:(NSString *)path
+    toPrivilegedLocation:(NSString *)location
                overwrite:(BOOL)overwrite
-                   error:(NSError**)error;
+                   error:(NSError **)error;
 
 /**
  *  Move a file to an protected path
@@ -52,7 +52,7 @@
  *
  *  @return YES on success NO on failure
  */
-- (BOOL)deleteItemAtPrivilegedPath:(NSString*)path error:(NSError**)error;
+- (BOOL)deleteItemAtPrivilegedPath:(NSString *)path error:(NSError **)error;
 
 /**
  *  Set permissions on a protected file
@@ -64,7 +64,7 @@
  *
  *  @return YES on success NO on failure
  */
-- (BOOL)setAttributes:(NSDictionary*)attributes
-    ofItemAtPrivilegedPath:(NSString*)path
-                     error:(NSError**)error;
+- (BOOL)setAttributes:(NSDictionary *)attributes
+    ofItemAtPrivilegedPath:(NSString *)path
+                     error:(NSError **)error;
 @end

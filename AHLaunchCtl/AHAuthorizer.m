@@ -20,38 +20,38 @@
 // THE SOFTWARE.
 
 #import "AHAuthorizer.h"
-OSStatus SetupAuthorization(AuthorizationRef* gAuthorization);
+OSStatus SetupAuthorization(AuthorizationRef *gAuthorization);
 
-static NSString* kCommandKeyAuthRightName = @"authRightName";
-static NSString* kCommandKeyAuthRightDefault = @"authRightDefault";
-static NSString* kCommandKeyAuthRightDesc = @"authRightDescription";
-static NSString* kAHAuthorizationAdd = @"com.eeaapps.launchctl.add";
-static NSString* kAHAuthorizationRemove = @"com.eeaapps.launchctl.remove";
-static NSString* kAHAuthorizationStart = @"com.eeaapps.launchctl.start";
-static NSString* kAHAuthorizationStop = @"com.eeaapps.launchctl.stop";
-static NSString* kAHAuthorizationRestart = @"com.eeaapps.launchctl.restart";
-static NSString* kAHAuthorizationRemoveHelper =
+static NSString *kCommandKeyAuthRightName = @"authRightName";
+static NSString *kCommandKeyAuthRightDefault = @"authRightDefault";
+static NSString *kCommandKeyAuthRightDesc = @"authRightDescription";
+static NSString *kAHAuthorizationAdd = @"com.eeaapps.launchctl.add";
+static NSString *kAHAuthorizationRemove = @"com.eeaapps.launchctl.remove";
+static NSString *kAHAuthorizationStart = @"com.eeaapps.launchctl.start";
+static NSString *kAHAuthorizationStop = @"com.eeaapps.launchctl.stop";
+static NSString *kAHAuthorizationRestart = @"com.eeaapps.launchctl.restart";
+static NSString *kAHAuthorizationRemoveHelper =
     @"com.eeaapps.launchctl.removehelper";
-static NSString* kAHAuthorizationSessionAuth =
+static NSString *kAHAuthorizationSessionAuth =
     @"com.eeaapps.launchctl.authsession";
-static NSString* kAHAuthorizationSystemDaemon =
+static NSString *kAHAuthorizationSystemDaemon =
     @"com.eeaapps.launchctl.blesshelper";
-static NSString* kAHAuthorizationJobBless =
+static NSString *kAHAuthorizationJobBless =
     @"com.eeaapps.launchctl.system.daemon.modify";
 
-static NSString* kNSAuthorizationJobBless =
+static NSString *kNSAuthorizationJobBless =
     @"com.apple.ServiceManagement.blesshelper";
-static NSString* kNSAuthorizationSystemDaemon =
+static NSString *kNSAuthorizationSystemDaemon =
     @"com.apple.ServiceManagement.daemons.modify";
 
 @implementation AHAuthorizer {
     NSInteger _authTime;
 }
 #pragma mark - Rights dictionary
-+ (NSDictionary*)commandInfo
++ (NSDictionary *)commandInfo
 {
     static dispatch_once_t onceToken;
-    static NSDictionary* commandInfo;
+    static NSDictionary *commandInfo;
     dispatch_once(&onceToken, ^{
       commandInfo = @{
         NSStringFromSelector(@selector(authorizeSMJobBlessWithPrompt:)) : @{
@@ -67,14 +67,14 @@ static NSString* kNSAuthorizationSystemDaemon =
     return commandInfo;
 }
 #pragma mark - Authorization Methods
-+ (NSError*)checkAuthorization:(NSData*)authData
-                       command:(SEL)command
++ (NSError *)checkAuthorization:(NSData *)authData
+                        command:(SEL)command
 // Check that the client denoted by authData is allowed to run the specified
 // command.  authData is expected to be an NSData with an
 // AuthorizationExternalForm embedded inside.
 {
 #pragma unused(authData)
-    NSError* error;
+    NSError *error;
     OSStatus err;
     OSStatus junk;
     AuthorizationRef authRef;
@@ -130,12 +130,12 @@ static NSString* kNSAuthorizationSystemDaemon =
     return error;
 }
 
-+ (NSData*)authorizeHelper
++ (NSData *)authorizeHelper
 {
     OSStatus err;
     AuthorizationExternalForm extForm;
     AuthorizationRef authRef;
-    NSData* authorization;
+    NSData *authorization;
 
     err = AuthorizationCreate(NULL, NULL, 0, &authRef);
     if (err == errAuthorizationSuccess) {
@@ -153,21 +153,21 @@ static NSString* kNSAuthorizationSystemDaemon =
     return authorization;
 }
 
-+ (NSString*)authorizationRightForCommand:(SEL)command
++ (NSString *)authorizationRightForCommand:(SEL)command
 // See comment in header.
 {
     return [self commandInfo][NSStringFromSelector(
         command)][kCommandKeyAuthRightName];
 }
 
-+ (void)enumerateRightsUsingBlock:(void (^)(NSString* authRightName,
++ (void)enumerateRightsUsingBlock:(void (^)(NSString *authRightName,
                                             id authRightDefault,
-                                            NSString* authRightDesc))block
+                                            NSString *authRightDesc))block
 // Calls the supplied block with information about each known authorization
 // right..
 {
     [self.commandInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj,
-                                                          BOOL* stop) {
+                                                          BOOL *stop) {
 #pragma unused(key)
 #pragma unused(stop)
       NSDictionary *commandDict;
@@ -197,9 +197,9 @@ static NSString* kNSAuthorizationSystemDaemon =
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 {
     assert(authRef != NULL);
-    [self enumerateRightsUsingBlock:^(NSString* authRightName,
+    [self enumerateRightsUsingBlock:^(NSString *authRightName,
                                       id authRightDefault,
-                                      NSString* authRightDesc) {
+                                      NSString *authRightDesc) {
       OSStatus blockErr;
 
       blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
@@ -226,21 +226,21 @@ static NSString* kNSAuthorizationSystemDaemon =
     return authFlags;
 }
 
-+ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString*)prompt
++ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt
 {
-    AuthorizationItem authItem = {kNSAuthorizationSystemDaemon.UTF8String, 0,
-                                  NULL, 0 };
+    AuthorizationItem authItem = { kNSAuthorizationSystemDaemon.UTF8String, 0,
+                                   NULL, 0 };
     return [self authorizePrompt:prompt authItems:authItem];
 }
 
-+ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString*)prompt
++ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt
 {
-    AuthorizationItem authItem = {kNSAuthorizationJobBless.UTF8String, 0, NULL,
-                                  0 };
+    AuthorizationItem authItem = { kNSAuthorizationJobBless.UTF8String, 0, NULL,
+                                   0 };
     return [self authorizePrompt:prompt authItems:authItem];
 };
 
-+ (AuthorizationRef)authorizePrompt:(NSString*)prompt
++ (AuthorizationRef)authorizePrompt:(NSString *)prompt
                           authItems:(AuthorizationItem)authItem
 {
     AuthorizationRef authRef;
@@ -250,7 +250,7 @@ static NSString* kNSAuthorizationSystemDaemon =
 
     if (prompt) {
         AuthorizationItem envItem = { kAuthorizationEnvironmentPrompt, prompt.length,
-                                      (void*)prompt.UTF8String, 0 };
+                                      (void *)prompt.UTF8String, 0 };
         environment.count = 1;
         environment.items = &envItem;
     }
@@ -271,7 +271,5 @@ static NSString* kNSAuthorizationSystemDaemon =
         assert(junk == errAuthorizationSuccess);
     }
 }
-
-
 
 @end

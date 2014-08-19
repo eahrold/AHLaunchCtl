@@ -56,7 +56,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  Label
  */
-@property (copy, nonatomic) NSString* Label;
+@property (copy, nonatomic) NSString *Label;
 /**
  *  Disabled
  */
@@ -65,11 +65,11 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  Program
  */
-@property (copy, nonatomic) NSString* Program;
+@property (copy, nonatomic) NSString *Program;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* ProgramArguments;
+@property (copy, nonatomic) NSArray *ProgramArguments;
 /**
  *  see man launchd.plist
  */
@@ -77,33 +77,33 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 
 /**
  *  see man launchd.plist  
- */ @property(copy, nonatomic) NSString* ServiceDescription;
+ */ @property(copy, nonatomic) NSString *ServiceDescription;
 #pragma mark -
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* UserName;
+@property (copy, nonatomic) NSString *UserName;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* GroupName;
+@property (copy, nonatomic) NSString *GroupName;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* inetdCompatibility;
+@property (copy, nonatomic) NSDictionary *inetdCompatibility;
 #pragma mark -
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* LimitLoadToHosts;
+@property (copy, nonatomic) NSArray *LimitLoadToHosts;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* LimitLoadFromHosts;
+@property (copy, nonatomic) NSArray *LimitLoadFromHosts;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* LimitLoadToSessionType;
+@property (copy, nonatomic) NSString *LimitLoadToSessionType;
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -134,16 +134,16 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* RootDirectory;
+@property (copy, nonatomic) NSString *RootDirectory;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* WorkingDirectory;
+@property (copy, nonatomic) NSString *WorkingDirectory;
 #pragma mark -
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* EnvironmentVariables;
+@property (copy, nonatomic) NSDictionary *EnvironmentVariables;
 /**
  *  see man launchd.plist
  */
@@ -168,11 +168,11 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* WatchPaths;
+@property (copy, nonatomic) NSArray *WatchPaths;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* QueueDirectories;
+@property (copy, nonatomic) NSArray *QueueDirectories;
 /**
  *  see man launchd.plist
  */
@@ -183,26 +183,26 @@ typedef NS_ENUM(int, AHLaunchDomain) {
  * StartCalendarInterval dictionary of integers or array of dictionary of
  * integers
  */
-@property (copy, nonatomic) AHLaunchJobSchedule* StartCalendarInterval;
+@property (copy, nonatomic) AHLaunchJobSchedule *StartCalendarInterval;
 /**
  * Array Of AHLaunchJobSchedule for scheduling mulitple runs with the same
  * Launch Job
  */
-@property (copy, nonatomic) NSArray* StartCalendarIntervalArray;
+@property (copy, nonatomic) NSArray *StartCalendarIntervalArray;
 
 #pragma mark - In/Out
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* StandardInPath;
+@property (copy, nonatomic) NSString *StandardInPath;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* StandardOutPath;
+@property (copy, nonatomic) NSString *StandardOutPath;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* StandardErrorPath;
+@property (copy, nonatomic) NSString *StandardErrorPath;
 /**
  *  see man launchd.plist
  */
@@ -215,11 +215,11 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* SoftResourceLimits;
+@property (copy, nonatomic) NSDictionary *SoftResourceLimits;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* HardResourceLimits;
+@property (copy, nonatomic) NSDictionary *HardResourceLimits;
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -228,7 +228,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* ProcessType;
+@property (copy, nonatomic) NSString *ProcessType;
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -250,33 +250,33 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* MachServices;
+@property (copy, nonatomic) NSDictionary *MachServices;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* Sockets;
+@property (copy, nonatomic) NSDictionary *Sockets;
 #pragma mark - Specialized / Undocumented Apple Keys
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* LaunchEvents;
+@property (copy, nonatomic) NSDictionary *LaunchEvents;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* PerJobMachServices;
+@property (copy, nonatomic) NSDictionary *PerJobMachServices;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* MachExceptionHandler;
+@property (copy, nonatomic) NSString *MachExceptionHandler;
 #pragma mark -
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* POSIXSpawnType;
+@property (copy, nonatomic) NSString *POSIXSpawnType;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* PosixSpawnType;
+@property (copy, nonatomic) NSString *PosixSpawnType;
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -290,20 +290,20 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* CFBundleIdentifier;
+@property (copy, nonatomic) NSString *CFBundleIdentifier;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSString* SHAuthorizationRight;
+@property (copy, nonatomic) NSString *SHAuthorizationRight;
 #pragma mark -
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSDictionary* JetsamProperties;
+@property (copy, nonatomic) NSDictionary *JetsamProperties;
 /**
  *  see man launchd.plist
  */
-@property (copy, nonatomic) NSArray* BinaryOrderPreference;
+@property (copy, nonatomic) NSArray *BinaryOrderPreference;
 /**
  *  see man launchd.plist
  */
@@ -354,7 +354,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
  *
  *  @return The dictionary that will be submitted to launchd
  */
-- (NSDictionary*)dictionary;
+- (NSDictionary *)dictionary;
 
 /**
  *  The version number of the executable if it was compiled with an embedded
@@ -363,7 +363,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
  *
  *  @return Version String Value
  */
-- (NSString*)executableVersion;
+- (NSString *)executableVersion;
 
 #pragma mark - Class Methods
 /**
@@ -373,7 +373,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
  *
  *  @return allocated AHLaunchJob with cooresponding keys
  */
-+ (AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict;
++ (AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict;
 
 /**
  *  Create a job from a launchd.plist
@@ -382,6 +382,6 @@ typedef NS_ENUM(int, AHLaunchDomain) {
  *
  *  @return allocated AHLaunchJob with cooresponding keys
  */
-+ (AHLaunchJob*)jobFromFile:(NSString*)file;
++ (AHLaunchJob *)jobFromFile:(NSString *)file;
 
 @end

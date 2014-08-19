@@ -26,16 +26,16 @@
 
 /* Bridged implementation of the ServiceManagement Framework **/
 
-extern NSDictionary* AHJobCopyDictionary(AHLaunchDomain domain,
-                                         NSString* label);
+extern NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain,
+                                         NSString *label);
 
-extern NSArray* AHCopyAllJobDictionaries(AHLaunchDomain domain);
+extern NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain);
 
-extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary* dictionary,
-                        AuthorizationRef authRef, NSError** error);
+extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
+                        AuthorizationRef authRef, NSError **error);
 
-extern BOOL AHJobRemove(AHLaunchDomain domain, NSString* label,
-                        AuthorizationRef authRef, NSError** error);
+extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
+                        AuthorizationRef authRef, NSError **error);
 
-extern BOOL AHJobBless(AHLaunchDomain domain, NSString* label,
-                       AuthorizationRef authRef, NSError** error);
+extern BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
+                       AuthorizationRef authRef, NSError **error);

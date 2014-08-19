@@ -24,7 +24,7 @@
 #import "AHServiceManagement.h"
 
 @interface AHLaunchJob () <NSSecureCoding>
-@property (copy, readwrite) NSMutableDictionary* internalDictionary;
+@property (copy, readwrite) NSMutableDictionary *internalDictionary;
 @property (nonatomic, readwrite) AHLaunchDomain domain; //
 @property (nonatomic, readwrite) NSInteger LastExitStatus; //
 @property (nonatomic, readwrite) NSInteger PID; //
@@ -58,19 +58,19 @@
 }
 
 #pragma mark - Secure Coding
-- (id)initWithCoder:(NSCoder*)aDecoder
+- (id)initWithCoder:(NSCoder *)aDecoder
 {
     self = [super init];
-    NSSet* SAND = [NSSet setWithObjects:[NSArray class], [NSDictionary class],
-                   [NSString class], [NSNumber class], nil];
+    NSSet *SAND = [NSSet setWithObjects:[NSArray class], [NSDictionary class],
+                                        [NSString class], [NSNumber class], nil];
     if (self) {
         _internalDictionary =
-        [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
+            [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
         _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
         _Program =
-        [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
+            [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
         _ProgramArguments =
-        [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
+            [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
     }
     return self;
 }
@@ -80,7 +80,7 @@
     return YES;
 }
 
-- (void)encodeWithCoder:(NSCoder*)aEncoder
+- (void)encodeWithCoder:(NSCoder *)aEncoder
 {
     [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
     [aEncoder encodeObject:_Label forKey:@"Label"];
@@ -89,18 +89,18 @@
 }
 
 #pragma mark - Instance Methods
-- (NSDictionary*)dictionary
+- (NSDictionary *)dictionary
 {
     return [NSDictionary dictionaryWithDictionary:_internalDictionary];
 }
 
-- (NSString*)executableVersion
+- (NSString *)executableVersion
 {
-    NSString* helperVersion;
+    NSString *helperVersion;
     if (_ProgramArguments.count) {
-        NSURL* execURL =
+        NSURL *execURL =
             [NSURL fileURLWithPath:[self.ProgramArguments objectAtIndex:0]];
-        NSDictionary* helperPlist = (NSDictionary*)CFBridgingRelease(
+        NSDictionary *helperPlist = (NSDictionary *)CFBridgingRelease(
             CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(execURL)));
         if (helperPlist)
             helperVersion = helperPlist[@"CFBundleVersion"];
@@ -108,9 +108,9 @@
     return helperVersion;
 };
 
-- (NSSet*)ignoredProperties
+- (NSSet *)ignoredProperties
 {
-    NSSet* ignoredProperties =
+    NSSet *ignoredProperties =
         [NSSet setWithObjects:@"PID", @"LastExitStatus", @"isCurrentlyLoaded",
                               @"domain", nil];
     return ignoredProperties;
@@ -120,10 +120,10 @@
 - (void)startObservingOnAllProperties
 {
     unsigned int count;
-    objc_property_t* properties = class_copyPropertyList([self class], &count);
+    objc_property_t *properties = class_copyPropertyList([self class], &count);
     for (int i = 0; i < count; ++i) {
-        const char* property = property_getName(properties[i]);
-        NSString* keyPath = [NSString stringWithUTF8String:property];
+        const char *property = property_getName(properties[i]);
+        NSString *keyPath = [NSString stringWithUTF8String:property];
         if (![[self ignoredProperties] member:keyPath]) {
             [self addObserver:self
                    forKeyPath:keyPath
@@ -136,26 +136,26 @@
 - (void)removeObservingOnAllProperties
 {
     unsigned int count;
-    objc_property_t* properties = class_copyPropertyList([self class], &count);
+    objc_property_t *properties = class_copyPropertyList([self class], &count);
     for (int i = 0; i < count; ++i) {
-        const char* property = property_getName(properties[i]);
-        NSString* keyPath = [NSString stringWithUTF8String:property];
+        const char *property = property_getName(properties[i]);
+        NSString *keyPath = [NSString stringWithUTF8String:property];
         @try {
             if (![[self ignoredProperties] member:keyPath]) {
                 [self removeObserver:self forKeyPath:keyPath];
             }
         }
-        @catch (NSException* exception)
+        @catch (NSException *exception)
         {
         }
     }
     free(properties);
 }
 
-- (void)observeValueForKeyPath:(NSString*)keyPath
+- (void)observeValueForKeyPath:(NSString *)keyPath
                       ofObject:(id)object
-                        change:(NSDictionary*)change
-                       context:(void*)context
+                        change:(NSDictionary *)change
+                       context:(void *)context
 {
     if (!_internalDictionary) {
         _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:31];
@@ -169,7 +169,7 @@
     }
 
     objc_property_t property = class_getProperty([self class], keyPath.UTF8String);
-    const char* p = property_getAttributes(property);
+    const char *p = property_getAttributes(property);
 
     if (p != NULL) {
         if (!strncmp("Tc", p, 2)) {
@@ -179,16 +179,16 @@
     }
 }
 
-- (void)handleStartCalendarInterval:(NSString*)key change:(id)change
+- (void)handleStartCalendarInterval:(NSString *)key change:(id)change
 {
     if ([change isKindOfClass:[AHLaunchJobSchedule class]]) {
         [_internalDictionary setObject:[change dictionary]
                                 forKey:@"StartCalendarInterval"];
 
     } else if ([change isKindOfClass:[NSArray class]]) {
-        NSMutableArray* sci =
+        NSMutableArray *sci =
             [[NSMutableArray alloc] initWithCapacity:[change count]];
-        for (AHLaunchJobSchedule* schedule in change) {
+        for (AHLaunchJobSchedule *schedule in change) {
             [sci addObject:schedule.dictionary];
         }
         [_internalDictionary setObject:sci forKey:@"StartCalendarInterval"];
@@ -228,28 +228,28 @@
     return NO;
 }
 
-- (NSString*)description
+- (NSString *)description
 {
     if (!_internalDictionary.count) {
         return @"No Job Set";
     } else {
         NSInteger pid = self.PID;
-        NSString* pidStr;
+        NSString *pidStr;
         if (pid == -1) {
             pidStr = @"--";
         } else {
             pidStr = [NSString stringWithFormat:@"%ld", pid];
         }
         NSInteger les = self.LastExitStatus;
-        NSString* lesStr;
+        NSString *lesStr;
         if (les == -1) {
             lesStr = @"--";
         } else {
             lesStr = [NSString stringWithFormat:@"%ld", les];
         }
-        NSString* loaded = self.isCurrentlyLoaded ? @"YES" : @"NO";
+        NSString *loaded = self.isCurrentlyLoaded ? @"YES" : @"NO";
 
-        NSString* format = [NSString
+        NSString *format = [NSString
             stringWithFormat:@"Loaded:%@\t LastExit:%@\t PID:%@\t Label:%@", loaded,
                              lesStr, pidStr, _Label];
         return format;
@@ -257,17 +257,17 @@
 }
 
 #pragma mark--- Private Methods ---
-- (id)serviceManagementValueForKey:(NSString*)key
+- (id)serviceManagementValueForKey:(NSString *)key
 {
     if (_Label && _domain != 0) {
-        NSDictionary* dict = AHJobCopyDictionary(_domain, _Label);
+        NSDictionary *dict = AHJobCopyDictionary(_domain, _Label);
         return [dict objectForKey:key];
     } else {
         return nil;
     }
 }
 
-- (void)writeBoolValueToDict:(id)value forKey:(NSString*)keyPath
+- (void)writeBoolValueToDict:(id)value forKey:(NSString *)keyPath
 {
     if ([value isEqual:@YES]) {
         [_internalDictionary setValue:[NSNumber numberWithBool:(BOOL)value]
@@ -277,9 +277,9 @@
     }
 }
 
-- (void)writeObjectValueToDict:(id)value forKey:(NSString*)keyPath
+- (void)writeObjectValueToDict:(id)value forKey:(NSString *)keyPath
 {
-    NSString* stringValue;
+    NSString *stringValue;
     if ([value isKindOfClass:[NSString class]])
         stringValue = value;
     if ([value isKindOfClass:[NSNull class]] ||
@@ -290,18 +290,17 @@
     }
 }
 
-
 #pragma mark - Class Methods
-+ (AHLaunchJob*)jobFromDictionary:(NSDictionary*)dict
++ (AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict
 {
     assert(dict != nil);
-    AHLaunchJob* job = [[AHLaunchJob alloc] initWithoutObservers];
+    AHLaunchJob *job = [[AHLaunchJob alloc] initWithoutObservers];
     for (id key in dict) {
         if ([key isKindOfClass:[NSString class]]) {
             @try {
                 [job setValue:[dict valueForKey:key] forKey:key];
             }
-            @catch (NSException* exception)
+            @catch (NSException *exception)
             {
                 NSLog(@"Exception Raised: %@", exception);
             }
@@ -312,9 +311,9 @@
     return job;
 }
 
-+ (AHLaunchJob*)jobFromFile:(NSString*)file
++ (AHLaunchJob *)jobFromFile:(NSString *)file
 {
-    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:file];
+    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
     return [self jobFromDictionary:dict];
 }
 

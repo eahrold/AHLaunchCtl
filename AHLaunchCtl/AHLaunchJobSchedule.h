@@ -10,7 +10,7 @@
 extern NSInteger AHUndefinedSchedulComponent;
 
 @interface AHLaunchJobSchedule : NSDateComponents
-- (NSDictionary*)dictionary;
+- (NSDictionary *)dictionary;
 
 /**
  *  Set up a custom AHLaunchCtl Schedule

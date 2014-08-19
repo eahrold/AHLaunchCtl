@@ -28,7 +28,7 @@
  *
  *  @return NSData representation of external form
  */
-+ (NSData*)authorizeHelper;
++ (NSData *)authorizeHelper;
 
 /**
  *  Used by the helpertool to check the authorization data against the command
@@ -39,7 +39,7 @@
  *
  *  @return Populated NSError object on failure.
  */
-+ (NSError*)checkAuthorization:(NSData*)authData command:(SEL)command;
++ (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command;
 
 /**
  *  Prompt for authorization to the System Daemon
@@ -48,7 +48,7 @@
  *
  *  @return AuthorizationRef
  */
-+ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString*)prompt;
++ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt;
 
 /**
  *  Prompt for authorization to the Service Management system
@@ -57,7 +57,7 @@
  *
  *  @return AuthorizationRef
  */
-+ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString*)prompt;
++ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt;
 
 /**
  *  Free the AuthorizationRef object

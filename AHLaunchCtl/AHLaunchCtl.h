@@ -22,82 +22,142 @@
 
 #import <Foundation/Foundation.h>
 #import "AHLaunchJob.h"
+#import "AHServiceManagement.h"
 
-extern NSString* const kAHLaunchCtlHelperTool;
+typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
+    /** No Error */
+    kAHErrorSuccess,
+
+    /** Error encountered when job label that is not in dot syntax or has spaces */
+    kAHErrorJobLabelNotValid,
+
+    /** job requires - Label, and Program Arguments */
+    kAHErrorJobMissingRequiredKeys,
+
+    /** Error encountered when job is not Loaded */
+    kAHErrorJobNotLoaded,
+
+    /** Error encountered when job already exists */
+    kAHErrorJobAlreayExists,
+
+    /** Error Encountered when job already loaded */
+    kAHErrorJobAlreayLoaded,
+
+    /** Error Encountered when trying to load a job */
+    kAHErrorCouldNotLoadJob,
+
+    /** Error Encountered when trying to load a helper tool */
+    kAHErrorCouldNotLoadHelperTool,
+
+    /** Error Encountered when trying a helper tool could not be removed */
+    kAHErrorCouldNotUnloadHelperTool,
+
+    /** Error Encountered when trying a helper tool could not be removed */
+    kAHErrorHelperToolNotLoaded,
+
+    /** Error Encountered when files associated with helper tool could not be removed */
+    kAHErrorCouldNotRemoveHelperToolFiles,
+
+    /** Error Encountered when a job could not be unloaded */
+    kAHErrorCouldNotUnloadJob,
+
+    /** Error Encountered when a job could not be reloaded */
+    kAHErrorJobCouldNotReload,
+
+    /** Error Encountered when the launchd.plist file could not be located */
+    kAHErrorFileNotFound,
+
+    /** Error Encountered when  the launchd.plist file could not be written, insufficent priviledges */
+    kAHErrorCouldNotWriteFile,
+
+    /** Error Encountered when more than one job with the same label exist */
+    kAHErrorMultipleJobsMatching,
+
+    /** Error Encountered when user is not priviledged to install into AHLaunchDomain */
+    kAHErrorInsufficentPriviledges,
+
+    /** Error Encountered when a user is trying to unload another's launch job */
+    kAHErrorExecutingAsIncorrectUser,
+
+    /** Error Encountered when the program to be loaded is not executable */
+    kAHErrorProgramNotExecutable,
+};
+
+extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
 @interface AHLaunchCtl : NSObject
 
-+ (AHLaunchCtl*)sharedControler;
++ (AHLaunchCtl *)sharedControler;
 #pragma mark - Public Methods
 /**
  *  Write the launchd.plist and load the job into context
  *
  *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)add:(AHLaunchJob*)job toDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)add:(AHLaunchJob *)job toDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Remove launchd.plist and unload the job
  *
  *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)remove:(NSString*)label fromDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)remove:(NSString *)label fromDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Loads launchd job
  *  @param job AHLaunchJob Object, Label and Program keys required.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)load:(AHLaunchJob*)job inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)load:(AHLaunchJob *)job inDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Unloads a launchd job
  *  @param error Populated should an error occur.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)unload:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)unload:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Loads and existing launchd.plist (Only User when not including helper tool)
  *  @param label Name of the launchctl file.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)start:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)start:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Stops a running launchd job (Only User when not including helper tool)
  *  @param label Name of the running launchctl job.
  *  @param error Populated should an error occur.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)stop:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)stop:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
  *  Restarts a launchd job. (Only User when not including helper tool)
  *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)restart:(NSString*)label inDomain:(AHLaunchDomain)domain error:(NSError**)error;
+- (BOOL)restart:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 #pragma mark - Class Methods
 /**
@@ -110,76 +170,76 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-+ (BOOL)launchAtLogin:(NSString*)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError**)error;
++ (BOOL)launchAtLogin:(NSString *)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError **)error;
 
 /**
  Schedule a LaunchD Job to run at an interval.
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
  *  @param program Path to the executable to run
  *  @param interval How often in seconds to run.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-+ (void)scheduleJob:(NSString*)label
-            program:(NSString*)program
++ (void)scheduleJob:(NSString *)label
+            program:(NSString *)program
            interval:(int)seconds
              domain:(AHLaunchDomain)domain
-              reply:(void (^)(NSError* error))reply;
+              reply:(void (^)(NSError *error))reply;
 /**
  *  Schedule a LaunchD Job to run at an interval.
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
  *  @param program Path to the executable to run
  *  @param programArguments Array of arguments to pass to the executable.
  *  @param interval How often in seconds to run.
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-+ (void)scheduleJob:(NSString*)label
-             program:(NSString*)program
-    programArguments:(NSArray*)programArguments
++ (void)scheduleJob:(NSString *)label
+             program:(NSString *)program
+    programArguments:(NSArray *)programArguments
             interval:(int)seconds
               domain:(AHLaunchDomain)domain
-               reply:(void (^)(NSError* error))reply;
+               reply:(void (^)(NSError *error))reply;
 
 /**
  *  Create a job object based on a launchd.plist file
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the cooresponding keys
  */
-+ (AHLaunchJob*)jobFromFileNamed:(NSString*)label
-                        inDomain:(AHLaunchDomain)domain;
++ (AHLaunchJob *)jobFromFileNamed:(NSString *)label
+                         inDomain:(AHLaunchDomain)domain;
 
 /**
  *  Create a job object based on currently running Launchd Job
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the cooresponding keys
  */
-+ (AHLaunchJob*)runningJobWithLabel:(NSString*)label
-                           inDomain:(AHLaunchDomain)domain;
++ (AHLaunchJob *)runningJobWithLabel:(NSString *)label
+                            inDomain:(AHLaunchDomain)domain;
 
 /**
  *  List with all Jobs avaliable based of files in the specified domain
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return Array of allocated AHLaunchJob with the cooresponding keys
  */
-+ (NSArray*)allJobsFromFilesInDomain:(AHLaunchDomain)domain;
++ (NSArray *)allJobsFromFilesInDomain:(AHLaunchDomain)domain;
 
 /**
  *  List with all currently running jobs in the specified domain
- *  @param domain Cooresponding LCLaunchDomain
+ *  @param domain Cooresponding AHLaunchDomain
  *
  *  @return Array of allocated AHLaunchJob with the cooresponding keys
  */
-+ (NSArray*)allRunningJobsInDomain:(AHLaunchDomain)domain;
++ (NSArray *)allRunningJobsInDomain:(AHLaunchDomain)domain;
 
 /**
  *  List of running Jobs based on criteria
@@ -189,35 +249,59 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *
  *  @return Array of allocated AHLaunchJob with the cooresponding keys
  */
-+ (NSArray*)runningJobsMatching:(NSString*)match
-                       inDomain:(AHLaunchDomain)domain;
++ (NSArray *)runningJobsMatching:(NSString *)match
+                        inDomain:(AHLaunchDomain)domain;
 
 /**
  *  installs a privileged helper tool with the specified label.
  *
  *  @param label  label of the Helper Tool
- *  @param prompt String to include for the authorization prompt
+ *  @param prompt message to prefix the authorization prompt
  *  @param error  populated should error occur
  *
  *  @return YES for success NO on failure;
  *  @warning Must be code singed properly, and have an embedded Info.plist and Launchd.plist, and located in the applications MainBundle/Library/LaunchServices
  */
-+ (BOOL)installHelper:(NSString*)label
-               prompt:(NSString*)prompt
-                error:(NSError**)error;
++ (BOOL)installHelper:(NSString *)label
+               prompt:(NSString *)prompt
+                error:(NSError **)error;
 
 /**
  *  uninstalls HelperTool with specified label.
  *
  *  @param label  label of the Helper Tool
+ *  @param prompt message to prefix the authorization prompt
  *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *  @return YES for success NO on failure;
+ 
  */
-+ (BOOL)uninstallHelper:(NSString*)label
-                  error:(NSError* __autoreleasing*)error;
++ (BOOL)uninstallHelper:(NSString *)label
+                 prompt:(NSString *)prompt
+                  error:(NSError *__autoreleasing *)error;
+/**
+ *  uninstalls HelperTool with specified label.
+ *
+ *  @param label label of the Helper Tool
+ *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *
+ *  @return YES for success NO on failure;
+ */
++ (BOOL)uninstallHelper:(NSString *)label
+                  error:(NSError *__autoreleasing *)error __attribute__((deprecated));
 
+/**
+ *  Cleans up files assoicated with the helper tool that SMJobBless leaves behind
+ *
+ *  @param label label of the Helper Tool
+ *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *
+ *  @return YES for success NO on failure;
+ */
++ (BOOL)removeFilesForHelperWithLabel:(NSString *)label
+                                error:(NSError *__autoreleasing *)error;
 
 #pragma mark - Utility
-+ (BOOL)version:(NSString*)versionA isGreaterThanVersion:(NSString*)versionB;
++ (BOOL)version:(NSString *)versionA isGreaterThanVersion:(NSString *)versionB;
 #pragma mark - Domain Error
 /**
  *  Convience Method for populating an NSError using message and code.  It also can be used to provide a return value for escaping another method. eg on filure of a previous condition you could do "return [AHLaunchCtl errorWithMessage:@"your message" andCode:1 error:error]" and you'll get escaped out, if method return you're using on has BOOL return and error is alreay an __autoreleasing error pointer
@@ -228,6 +312,6 @@ extern NSString* const kAHLaunchCtlHelperTool;
  *
  *  @return YES if error code passed is 0, NO on all other error codes passed into;
  */
-+ (BOOL)errorWithMessage:(NSString*)message andCode:(NSInteger)code error:(NSError**)error;
++ (BOOL)errorWithMessage:(NSString *)message andCode:(NSInteger)code error:(NSError **)error;
 
 @end

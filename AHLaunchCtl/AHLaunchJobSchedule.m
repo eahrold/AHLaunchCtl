@@ -11,9 +11,9 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
 
 @implementation AHLaunchJobSchedule
 
-- (NSDictionary*)dictionary
+- (NSDictionary *)dictionary
 {
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] initWithCapacity:5];
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:5];
     if (self.minute != AHUndefinedSchedulComponent)
         [dict setObject:[NSNumber numberWithInteger:self.minute] forKey:@"Minute"];
     if (self.hour != AHUndefinedSchedulComponent)
@@ -35,7 +35,7 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
                            weekday:(NSInteger)weekday
                              month:(NSInteger)month
 {
-    AHLaunchJobSchedule* components = [AHLaunchJobSchedule new];
+    AHLaunchJobSchedule *components = [AHLaunchJobSchedule new];
 
     if (minute != AHUndefinedSchedulComponent) {
         components.minute = minute;
