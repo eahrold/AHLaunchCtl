@@ -23,6 +23,7 @@
 #import "AHAuthorizer.h"
 #import "AHServiceManagement.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import <pwd.h>
 
 NSString *const kAHLaunchCtlHelperTool = @"com.eeaapps.launchctl.helper";
 
@@ -75,7 +76,7 @@ static BOOL resetToOriginalUser(uid_t uid);
                 return [[self class] errorWithCode:kAHErrorExecutingAsIncorrectUser
                                              error:error];
         }
-        rc = [self load:job inDomain:domain error:error];
+        rc = [self reload:job inDomain:domain error:error];
         resetToOriginalUser(uid);
     }
     return rc;
@@ -107,20 +108,36 @@ static BOOL resetToOriginalUser(uid_t uid);
        error:(NSError *__autoreleasing *)error
 {
     if (![self hasProperPriviledgeLevel:domain]) {
-        return
-            [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
     }
 
     BOOL rc;
     AuthorizationRef authRef = NULL;
 
-    // If this is a launch agent and no user is logged in no reason to load;
+    NSString *consoleUser;
+    BOOL runningWithEuid = NO;
+    
+    // Capture the current use euid
+    struct passwd *cuss = getpwnam(NSUserName().UTF8String);
+    struct passwd *cupw = getpwuid(cuss->pw_uid);
+    uid_t currentUserEuid = cupw->pw_uid;
+
     if (domain <= kAHSystemLaunchAgent) {
-        NSString *result = CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
-        if ([result isEqualToString:@"loginwindow"] || !result) {
+        // If this is a launch agent and no user is logged in no reason to load;
+        consoleUser = CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
+        if (!consoleUser ||[consoleUser isEqualToString:@"loginwindow"]) {
             NSLog(@"No User Logged in");
             return YES;
+        }else{
+            if([NSUserName() isEqualToString:@"root"]){
+                struct passwd *ss = getpwnam(consoleUser.UTF8String);
+                struct passwd *pw = getpwuid(ss->pw_uid);
+                uid_t consoleUserUid = pw->pw_uid;
+                seteuid(consoleUserUid);
+                runningWithEuid = YES;
+            }
         }
+        
     }
 
     if (domain >= kAHSystemLaunchAgent) {
@@ -132,7 +149,11 @@ static BOOL resetToOriginalUser(uid_t uid);
     if (rc) {
         job.domain = domain;
     }
-
+    
+    if(runningWithEuid){
+        seteuid(currentUserEuid);
+    }
+    
     [AHAuthorizer authoriztionFree:authRef];
     return rc;
 }
@@ -153,7 +174,7 @@ static BOOL resetToOriginalUser(uid_t uid);
     BOOL rc;
     AuthorizationRef authRef = NULL;
 
-    // If this is a launch agent and no user is logged in no reason to load;
+    // If this is a launch agent and no user is logged in no reason to unload;
     if (domain <= kAHSystemLaunchAgent) {
         NSString *result = CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
         if ([result isEqualToString:@"loginwindow"] || !result) {
@@ -725,8 +746,6 @@ static NSString *errorMsgFromCode(NSInteger code)
 static NSString *launchFileDirectory(AHLaunchDomain domain)
 {
     NSString *type;
-    NSString *fallback = [NSHomeDirectory()
-        stringByAppendingPathComponent:@"%@/Library/LaunchAgents/"];
     switch (domain) {
     case kAHGlobalLaunchAgent:
         type = @"/Library/LaunchAgents/";
@@ -741,10 +760,8 @@ static NSString *launchFileDirectory(AHLaunchDomain domain)
         type = @"/System/Library/LaunchDaemons/";
         break;
     case kAHUserLaunchAgent:
-        type = fallback;
-        break;
     default:
-        type = fallback;
+        type = [@"~/Library/LaunchAgents/" stringByExpandingTildeInPath];
         break;
     }
     return type;
@@ -755,8 +772,7 @@ static NSString *launchFile(NSString *label, AHLaunchDomain domain)
     NSString *file;
     if (domain == 0 || !label)
         return nil;
-    file = [NSString
-        stringWithFormat:@"%@/%@.plist", launchFileDirectory(domain), label];
+    file = [NSString stringWithFormat:@"%@/%@.plist", launchFileDirectory(domain), label];
     return file;
 }
 

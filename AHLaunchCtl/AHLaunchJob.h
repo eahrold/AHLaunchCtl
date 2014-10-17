@@ -22,30 +22,30 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchJobSchedule.h"
 
-typedef NS_ENUM(int, AHLaunchDomain) {
-    /** User Launch Agents ~/Library/LaunchAgents
-   *  loaded by the Console user
-   */
-    kAHUserLaunchAgent = 1,
-    /** Administrator provided LaunchAgents /Library/LaunchAgents/
-   *  loaded by the console user
-   */
-    kAHGlobalLaunchAgent,
+typedef NS_ENUM(NSInteger, AHLaunchDomain) {
+  /** User Launch Agents ~/Library/LaunchAgents
+ *  loaded by the Console user
+ */
+  kAHUserLaunchAgent = 1,
+  /** Administrator provided LaunchAgents /Library/LaunchAgents/
+ *  loaded by the console user
+ */
+  kAHGlobalLaunchAgent,
 
-    /** Apple provided LaunchDaemons /Library/LaunchAgents/
-   *  loaded by root user
-   */
-    kAHSystemLaunchAgent,
+  /** Apple provided LaunchDaemons /System/Library/LaunchAgents/
+ *  loaded by root user
+ */
+  kAHSystemLaunchAgent,
 
-    /** Administrator provided LaunchAgents /Library/LaunchDaemons/
-   * loaded by root user
-   */
-    kAHGlobalLaunchDaemon,
+  /** Administrator provided LaunchAgents /Library/LaunchDaemons/
+ * loaded by root user
+ */
+  kAHGlobalLaunchDaemon,
 
-    /** Apple provided LaunchDaemons /Library/LaunchDaemons/
-   *  loaded by root user
-   */
-    kAHSystemLaunchDaemon,
+  /** Apple provided LaunchDaemons /System/Library/LaunchDaemons/
+ *  loaded by root user
+ */
+  kAHSystemLaunchDaemon,
 };
 
 /**
@@ -119,7 +119,7 @@ typedef NS_ENUM(int, AHLaunchDomain) {
 @property (nonatomic) BOOL BeginTransactionAtShutdown;
 #pragma mark -
 /**
- *  KeepAlive dictionary or Number user @YES and @NO
+ *  KeepAlive dictionary or Number use @YES and @NO
  */
 @property (nonatomic) id KeepAlive;
 /**

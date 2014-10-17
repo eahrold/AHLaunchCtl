@@ -9,17 +9,9 @@
 /* Begin PBXBuildFile section */
 		BE190A51190C3A7300607787 /* AHLaunchJobSchedule.h in Headers */ = {isa = PBXBuildFile; fileRef = BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE190A52190C3A7300607787 /* AHLaunchJobSchedule.m in Sources */ = {isa = PBXBuildFile; fileRef = BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */; };
-		BE5B001118A48412000D8603 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
 		BE6F549A18B114CC00826656 /* AHServiceManagement.h in Headers */ = {isa = PBXBuildFile; fileRef = BE6F549818B114CC00826656 /* AHServiceManagement.h */; };
 		BE6F549B18B114CC00826656 /* AHServiceManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = BE6F549918B114CC00826656 /* AHServiceManagement.m */; };
 		BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */; };
-		BE76C70618A19369003C94A0 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C70518A19369003C94A0 /* XCTest.framework */; };
-		BE76C70718A19369003C94A0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F418A19369003C94A0 /* Cocoa.framework */; };
-		BE76C70A18A19369003C94A0 /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
-		BE76C71018A19369003C94A0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BE76C70E18A19369003C94A0 /* InfoPlist.strings */; };
-		BE76C71218A19369003C94A0 /* AHLaunchCtlTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C71118A19369003C94A0 /* AHLaunchCtlTests.m */; };
-		BE76C71C18A19B2C003C94A0 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
-		BE76C71E18A19B42003C94A0 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 		BE854D8318AA71D6001548A8 /* AHAuthorizer.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D8118AA71D6001548A8 /* AHAuthorizer.m */; };
 		BE8EA57318B7ABC9008BEE58 /* NSFileManger+Privileged.m in Sources */ = {isa = PBXBuildFile; fileRef = BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */; };
 		BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -31,10 +23,16 @@
 		BEDDB53E18B1554700C16956 /* AHAuthorizer.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D8018AA71D6001548A8 /* AHAuthorizer.h */; };
 		BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */ = {isa = PBXBuildFile; fileRef = BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */; };
+		BEFC28CB19F0D79D00C35A6F /* AHLaunchCtl_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BEFC28CA19F0D79D00C35A6F /* AHLaunchCtl_Tests.m */; };
+		BEFC28D119F0D85200C35A6F /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
+		BEFC28D219F0D85B00C35A6F /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
+		BEFC28D319F0D86000C35A6F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F718A19369003C94A0 /* Foundation.framework */; };
+		BEFC28D419F0D86600C35A6F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
+		BEFC28D519F0D8A500C35A6F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BE76C70818A19369003C94A0 /* PBXContainerItemProxy */ = {
+		BEFC28CF19F0D84A00C35A6F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE76C6E918A19369003C94A0 /* Project object */;
 			proxyType = 1;
@@ -63,7 +61,7 @@
 /* Begin PBXFileReference section */
 		BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHLaunchJobSchedule.h; sourceTree = "<group>"; };
 		BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHLaunchJobSchedule.m; sourceTree = "<group>"; };
-		BE2C317E1988397300F8044E /* HelperTool_CodeSign_RunScript.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = HelperTool_CodeSign_RunScript.py; sourceTree = "<group>"; };
+		BE2C317E1988397300F8044E /* HelperTool-CodeSign.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = "HelperTool-CodeSign.py"; sourceTree = "<group>"; };
 		BE5B001018A48412000D8603 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		BE5B001C18A55BAA000D8603 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		BE6F549818B114CC00826656 /* AHServiceManagement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHServiceManagement.h; sourceTree = "<group>"; };
@@ -76,11 +74,7 @@
 		BE76C6FC18A19369003C94A0 /* AHLaunchCtl-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AHLaunchCtl-Prefix.pch"; sourceTree = "<group>"; };
 		BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchCtl.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AHLaunchCtl.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		BE76C70418A19369003C94A0 /* AHLaunchCtlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AHLaunchCtlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE76C70518A19369003C94A0 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		BE76C70D18A19369003C94A0 /* AHLaunchCtlTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AHLaunchCtlTests-Info.plist"; sourceTree = "<group>"; };
-		BE76C70F18A19369003C94A0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		BE76C71118A19369003C94A0 /* AHLaunchCtlTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHLaunchCtlTests.m; sourceTree = "<group>"; };
 		BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		BE854D8018AA71D6001548A8 /* AHAuthorizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHAuthorizer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -89,6 +83,9 @@
 		BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManger+Privileged.m"; sourceTree = "<group>"; };
 		BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchJob.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AHLaunchJob.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		BEFC28C619F0D79D00C35A6F /* AHLaunchCtl Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AHLaunchCtl Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEFC28C919F0D79D00C35A6F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BEFC28CA19F0D79D00C35A6F /* AHLaunchCtl_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHLaunchCtl_Tests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,16 +96,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE76C70118A19369003C94A0 /* Frameworks */ = {
+		BEFC28C319F0D79D00C35A6F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE5B001118A48412000D8603 /* Security.framework in Frameworks */,
-				BE76C71E18A19B42003C94A0 /* SystemConfiguration.framework in Frameworks */,
-				BE76C71C18A19B2C003C94A0 /* ServiceManagement.framework in Frameworks */,
-				BE76C70A18A19369003C94A0 /* libAHLaunchCtl.a in Frameworks */,
-				BE76C70718A19369003C94A0 /* Cocoa.framework in Frameworks */,
-				BE76C70618A19369003C94A0 /* XCTest.framework in Frameworks */,
+				BEFC28D519F0D8A500C35A6F /* SystemConfiguration.framework in Frameworks */,
+				BEFC28D419F0D86600C35A6F /* Security.framework in Frameworks */,
+				BEFC28D319F0D86000C35A6F /* Foundation.framework in Frameworks */,
+				BEFC28D219F0D85B00C35A6F /* ServiceManagement.framework in Frameworks */,
+				BEFC28D119F0D85200C35A6F /* libAHLaunchCtl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,9 +114,9 @@
 		BE76C6E818A19369003C94A0 = {
 			isa = PBXGroup;
 			children = (
-				BE2C317E1988397300F8044E /* HelperTool_CodeSign_RunScript.py */,
+				BE2C317E1988397300F8044E /* HelperTool-CodeSign.py */,
 				BE76C6FA18A19369003C94A0 /* AHLaunchCtl */,
-				BE76C70B18A19369003C94A0 /* AHLaunchCtlTests */,
+				BEFC28C719F0D79D00C35A6F /* AHLaunchCtl Tests */,
 				BE76C6F318A19369003C94A0 /* Frameworks */,
 				BE76C6F218A19369003C94A0 /* Products */,
 			);
@@ -130,7 +126,7 @@
 			isa = PBXGroup;
 			children = (
 				BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */,
-				BE76C70418A19369003C94A0 /* AHLaunchCtlTests.xctest */,
+				BEFC28C619F0D79D00C35A6F /* AHLaunchCtl Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -186,24 +182,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		BE76C70B18A19369003C94A0 /* AHLaunchCtlTests */ = {
-			isa = PBXGroup;
-			children = (
-				BE76C71118A19369003C94A0 /* AHLaunchCtlTests.m */,
-				BE76C70C18A19369003C94A0 /* Supporting Files */,
-			);
-			path = AHLaunchCtlTests;
-			sourceTree = "<group>";
-		};
-		BE76C70C18A19369003C94A0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				BE76C70D18A19369003C94A0 /* AHLaunchCtlTests-Info.plist */,
-				BE76C70E18A19369003C94A0 /* InfoPlist.strings */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		BE8EA57218B7A286008BEE58 /* Catagories */ = {
 			isa = PBXGroup;
 			children = (
@@ -211,6 +189,23 @@
 				BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */,
 			);
 			name = Catagories;
+			sourceTree = "<group>";
+		};
+		BEFC28C719F0D79D00C35A6F /* AHLaunchCtl Tests */ = {
+			isa = PBXGroup;
+			children = (
+				BEFC28CA19F0D79D00C35A6F /* AHLaunchCtl_Tests.m */,
+				BEFC28C819F0D79D00C35A6F /* Supporting Files */,
+			);
+			path = "AHLaunchCtl Tests";
+			sourceTree = "<group>";
+		};
+		BEFC28C819F0D79D00C35A6F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BEFC28C919F0D79D00C35A6F /* Info.plist */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,22 +244,22 @@
 			productReference = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		BE76C70318A19369003C94A0 /* AHLaunchCtlTests */ = {
+		BEFC28C519F0D79D00C35A6F /* AHLaunchCtl Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE76C71818A19369003C94A0 /* Build configuration list for PBXNativeTarget "AHLaunchCtlTests" */;
+			buildConfigurationList = BEFC28CC19F0D79D00C35A6F /* Build configuration list for PBXNativeTarget "AHLaunchCtl Tests" */;
 			buildPhases = (
-				BE76C70018A19369003C94A0 /* Sources */,
-				BE76C70118A19369003C94A0 /* Frameworks */,
-				BE76C70218A19369003C94A0 /* Resources */,
+				BEFC28C219F0D79D00C35A6F /* Sources */,
+				BEFC28C319F0D79D00C35A6F /* Frameworks */,
+				BEFC28C419F0D79D00C35A6F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BE76C70918A19369003C94A0 /* PBXTargetDependency */,
+				BEFC28D019F0D84A00C35A6F /* PBXTargetDependency */,
 			);
-			name = AHLaunchCtlTests;
-			productName = AHLaunchCtlTests;
-			productReference = BE76C70418A19369003C94A0 /* AHLaunchCtlTests.xctest */;
+			name = "AHLaunchCtl Tests";
+			productName = "AHLaunchCtl Tests";
+			productReference = BEFC28C619F0D79D00C35A6F /* AHLaunchCtl Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -273,11 +268,11 @@
 		BE76C6E918A19369003C94A0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Eldon Ahrold";
 				TargetAttributes = {
-					BE76C70318A19369003C94A0 = {
-						TestTargetID = BE91DC4318A586D5000FD8D7;
+					BEFC28C519F0D79D00C35A6F = {
+						CreatedOnToolsVersion = 6.0.1;
 					};
 				};
 			};
@@ -295,17 +290,16 @@
 			projectRoot = "";
 			targets = (
 				BE76C6F018A19369003C94A0 /* AHLaunchCtl */,
-				BE76C70318A19369003C94A0 /* AHLaunchCtlTests */,
+				BEFC28C519F0D79D00C35A6F /* AHLaunchCtl Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BE76C70218A19369003C94A0 /* Resources */ = {
+		BEFC28C419F0D79D00C35A6F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE76C71018A19369003C94A0 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,34 +319,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BE76C70018A19369003C94A0 /* Sources */ = {
+		BEFC28C219F0D79D00C35A6F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE76C71218A19369003C94A0 /* AHLaunchCtlTests.m in Sources */,
+				BEFC28CB19F0D79D00C35A6F /* AHLaunchCtl_Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BE76C70918A19369003C94A0 /* PBXTargetDependency */ = {
+		BEFC28D019F0D84A00C35A6F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BE76C6F018A19369003C94A0 /* AHLaunchCtl */;
-			targetProxy = BE76C70818A19369003C94A0 /* PBXContainerItemProxy */;
+			targetProxy = BEFC28CF19F0D84A00C35A6F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		BE76C70E18A19369003C94A0 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BE76C70F18A19369003C94A0 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BE76C71318A19369003C94A0 /* Debug */ = {
@@ -427,6 +410,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
 				INSTALL_PATH = /usr/local/lib;
@@ -443,6 +427,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
 				INSTALL_PATH = /usr/local/lib;
@@ -455,45 +440,47 @@
 			};
 			name = Release;
 		};
-		BE76C71918A19369003C94A0 /* Debug */ = {
+		BEFC28CD19F0D79D00C35A6F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchControl.app/Contents/MacOS/LaunchControl";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
 				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "AHLaunchCtlTests/AHLaunchCtlTests-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = "AHLaunchCtl Tests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
 		};
-		BE76C71A18A19369003C94A0 /* Release */ = {
+		BEFC28CE19F0D79D00C35A6F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchControl.app/Contents/MacOS/LaunchControl";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
 				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AHLaunchCtl/AHLaunchCtl-Prefix.pch";
-				INFOPLIST_FILE = "AHLaunchCtlTests/AHLaunchCtlTests-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = "AHLaunchCtl Tests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -518,14 +505,13 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE76C71818A19369003C94A0 /* Build configuration list for PBXNativeTarget "AHLaunchCtlTests" */ = {
+		BEFC28CC19F0D79D00C35A6F /* Build configuration list for PBXNativeTarget "AHLaunchCtl Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BE76C71918A19369003C94A0 /* Debug */,
-				BE76C71A18A19369003C94A0 /* Release */,
+				BEFC28CD19F0D79D00C35A6F /* Debug */,
+				BEFC28CE19F0D79D00C35A6F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
