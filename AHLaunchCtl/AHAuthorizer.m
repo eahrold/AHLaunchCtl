@@ -264,7 +264,7 @@ static NSString *kNSAuthorizationSystemDaemon =
     return authRef;
 }
 
-+ (void)authoriztionFree:(AuthorizationRef)authRef
++ (void)authorizationFree:(AuthorizationRef)authRef
 {
     if (authRef != NULL) {
         OSStatus junk = AuthorizationFree(authRef, kAuthorizationFlagDestroyRights);

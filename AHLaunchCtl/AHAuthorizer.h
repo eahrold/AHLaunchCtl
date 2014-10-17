@@ -34,7 +34,7 @@
 + (NSData *)authorizeHelper;
 
 /**
- *  Used by the helpertool to check the authorization data against the command
+ *  Used by the helper tool to check the authorization data against the command
  *dictionary
  *
  *  @param authData authorization data
@@ -67,6 +67,6 @@
  *
  *  @param authRef the AuthorizationRef to be freed
  */
-+ (void)authoriztionFree:(AuthorizationRef)authRef;
++ (void)authorizationFree:(AuthorizationRef)authRef;
 
 @end

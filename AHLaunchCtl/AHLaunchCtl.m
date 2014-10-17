@@ -54,9 +54,9 @@ static BOOL resetToOriginalUser(uid_t uid);
     toDomain:(AHLaunchDomain)domain
        error:(NSError *__autoreleasing *)error
 {
-    if (![self hasProperPriviledgeLevel:domain]) {
+    if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
     }
 
     uid_t uid = getuid();
@@ -86,9 +86,9 @@ static BOOL resetToOriginalUser(uid_t uid);
     fromDomain:(AHLaunchDomain)domain
          error:(NSError *__autoreleasing *)error
 {
-    if (![self hasProperPriviledgeLevel:domain]) {
+    if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
     }
 
     uid_t uid = getuid();
@@ -107,8 +107,8 @@ static BOOL resetToOriginalUser(uid_t uid);
     inDomain:(AHLaunchDomain)domain
        error:(NSError *__autoreleasing *)error
 {
-    if (![self hasProperPriviledgeLevel:domain]) {
-        return [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+    if (![self hasProperPrivilegeLevel:domain]) {
+        return [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
     }
 
     BOOL rc;
@@ -154,7 +154,7 @@ static BOOL resetToOriginalUser(uid_t uid);
         seteuid(currentUserEuid);
     }
     
-    [AHAuthorizer authoriztionFree:authRef];
+    [AHAuthorizer authorizationFree:authRef];
     return rc;
 }
 
@@ -162,9 +162,9 @@ static BOOL resetToOriginalUser(uid_t uid);
       inDomain:(AHLaunchDomain)domain
          error:(NSError *__autoreleasing *)error
 {
-    if (![self hasProperPriviledgeLevel:domain]) {
+    if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
     }
 
     if (!jobIsRunning(label, domain)) {
@@ -187,7 +187,7 @@ static BOOL resetToOriginalUser(uid_t uid);
         authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:nil];
 
     rc = AHJobRemove(domain, label, authRef, error);
-    [AHAuthorizer authoriztionFree:authRef];
+    [AHAuthorizer authorizationFree:authRef];
     return rc;
 }
 
@@ -318,7 +318,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 }
 
 #pragma mark - util
-- (BOOL)hasProperPriviledgeLevel:(AHLaunchDomain)domain
+- (BOOL)hasProperPrivilegeLevel:(AHLaunchDomain)domain
 {
     uid_t uid = getuid();
     if (domain > kAHUserLaunchAgent && uid != 0) {
@@ -361,14 +361,14 @@ static BOOL resetToOriginalUser(uid_t uid);
     authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt];
     if (authRef == NULL) {
         rc =
-            [[self class] errorWithCode:kAHErrorInsufficentPriviledges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
     } else {
         if (!AHJobBless(kAHSystemLaunchDaemon, label, authRef, error)) {
             rc = [[self class] errorWithCode:kAHErrorCouldNotLoadHelperTool
                                        error:error];
         }
     }
-    [AHAuthorizer authoriztionFree:authRef];
+    [AHAuthorizer authorizationFree:authRef];
     return rc;
 }
 
@@ -381,7 +381,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 
         authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt];
         if (authRef == NULL) {
-            return [[self class] errorWithCode:kAHErrorInsufficentPriviledges
+            return [[self class] errorWithCode:kAHErrorInsufficentPrivileges
                                          error:error];
         } else {
             if (!AHJobRemove(kAHSystemLaunchDaemon, label, authRef, error)) {
@@ -389,7 +389,7 @@ static BOOL resetToOriginalUser(uid_t uid);
                                              error:error];
             }
         }
-        [AHAuthorizer authoriztionFree:authRef];
+        [AHAuthorizer authorizationFree:authRef];
     } else {
         return [self errorWithCode:kAHErrorHelperToolNotLoaded error:error];
     }
@@ -448,7 +448,7 @@ static BOOL resetToOriginalUser(uid_t uid);
     return NO;
 }
 
-#pragma mark - Convience Accessors
+#pragma mark - Convenience Accessors
 + (BOOL)launchAtLogin:(NSString *)app
                launch:(BOOL)launch
                global:(BOOL)global
@@ -688,10 +688,10 @@ static NSString *errorMsgFromCode(NSInteger code)
         msg = @"Could not load job";
         break;
     case kAHErrorCouldNotLoadHelperTool:
-        msg = @"Unable to install the priviledged helper tool";
+        msg = @"Unable to install the privileged helper tool";
         break;
     case kAHErrorCouldNotUnloadHelperTool:
-        msg = @"Unable to remove the priviledged helper tool";
+        msg = @"Unable to remove the privileged helper tool";
         break;
     case kAHErrorHelperToolNotLoaded:
         msg =
@@ -700,11 +700,11 @@ static NSString *errorMsgFromCode(NSInteger code)
         break;
     case kAHErrorCouldNotRemoveHelperToolFiles:
         msg =
-            @"Unable to remove some files associated with the priviledged helper "
+            @"Unable to remove some files associated with the privileged helper "
             @"tool";
         break;
     case kAHErrorJobAlreayExists:
-        msg = @"The specified job alreay exists";
+        msg = @"The specified job already exists";
         break;
     case kAHErrorJobAlreayLoaded:
         msg = @"The specified job is already loaded";
@@ -724,7 +724,7 @@ static NSString *errorMsgFromCode(NSInteger code)
     case kAHErrorCouldNotWriteFile:
         msg = @"There were problem writing to the file";
         break;
-    case kAHErrorInsufficentPriviledges:
+    case kAHErrorInsufficentPrivileges:
         msg = @"You are not authorized to to perform this action";
         break;
     case kAHErrorJobMissingRequiredKeys:
@@ -737,7 +737,7 @@ static NSString *errorMsgFromCode(NSInteger code)
         msg = @"The path specified doesn’t appear to be executable.";
         break;
     default:
-        msg = @"unknown problem occured";
+        msg = @"unknown problem occurred";
         break;
     }
     return msg;

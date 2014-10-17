@@ -63,7 +63,7 @@ extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
  *  Remove a loaded job
  *
  *  @param domain     Domain for the job
- *  @param label      Lable of the job
+ *  @param label      Label of the job
  *  @param authRef    Authorization data for job
  *  @param error      Pointer to error to populate should one occur
  *
@@ -75,7 +75,7 @@ extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
 /**
  *  Submits the executable for the given label as a launchd job.
  *  @param domain     Domain for the job
- *  @param label      Lable of the executable
+ *  @param label      Label of the executable
  *  @param authRef    Authorization data for job
  *  @param error      Pointer to error to populate should one occur
  *

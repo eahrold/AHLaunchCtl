@@ -186,7 +186,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  */
 @property (copy, nonatomic) AHLaunchJobSchedule *StartCalendarInterval;
 /**
- * Array Of AHLaunchJobSchedule for scheduling mulitple runs with the same
+ * Array Of AHLaunchJobSchedule for scheduling multiple runs with the same
  * Launch Job
  */
 @property (copy, nonatomic) NSArray *StartCalendarIntervalArray;
@@ -345,7 +345,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  */
 @property (nonatomic, readonly) NSInteger LastExitStatus;
 /**
- *  wether or not the curent job is loaded
+ *  wether or not the current job is loaded
  */
 @property (nonatomic, readonly) BOOL isCurrentlyLoaded;
 
@@ -359,8 +359,8 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
 
 /**
  *  The version number of the executable if it was compiled with an embedded
- *  Info.plist  This is primairly used for determining the version on a
- *  priviledged helper application
+ *  Info.plist  This is primarily used for determining the version on a
+ *  privileged helper application
  *
  *  @return Version String Value
  */
@@ -372,7 +372,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *
  *  @param dict dictionary with KVC attributes
  *
- *  @return allocated AHLaunchJob with cooresponding keys
+ *  @return allocated AHLaunchJob with corresponding keys
  */
 + (AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict;
 
@@ -381,7 +381,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *
  *  @param file path to launchd.plist
  *
- *  @return allocated AHLaunchJob with cooresponding keys
+ *  @return allocated AHLaunchJob with corresponding keys
  */
 + (AHLaunchJob *)jobFromFile:(NSString *)file;
 

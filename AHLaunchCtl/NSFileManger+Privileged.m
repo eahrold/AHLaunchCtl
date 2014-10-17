@@ -132,7 +132,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
             job.ProgramArguments = @[ @"/usr/sbin/chown", chown, path ];
             rc = AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
         }
-        [AHAuthorizer authoriztionFree:authRef];
+        [AHAuthorizer authorizationFree:authRef];
     }
     return rc;
 }
