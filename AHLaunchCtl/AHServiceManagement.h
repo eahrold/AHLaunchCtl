@@ -26,16 +26,60 @@
 
 /* Bridged implementation of the ServiceManagement Framework **/
 
+/**
+ *  Dictionary representation of the LaunchD job
+ *
+ *  @param domain Domain of the job
+ *  @param label  Label of the job
+ *
+ *  @return Populated dictionary if job exists
+ */
 extern NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain,
                                          NSString *label);
 
+/**
+ *  Array of Jobs
+ *
+ *  @param domain Domain to get jobs from
+ *
+ *  @return Array of Jobs
+ */
 extern NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain);
 
+/**
+ *  Submit a job to load
+ *
+ *  @param domain     Domain for the job
+ *  @param dictionary Job object and keys
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
 extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
                         AuthorizationRef authRef, NSError **error);
 
+/**
+ *  Remove a loaded job
+ *
+ *  @param domain     Domain for the job
+ *  @param label      Lable of the job
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
 extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
                         AuthorizationRef authRef, NSError **error);
 
+/**
+ *  Submits the executable for the given label as a launchd job.
+ *  @param domain     Domain for the job
+ *  @param label      Lable of the executable
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
 extern BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
                        AuthorizationRef authRef, NSError **error);

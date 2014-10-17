@@ -22,30 +22,31 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchJobSchedule.h"
 
+/**
+ *  AHLaunchDomain Launch Domain specifying which context the job should run under and where the launchd.plist file is located
+ */
 typedef NS_ENUM(NSInteger, AHLaunchDomain) {
-  /** User Launch Agents ~/Library/LaunchAgents
- *  loaded by the Console user
- */
-  kAHUserLaunchAgent = 1,
-  /** Administrator provided LaunchAgents /Library/LaunchAgents/
- *  loaded by the console user
- */
-  kAHGlobalLaunchAgent,
+    /**
+     *  User Launch Agents ~/Library/LaunchAgents.  Loaded by the Console user.
+     */
 
-  /** Apple provided LaunchDaemons /System/Library/LaunchAgents/
- *  loaded by root user
- */
-  kAHSystemLaunchAgent,
-
-  /** Administrator provided LaunchAgents /Library/LaunchDaemons/
- * loaded by root user
- */
-  kAHGlobalLaunchDaemon,
-
-  /** Apple provided LaunchDaemons /System/Library/LaunchDaemons/
- *  loaded by root user
- */
-  kAHSystemLaunchDaemon,
+    kAHUserLaunchAgent = 1,
+    /**
+     *  Administrator provided LaunchAgents /Library/LaunchAgents/.  Loaded by the console user
+     */
+    kAHGlobalLaunchAgent,
+    /**
+     *  Apple provided LaunchDaemons /System/Library/LaunchAgents/.  Loaded by root user
+     */
+    kAHSystemLaunchAgent,
+    /**
+     *  Administrator provided LaunchAgents /Library/LaunchDaemons/.  Loaded by root user
+     */
+    kAHGlobalLaunchDaemon,
+    /**
+     *  Apple provided LaunchDaemons /System/Library/LaunchDaemons/.  Loaded by root user.
+     */
+    kAHSystemLaunchDaemon,
 };
 
 /**

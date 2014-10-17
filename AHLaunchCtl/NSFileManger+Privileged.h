@@ -10,7 +10,7 @@
 #import "AHLaunchCtl.h"
 
 /**
- *  An Catagory for NSFileManger that extends it to perform privileged
+ *  A Category for NSFileManger that extends it to perform privileged
  * operations using AHLaunchCtl library and
  */
 @interface NSFileManager (Privileged)
@@ -67,4 +67,5 @@
 - (BOOL)setAttributes:(NSDictionary *)attributes
     ofItemAtPrivilegedPath:(NSString *)path
                      error:(NSError **)error;
+
 @end

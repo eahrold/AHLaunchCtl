@@ -176,19 +176,19 @@
 		BE76C6FB18A19369003C94A0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				BE8EA57218B7A286008BEE58 /* Catagories */,
+				BE8EA57218B7A286008BEE58 /* Categories */,
 				BE76C6FC18A19369003C94A0 /* AHLaunchCtl-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		BE8EA57218B7A286008BEE58 /* Catagories */ = {
+		BE8EA57218B7A286008BEE58 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
 				BEA75B3F18B531D700CA2672 /* NSFileManger+Privileged.h */,
 				BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */,
 			);
-			name = Catagories;
+			name = Categories;
 			sourceTree = "<group>";
 		};
 		BEFC28C719F0D79D00C35A6F /* AHLaunchCtl Tests */ = {
@@ -512,6 +512,7 @@
 				BEFC28CE19F0D79D00C35A6F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

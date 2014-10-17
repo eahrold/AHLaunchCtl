@@ -7,8 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+/**
+ *  Used as a wildcard in schedule
+ */
 extern NSInteger AHUndefinedSchedulComponent;
 
+/**
+ *  Schedule Class for StartCalendarIntervals
+ */
 @interface AHLaunchJobSchedule : NSDateComponents
 - (NSDictionary *)dictionary;
 

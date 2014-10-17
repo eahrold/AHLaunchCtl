@@ -24,76 +24,115 @@
 #import "AHLaunchJob.h"
 #import "AHServiceManagement.h"
 
+/**
+ *  AHLaunchCtlErrorCodes
+ */
 typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
-    /** No Error */
+    /**
+     *  No Error
+     */
     kAHErrorSuccess,
-
-    /** Error encountered when job label that is not in dot syntax or has spaces */
+    /**
+     *  Error encountered when job label that is not in dot syntax or has spaces
+     */
     kAHErrorJobLabelNotValid,
-
-    /** job requires - Label, and Program Arguments */
+    /**
+     *  job requires Label and Program Arguments
+     */
     kAHErrorJobMissingRequiredKeys,
-
-    /** Error encountered when job is not Loaded */
+    /**
+     *  Error encountered when job is not Loaded
+     */
     kAHErrorJobNotLoaded,
-
-    /** Error encountered when job already exists */
+    /**
+     *  Error encountered when job already exists
+     */
     kAHErrorJobAlreayExists,
-
-    /** Error Encountered when job already loaded */
+    /**
+     *  Error Encountered when job already loaded
+     */
     kAHErrorJobAlreayLoaded,
-
-    /** Error Encountered when trying to load a job */
+    /**
+     *  Error Encountered when trying to load a job
+     */
     kAHErrorCouldNotLoadJob,
-
-    /** Error Encountered when trying to load a helper tool */
+    /**
+     *  Error Encountered when trying to load a helper tool
+     */
     kAHErrorCouldNotLoadHelperTool,
-
-    /** Error Encountered when trying a helper tool could not be removed */
+    /**
+     *   Error Encountered when trying a helper tool could not be removed
+     */
     kAHErrorCouldNotUnloadHelperTool,
-
-    /** Error Encountered when trying a helper tool could not be removed */
+    /**
+     *  Error Encountered when trying a helper tool could not be removed
+     */
     kAHErrorHelperToolNotLoaded,
-
-    /** Error Encountered when files associated with helper tool could not be removed */
+    /**
+     *  Error Encountered when files associated with helper tool could not be removed
+     */
     kAHErrorCouldNotRemoveHelperToolFiles,
-
-    /** Error Encountered when a job could not be unloaded */
+    /**
+     *  Error Encountered when a job could not be unloaded
+     */
     kAHErrorCouldNotUnloadJob,
-
-    /** Error Encountered when a job could not be reloaded */
+    /**
+     *  Error Encountered when a job could not be reloaded
+     */
     kAHErrorJobCouldNotReload,
-
-    /** Error Encountered when the launchd.plist file could not be located */
+    /**
+     *  Error Encountered when the launchd.plist file could not be located
+     */
     kAHErrorFileNotFound,
-
-    /** Error Encountered when  the launchd.plist file could not be written, insufficent priviledges */
+    /**
+     *  Error Encountered when  the launchd.plist file could not be written or insufficent priviledges
+     */
     kAHErrorCouldNotWriteFile,
-
-    /** Error Encountered when more than one job with the same label exist */
+    /**
+     *  Error Encountered when more than one job with the same label exist
+     */
     kAHErrorMultipleJobsMatching,
-
-    /** Error Encountered when user is not priviledged to install into AHLaunchDomain */
+    /**
+     *  Error Encountered when user is not priviledged to install into domain
+     */
     kAHErrorInsufficentPriviledges,
-
-    /** Error Encountered when a user is trying to unload another's launch job */
+    /**
+     *  Error Encountered when a user is trying to unload another's launch job
+     */
     kAHErrorExecutingAsIncorrectUser,
-
-    /** Error Encountered when the program to be loaded is not executable */
+    /**
+     *  Error Encountered when the program to be loaded is not executable
+     */
     kAHErrorProgramNotExecutable,
 };
 
+/**
+ *  Function to test whether the job is currently running
+ *
+ *  @param label  Label of the LaunchD job
+ *  @param domain AHLaunchDomain
+ *
+ *  @return YES if Loaded, NO otherwise
+ */
 extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
+/**
+ *  Objective-C Framework For LaunchAgents and LaunchDaemons
+ */
 @interface AHLaunchCtl : NSObject
 
+/**
+ *  Singleton Object to handle AHLaunchJobs
+ *
+ *  @return Shared Controller
+ */
 + (AHLaunchCtl *)sharedControler;
 #pragma mark - Public Methods
 /**
  *  Write the launchd.plist and load the job into context
  *
- *  @param label Name of the running launchctl job.
- *  @param domain Cooresponding AHLaunchDomain
+ *  @param job AHLaunchJob with desired keys.
+ *  @param domain Cooresponding AHLaunchDomain.
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
@@ -115,6 +154,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  Loads launchd job
  *  @param job AHLaunchJob Object, Label and Program keys required.
  *  @param domain Cooresponding AHLaunchDomain
+ *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
@@ -122,8 +162,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
 /**
  *  Unloads a launchd job
- *  @param error Populated should an error occur.
+ *  @param label Name of the running launchctl job.
  *  @param domain Cooresponding AHLaunchDomain
+ *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
@@ -173,18 +214,18 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 + (BOOL)launchAtLogin:(NSString *)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError **)error;
 
 /**
- Schedule a LaunchD Job to run at an interval.
+ *  Schedule a LaunchD Job to run at an interval.
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
  *  @param program Path to the executable to run
- *  @param interval How often in seconds to run.
+ *  @param interval How often (in seconds) to run.
  *  @param domain Cooresponding AHLaunchDomain
- *  @param error Populated should an error occur.
+ *  @param reply Reply block executed on completion that has no return value and takes on argument NSError.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
 + (void)scheduleJob:(NSString *)label
             program:(NSString *)program
-           interval:(int)seconds
+           interval:(int)interval
              domain:(AHLaunchDomain)domain
               reply:(void (^)(NSError *error))reply;
 /**
@@ -192,16 +233,16 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
  *  @param program Path to the executable to run
  *  @param programArguments Array of arguments to pass to the executable.
- *  @param interval How often in seconds to run.
+ *  @param interval How often (in seconds) to run.
  *  @param domain Cooresponding AHLaunchDomain
- *  @param error Populated should an error occur.
+ *  @param reply Reply block executed on completion that has no return value and takes on argument NSError.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
 + (void)scheduleJob:(NSString *)label
              program:(NSString *)program
     programArguments:(NSArray *)programArguments
-            interval:(int)seconds
+            interval:(int)interval
               domain:(AHLaunchDomain)domain
                reply:(void (^)(NSError *error))reply;
 
@@ -267,13 +308,12 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
                 error:(NSError **)error;
 
 /**
- *  uninstalls HelperTool with specified label.
+ *  Uninstalls HelperTool with specified label.
  *
- *  @param label  label of the Helper Tool
- *  @param prompt message to prefix the authorization prompt
- *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *  @param label Label of the Helper Tool.
+ *  @param prompt Message to prefix the authorization prompt.
+ *  @param error Error object populated if an error occurs.
  *  @return YES for success NO on failure;
- 
  */
 + (BOOL)uninstallHelper:(NSString *)label
                  prompt:(NSString *)prompt
@@ -282,7 +322,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  uninstalls HelperTool with specified label.
  *
  *  @param label label of the Helper Tool
- *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *  @param error error object populated if an error occurs.
  *
  *  @return YES for success NO on failure;
  */
@@ -293,7 +333,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  Cleans up files assoicated with the helper tool that SMJobBless leaves behind
  *
  *  @param label label of the Helper Tool
- *  @param reply A block object to be executed when the request operation finishes.  This block has no return value and takes one argument: NSError.
+ *  @param error error object populated if an error occurs.
  *
  *  @return YES for success NO on failure;
  */

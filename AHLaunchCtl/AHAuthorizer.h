@@ -21,6 +21,9 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ *  Authorization Class for AHLaunchCtl jobs where authorization is required.
+ */
 @interface AHAuthorizer : NSObject
 
 /**
