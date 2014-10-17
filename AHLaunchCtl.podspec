@@ -1,16 +1,14 @@
-Pod::Spec.new do |s|
-  s.name = 'AHLaunchCtl'
-  s.version = '0.2.0'
-  s.license = 'MIT'
-  s.summary = 'An LaunchD framework for OSX Cocoa apps'
-  s.homepage = 'https://github.com/eahrold/AHLaunchCtl'
-  s.authors  = { 'Eldon Ahrold' => 'eldonahrold@gmail.com' }
-  s.source   = { :git => 'https://github.com/eahrold/AHLaunchCtl.git', :tag => "0.2.0", :submodules => true }
-  s.requires_arc = true
-
-  s.osx.deployment_target = '10.8'
-  
-  s.public_header_files = 'AHLaunchCtl/*.h'
-  s.source_files = 'AHLaunchCtl/*.{h,m}'
-  s.frameworks = 'SystemConfiguration','ServiceManagement','Security'
+Pod::Spec.new do |spec|
+  spec.name = 'AHLaunchCtl'
+  spec.version = '0.2.1'
+  spec.license = 'MIT'
+  spec.summary = 'An LaunchD framework for OSX Cocoa apps'
+  spec.homepage = 'https://github.com/eahrold/AHLaunchCtl'
+  spec.authors  = { 'Eldon Ahrold' => 'eldonahrold@gmail.com' }
+  spec.source   = { :git => 'https://github.com/eahrold/AHLaunchCtl.git', :tag => "v#{spec.version}", :submodules => true}
+  spec.requires_arc = true
+  spec.osx.deployment_target = '10.8'
+  spec.frameworks = 'SystemConfiguration','ServiceManagement','Security'
+  spec.public_header_files = 'AHLaunchCtl/*.h'
+  spec.source_files = 'AHLaunchCtl/*.{h,m}'
 end
