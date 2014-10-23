@@ -133,8 +133,10 @@ static BOOL resetToOriginalUser(uid_t uid);
                 struct passwd *ss = getpwnam(consoleUser.UTF8String);
                 struct passwd *pw = getpwuid(ss->pw_uid);
                 uid_t consoleUserUid = pw->pw_uid;
-                seteuid(consoleUserUid);
-                runningWithEuid = YES;
+                int success = seteuid(consoleUserUid);
+                if (success == 0){
+                    runningWithEuid = YES;
+                }
             }
         }
         
@@ -151,9 +153,10 @@ static BOOL resetToOriginalUser(uid_t uid);
     }
     
     if(runningWithEuid){
-        seteuid(currentUserEuid);
+        int success = seteuid(currentUserEuid);
+        NSAssert(success == 0, @"There was a problem resetting the uid to the original value");
     }
-    
+
     [AHAuthorizer authorizationFree:authRef];
     return rc;
 }
