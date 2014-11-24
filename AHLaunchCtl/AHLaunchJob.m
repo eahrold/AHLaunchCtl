@@ -24,7 +24,7 @@
 #import "AHServiceManagement.h"
 
 @interface AHLaunchJob () <NSSecureCoding>
-@property (copy, readwrite) NSMutableDictionary *internalDictionary;
+@property (strong, atomic, readwrite) NSMutableDictionary *internalDictionary;
 @property (nonatomic, readwrite) AHLaunchDomain domain; //
 @property (nonatomic, readwrite) NSInteger LastExitStatus; //
 @property (nonatomic, readwrite) NSInteger PID; //

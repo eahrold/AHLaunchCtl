@@ -47,11 +47,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     /**
      *  Error encountered when job already exists
      */
-    kAHErrorJobAlreayExists,
+    kAHErrorJobAlreadyExists,
     /**
      *  Error Encountered when job already loaded
      */
-    kAHErrorJobAlreayLoaded,
+    kAHErrorJobAlreadyLoaded,
     /**
      *  Error Encountered when trying to load a job
      */
@@ -95,7 +95,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     /**
      *  Error Encountered when user is not privileged to install into domain
      */
-    kAHErrorInsufficentPrivileges,
+    kAHErrorInsufficientPrivileges,
     /**
      *  Error Encountered when a user is trying to unload another's launch job
      */
@@ -126,7 +126,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Shared Controller
  */
-+ (AHLaunchCtl *)sharedControler;
++ (AHLaunchCtl *)sharedController;
 #pragma mark - Public Methods
 /**
  *  Write the launchd.plist and load the job into context

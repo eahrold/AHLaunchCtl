@@ -40,7 +40,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 #pragma mark - Launch Controller
 @implementation AHLaunchCtl
 
-+ (AHLaunchCtl *)sharedControler
++ (AHLaunchCtl *)sharedController
 {
     static dispatch_once_t onceToken;
     static AHLaunchCtl *shared;
@@ -56,7 +56,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 {
     if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
     }
 
     uid_t uid = getuid();
@@ -88,7 +88,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 {
     if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
     }
 
     uid_t uid = getuid();
@@ -108,7 +108,7 @@ static BOOL resetToOriginalUser(uid_t uid);
        error:(NSError *__autoreleasing *)error
 {
     if (![self hasProperPrivilegeLevel:domain]) {
-        return [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
+        return [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
     }
 
     BOOL rc;
@@ -167,7 +167,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 {
     if (![self hasProperPrivilegeLevel:domain]) {
         return
-            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
     }
 
     if (!jobIsRunning(label, domain)) {
@@ -212,7 +212,7 @@ static BOOL resetToOriginalUser(uid_t uid);
         error:(NSError *__autoreleasing *)error
 {
     if (jobIsRunning(label, domain)) {
-        return [[self class] errorWithCode:kAHErrorJobAlreayLoaded error:error];
+        return [[self class] errorWithCode:kAHErrorJobAlreadyLoaded error:error];
     }
 
     AHLaunchJob *job = [[self class] jobFromFileNamed:label inDomain:domain];
@@ -336,7 +336,7 @@ static BOOL resetToOriginalUser(uid_t uid);
                 error:(NSError *__autoreleasing *)error
 {
     NSString *currentVersion;
-    NSString *avaliableVersion;
+    NSString *availableVersion;
 
     AHLaunchJob *job =
         [[self class] runningJobWithLabel:label inDomain:kAHGlobalLaunchDaemon];
@@ -350,9 +350,9 @@ static BOOL resetToOriginalUser(uid_t uid);
         NSDictionary *helperPlist = (NSDictionary *)CFBridgingRelease(
             CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(helperTool)));
 
-        avaliableVersion = helperPlist[@"CFBundleVersion"];
+        availableVersion = helperPlist[@"CFBundleVersion"];
 
-        if (![[self class] version:avaliableVersion
+        if (![[self class] version:availableVersion
                 isGreaterThanVersion:currentVersion]) {
             return YES;
         }
@@ -364,7 +364,7 @@ static BOOL resetToOriginalUser(uid_t uid);
     authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt];
     if (authRef == NULL) {
         rc =
-            [[self class] errorWithCode:kAHErrorInsufficentPrivileges error:error];
+            [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
     } else {
         if (!AHJobBless(kAHSystemLaunchDaemon, label, authRef, error)) {
             rc = [[self class] errorWithCode:kAHErrorCouldNotLoadHelperTool
@@ -384,7 +384,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 
         authRef = [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt];
         if (authRef == NULL) {
-            return [[self class] errorWithCode:kAHErrorInsufficentPrivileges
+            return [[self class] errorWithCode:kAHErrorInsufficientPrivileges
                                          error:error];
         } else {
             if (!AHJobRemove(kAHSystemLaunchDaemon, label, authRef, error)) {
@@ -706,10 +706,10 @@ static NSString *errorMsgFromCode(NSInteger code)
             @"Unable to remove some files associated with the privileged helper "
             @"tool";
         break;
-    case kAHErrorJobAlreayExists:
+    case kAHErrorJobAlreadyExists:
         msg = @"The specified job already exists";
         break;
-    case kAHErrorJobAlreayLoaded:
+    case kAHErrorJobAlreadyLoaded:
         msg = @"The specified job is already loaded";
         break;
     case kAHErrorJobCouldNotReload:
@@ -727,7 +727,7 @@ static NSString *errorMsgFromCode(NSInteger code)
     case kAHErrorCouldNotWriteFile:
         msg = @"There were problem writing to the file";
         break;
-    case kAHErrorInsufficentPrivileges:
+    case kAHErrorInsufficientPrivileges:
         msg = @"You are not authorized to to perform this action";
         break;
     case kAHErrorJobMissingRequiredKeys:

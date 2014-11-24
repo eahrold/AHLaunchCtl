@@ -59,7 +59,7 @@
 {
     NSError* error;
     AHLaunchJob *job = [self theJob];
-    BOOL success = [[AHLaunchCtl sharedControler] add:job
+    BOOL success = [[AHLaunchCtl sharedController] add:job
                                              toDomain:kAHUserLaunchAgent
                                                 error:&error];
 
@@ -81,7 +81,7 @@
     NSError* error;
     AHLaunchJob* job = [self theJob];
 
-    BOOL success = [[AHLaunchCtl sharedControler] load:job
+    BOOL success = [[AHLaunchCtl sharedController] load:job
                                               inDomain:kAHGlobalLaunchDaemon
                                                  error:&error];
 
@@ -94,7 +94,7 @@
     NSError* error;
     AHLaunchJob* job = [self theJob];
 
-    BOOL success = [[AHLaunchCtl sharedControler] load:job
+    BOOL success = [[AHLaunchCtl sharedController] load:job
                                               inDomain:kAHGlobalLaunchDaemon
                                                  error:&error];
 
@@ -106,7 +106,7 @@
     NSError* error;
 
     BOOL success =
-        [[AHLaunchCtl sharedControler] unload:@"com.eeaapps.echo.helloworld"
+        [[AHLaunchCtl sharedController] unload:@"com.eeaapps.echo.helloworld"
                                      inDomain:kAHGlobalLaunchDaemon
                                         error:&error];
     XCTAssertFalse(success, @"Error %@", error);
@@ -116,7 +116,7 @@
 {
     NSError* error;
     XCTAssertTrue(
-        [[AHLaunchCtl sharedControler] restart:@"com.eeaapps.echo.helloworld"
+        [[AHLaunchCtl sharedController] restart:@"com.eeaapps.echo.helloworld"
                                       inDomain:kAHUserLaunchAgent
                                          error:&error],
         @"Error: %@", error.localizedDescription);
@@ -126,7 +126,7 @@
 {
     NSError* error;
     XCTAssertTrue(
-        [[AHLaunchCtl sharedControler] remove:@"com.eeaapps.echo.helloworld"
+        [[AHLaunchCtl sharedController] remove:@"com.eeaapps.echo.helloworld"
                                    fromDomain:kAHUserLaunchAgent
                                         error:&error],
         @"Error: %@", error.localizedDescription);
