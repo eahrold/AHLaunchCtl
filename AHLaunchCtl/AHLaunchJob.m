@@ -32,7 +32,9 @@
 @end
 
 #pragma mark - AHLaunchJob
-@implementation AHLaunchJob
+@implementation AHLaunchJob{
+    unsigned int _count;
+}
 
 - (void)dealloc
 {
@@ -52,7 +54,8 @@
 {
     self = [super init];
     if (self) {
-        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:33];
+        _count = 33;
+        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:_count];
     }
     return [super init];
 }
@@ -65,12 +68,12 @@
                                         [NSString class], [NSNumber class], nil];
     if (self) {
         _internalDictionary =
-            [aDecoder decodeObjectOfClasses:SAND forKey:@"dictionary"];
-        _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Label"];
+            [aDecoder decodeObjectOfClasses:SAND forKey:NSStringFromSelector(@selector(dictionary))];
+        _Label = [aDecoder decodeObjectOfClass:[NSString class] forKey:NSStringFromSelector(@selector(Label))];
         _Program =
-            [aDecoder decodeObjectOfClass:[NSString class] forKey:@"Program"];
+            [aDecoder decodeObjectOfClass:[NSString class] forKey:NSStringFromSelector(@selector(Program))];
         _ProgramArguments =
-            [aDecoder decodeObjectOfClasses:SAND forKey:@"ProgramArguments"];
+            [aDecoder decodeObjectOfClasses:SAND forKey:NSStringFromSelector(@selector(ProgramArguments))];
     }
     return self;
 }
@@ -82,10 +85,10 @@
 
 - (void)encodeWithCoder:(NSCoder *)aEncoder
 {
-    [aEncoder encodeObject:_internalDictionary forKey:@"dictionary"];
-    [aEncoder encodeObject:_Label forKey:@"Label"];
-    [aEncoder encodeObject:_Program forKey:@"Program"];
-    [aEncoder encodeObject:_ProgramArguments forKey:@"ProgramArguments"];
+    [aEncoder encodeObject:_internalDictionary forKey:NSStringFromSelector(@selector(dictionary))];
+    [aEncoder encodeObject:_Label forKey:NSStringFromSelector(@selector(Label))];
+    [aEncoder encodeObject:_Program forKey:NSStringFromSelector(@selector(Program))];
+    [aEncoder encodeObject:_ProgramArguments forKey:NSStringFromSelector(@selector(ProgramArguments))];
 }
 
 #pragma mark - Instance Methods
@@ -110,18 +113,18 @@
 
 - (NSSet *)ignoredProperties
 {
-    NSSet *ignoredProperties =
-        [NSSet setWithObjects:@"PID", @"LastExitStatus", @"isCurrentlyLoaded",
-                              @"domain", nil];
+    NSSet * const ignoredProperties = [NSSet setWithArray:@[@"PID",
+                                                            @"LastExitStatus",
+                                                            @"isCurrentlyLoaded",
+                                                            @"domain"]];
     return ignoredProperties;
 }
 
 #pragma mark--- Observing ---
 - (void)startObservingOnAllProperties
 {
-    unsigned int count;
-    objc_property_t *properties = class_copyPropertyList([self class], &count);
-    for (int i = 0; i < count; ++i) {
+    objc_property_t *properties = class_copyPropertyList([self class], &_count);
+    for (int i = 0; i < _count; ++i) {
         const char *property = property_getName(properties[i]);
         NSString *keyPath = [NSString stringWithUTF8String:property];
         if (![[self ignoredProperties] member:keyPath]) {
@@ -158,7 +161,7 @@
                        context:(void *)context
 {
     if (!_internalDictionary) {
-        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:31];
+        _internalDictionary = [[NSMutableDictionary alloc] initWithCapacity:_count];
     }
 
     id chng = change[@"new"];
