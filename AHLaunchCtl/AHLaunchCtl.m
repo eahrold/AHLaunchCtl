@@ -460,7 +460,7 @@ static BOOL resetToOriginalUser(uid_t uid);
 {
     NSBundle *appBundle = [NSBundle bundleWithPath:app];
     NSString *appIdentifier =
-        [NSString stringWithFormat:@"%@.launcher", appBundle.bundleIdentifier];
+    [appBundle.bundleIdentifier stringByAppendingPathExtension:@"launcher"];
 
     AHLaunchCtl *controller = [AHLaunchCtl new];
     AHLaunchJob *job = [AHLaunchJob new];
@@ -471,9 +471,9 @@ static BOOL resetToOriginalUser(uid_t uid);
 
     AHLaunchDomain domain = global ? kAHGlobalLaunchAgent : kAHUserLaunchAgent;
     if (launch) {
-        return [controller add:job toDomain:domain error:error];
+        return [controller writeJobToFile:job inDomain:domain error:nil];
     } else {
-        return [controller remove:job.Label fromDomain:domain error:error];
+        return [controller removeJobFileWithLabel:appIdentifier domain:domain error:error];
     }
 }
 
