@@ -151,6 +151,16 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 - (BOOL)remove:(NSString *)label fromDomain:(AHLaunchDomain)domain error:(NSError **)error;
 
 /**
+ *  Remove launchd.plist and unload the job prompting for admin authorization.
+ *
+ *  @param label Name of the running launchctl job.
+ *  @param domain Corresponding AHLaunchDomain.
+ *  @param error Populated should an error occur.
+ *
+ *  @return Returns `YES` on success, or `NO` on failure.
+ */
+- (BOOL)remove:(NSString *)label fromDomainRequiringAuthorization:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error;
+/**
  *  Loads launchd job
  *  @param job AHLaunchJob Object, Label and Program keys required.
  *  @param domain Corresponding AHLaunchDomain

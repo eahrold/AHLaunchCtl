@@ -102,6 +102,68 @@ static BOOL resetToOriginalUser(uid_t uid);
     return [self removeJobFileWithLabel:label domain:domain error:error];
 }
 
+- (BOOL)remove:(NSString *)label fromDomainRequiringAuthorization:(AHLaunchDomain)domain
+         error:(NSError *__autoreleasing *)error
+{
+    BOOL succes = YES;
+    if (jobIsRunning(label, domain)) {
+        if (domain > kAHUserLaunchAgent) {
+            AuthorizationRef authRef;
+
+            OSStatus status = [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
+
+            if (status == errAuthorizationCanceled) {
+                succes = [[self class] errorWithMessage:@"User Canceled" andCode:status error:error];
+            } else if (authRef == NULL) {
+                succes =  [[self class] errorWithCode:status
+                                                error:error];
+            } else {
+                if (!AHJobRemove(kAHSystemLaunchDaemon, label, authRef, error)) {
+                    succes = [[self class] errorWithCode:kAHErrorCouldNotUnloadHelperTool
+                                                   error:error];
+                }
+            }
+
+            NSString *launchJobPlist = launchFile(label, domain);
+
+            NSFileManager *fm = [NSFileManager defaultManager];
+
+            if ([fm fileExistsAtPath:launchJobPlist]) {
+                NSString *const rmLaunchDLabel = @"com.eeaapps.ahlaunchctl.auth.job.remove";
+                NSDictionary *removeLaunchD = @{
+                                                @"Label" : rmLaunchDLabel,
+                                                @"ProgramArguments" : @[ @"/bin/rm", launchJobPlist ],
+                                                @"RunAtLoad" : @YES,
+                                                };
+
+                if((AHJobSubmit(kAHGlobalLaunchDaemon, removeLaunchD, authRef, error))){
+                    // success
+                    sleep(0.5);
+                }
+
+                if(jobIsRunning(rmLaunchDLabel, domain)){
+                    AHJobRemove(kAHGlobalLaunchDaemon, rmLaunchDLabel, authRef, nil);
+                }
+
+                if ([fm fileExistsAtPath:launchJobPlist]) {
+                    NSLog(@"There was a problem removing %@", launchJobPlist);
+                } else {
+#if DEBUG
+                    NSLog(@"Successfully removed %@", launchJobPlist);
+#endif
+                }
+            }
+
+            [AHAuthorizer authorizationFree:authRef];
+        } else {
+            [self remove:label fromDomain:domain error:error];
+        }
+    }
+
+    return succes;
+
+}
+
 #pragma mark--- Load / Unload Jobs ---
 - (BOOL)load:(AHLaunchJob *)job
     inDomain:(AHLaunchDomain)domain
@@ -379,7 +441,7 @@ static BOOL resetToOriginalUser(uid_t uid);
         // Run the job bless.
         if (!AHJobBless(kAHGlobalLaunchDaemon, label, authRef, error)) {
             success = [[self class] errorWithCode:kAHErrorCouldNotLoadHelperTool
-                                       error:error];
+                                            error:error];
         }
     }
     [AHAuthorizer authorizationFree:authRef];
@@ -400,11 +462,11 @@ static BOOL resetToOriginalUser(uid_t uid);
             succes = [[self class] errorWithMessage:@"User Canceled" andCode:status error:error];
         } else if (authRef == NULL) {
             succes =  [[self class] errorWithCode:status
-                                         error:error];
+                                            error:error];
         } else {
             if (!AHJobRemove(kAHSystemLaunchDaemon, label, authRef, error)) {
                 succes = [[self class] errorWithCode:kAHErrorCouldNotUnloadHelperTool
-                                             error:error];
+                                               error:error];
             }
 
             [self removeFilesForHelperWithLabel:label authRef:authRef error:error];
@@ -448,8 +510,6 @@ static BOOL resetToOriginalUser(uid_t uid);
         } else {
             sleep(0.5);
         }
-
-        NSLog(@"Removed launchd? %@", [[NSFileManager defaultManager] fileExistsAtPath:rmLaunchDLabel] ? @"NO": @"YES");
 
         if(jobIsRunning(rmLaunchDLabel, kAHGlobalLaunchDaemon)){
             AHJobRemove(kAHGlobalLaunchDaemon, rmLaunchDLabel, authRef, nil);
@@ -877,7 +937,7 @@ static BOOL setToConsoleUser()
 {
     uid_t effectiveUid;
     int results;
-
+    
     CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, &effectiveUid, NULL));
     results = seteuid(effectiveUid);
     
