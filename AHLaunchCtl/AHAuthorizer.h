@@ -51,7 +51,7 @@
  *
  *  @return AuthorizationRef
  */
-+ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt;
++ (OSStatus)authorizeSystemDaemonWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
 
 /**
  *  Prompt for authorization to the Service Management system
@@ -60,7 +60,7 @@
  *
  *  @return AuthorizationRef
  */
-+ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt;
++ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
 
 /**
  *  Free the AuthorizationRef object

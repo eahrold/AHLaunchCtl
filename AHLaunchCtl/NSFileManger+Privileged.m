@@ -18,26 +18,27 @@ static NSString *kNSFileManagerChownFile = @"com.eeaapps.launchctl.filechown";
 static NSString *kNSFileManagerChmodFile = @"com.eeaapps.launchctl.filechmod";
 
 static NSString *kNSFileManagerErrFileNotDirectory =
-    @"You specified a file not a directory";
+@"You specified a file not a directory";
 static NSString *kNSFileManagerErrDirectoryNotFile =
-    @"You specified a directory not a file";
+@"You specified a directory not a file";
 static NSString *kNSFileManagerErrNoFileAtLocation =
-    @"there was no file found at specified location";
+@"there was no file found at specified location";
 static NSString *kNSFileManagerErrNoDirectoryAtLocation =
-    @"there was no folder found at that location";
+@"there was no folder found at that location";
 
 @implementation NSFileManager (Privileged)
 
 - (BOOL)moveItemAtPath:(NSString *)path
-    toPrivilegedLocation:(NSString *)location
-               overwrite:(BOOL)overwrite
-                   error:(NSError *__autoreleasing *)error
+  toPrivilegedLocation:(NSString *)location
+             overwrite:(BOOL)overwrite
+                 error:(NSError *__autoreleasing *)error
 {
     AHLaunchJob *job;
     if (![self testSource:path andDest:location error:error]) {
     }
 
-    AuthorizationRef authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@""];
+    AuthorizationRef authRef = NULL;
+    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
@@ -50,19 +51,21 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
 }
 
 - (BOOL)copyItemAtPath:(NSString *)path
-    toPrivilegedLocation:(NSString *)location
-               overwrite:(BOOL)overwrite
-                   error:(NSError **)error
+  toPrivilegedLocation:(NSString *)location
+             overwrite:(BOOL)overwrite
+                 error:(NSError **)error
 {
     AHLaunchJob *job;
     if (![self testSource:path andDest:location error:error]) {
         return NO;
     }
 
-    AuthorizationRef authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@""];
+    AuthorizationRef authRef = NULL;
+    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
+
 
     job = [self FileManagerJob];
     job.Label = kNSFileManagerCopyFile;
@@ -75,34 +78,40 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
                              error:(NSError *__autoreleasing *)error
 {
     AHLaunchJob *job;
+    BOOL rc = NO;
     if (![self fileExistsAtPath:path]) {
         return NO;
     }
 
-    AuthorizationRef authRef = [AHAuthorizer authorizeSystemDaemonWithPrompt:@""];
+    AuthorizationRef authRef = NULL;
+    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
 
+
     job = [self FileManagerJob];
-    job.Label = kNSFileManagerCopyFile;
+    job.Label = kNSFileManagerDeleteFile;
     job.ProgramArguments = @[ @"/bin/rm", path ];
 
-    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
+    rc = AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
+    [AHAuthorizer authorizationFree:authRef];
+    return rc;
 }
 
 - (BOOL)setAttributes:(NSDictionary *)attributes
-    ofItemAtPrivilegedPath:(NSString *)path
-                     error:(NSError *__autoreleasing *)error
+ofItemAtPrivilegedPath:(NSString *)path
+                error:(NSError *__autoreleasing *)error
 {
     AHLaunchJob *job;
     BOOL rc = NO;
     if ([self fileExistsAtPath:path isDirectory:nil]) {
-        AuthorizationRef authRef =
-            [AHAuthorizer authorizeSystemDaemonWithPrompt:@""];
+        AuthorizationRef authRef = NULL;
+        [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
         if (authRef == NULL) {
             return NO;
         };
+
 
         NSNumber *permissions = attributes[NSFilePosixPermissions];
         NSString *owner = attributes[NSFileOwnerAccountName];
@@ -114,7 +123,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
 
             job.Label = kNSFileManagerChmodFile;
             job.ProgramArguments =
-                @[ @"/bin/chmod", [permissions stringValue], path ];
+            @[ @"/bin/chmod", [permissions stringValue], path ];
             rc = AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
         }
 
@@ -123,7 +132,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
             job.Label = kNSFileManagerChownFile;
 
             chown = [[NSMutableString alloc]
-                initWithCapacity:owner.length + group.length + 1];
+                     initWithCapacity:owner.length + group.length + 1];
             if (owner)
                 [chown appendString:owner];
             if (group)

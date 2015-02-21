@@ -31,18 +31,18 @@ static NSString *kAHAuthorizationStart = @"com.eeaapps.launchctl.start";
 static NSString *kAHAuthorizationStop = @"com.eeaapps.launchctl.stop";
 static NSString *kAHAuthorizationRestart = @"com.eeaapps.launchctl.restart";
 static NSString *kAHAuthorizationRemoveHelper =
-    @"com.eeaapps.launchctl.removehelper";
+@"com.eeaapps.launchctl.removehelper";
 static NSString *kAHAuthorizationSessionAuth =
-    @"com.eeaapps.launchctl.authsession";
+@"com.eeaapps.launchctl.authsession";
 static NSString *kAHAuthorizationSystemDaemon =
-    @"com.eeaapps.launchctl.blesshelper";
+@"com.eeaapps.launchctl.blesshelper";
 static NSString *kAHAuthorizationJobBless =
-    @"com.eeaapps.launchctl.system.daemon.modify";
+@"com.eeaapps.launchctl.system.daemon.modify";
 
 static NSString *kNSAuthorizationJobBless =
-    @"com.apple.ServiceManagement.blesshelper";
+@"com.apple.ServiceManagement.blesshelper";
 static NSString *kNSAuthorizationSystemDaemon =
-    @"com.apple.ServiceManagement.daemons.modify";
+@"com.apple.ServiceManagement.daemons.modify";
 
 @implementation AHAuthorizer {
     NSInteger _authTime;
@@ -53,16 +53,16 @@ static NSString *kNSAuthorizationSystemDaemon =
     static dispatch_once_t onceToken;
     static NSDictionary *commandInfo;
     dispatch_once(&onceToken, ^{
-      commandInfo = @{
-        NSStringFromSelector(@selector(authorizeSMJobBlessWithPrompt:)) : @{
-          kCommandKeyAuthRightName : kAHAuthorizationJobBless,
-          kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-          kCommandKeyAuthRightDesc :
-              NSLocalizedString(@"Install the Helper Tool?",
-                                @"prompt shown when user is required to "
-                                @"authorize to install helper tool")
-        },
-      };
+        commandInfo = @{
+                        NSStringFromSelector(@selector(authorizeSMJobBlessWithPrompt:authRef:)) : @{
+                                kCommandKeyAuthRightName : kAHAuthorizationJobBless,
+                                kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+                                kCommandKeyAuthRightDesc :
+                                    NSLocalizedString(@"Install the Helper Tool?",
+                                                      @"prompt shown when user is required to "
+                                                      @"authorize to install helper tool")
+                                },
+                        };
     });
     return commandInfo;
 }
@@ -107,18 +107,18 @@ static NSString *kNSAuthorizationSystemDaemon =
             AuthorizationRights rights = { 1, &oneRight };
 
             err = AuthorizationCopyRights(
-                authRef, &rights, NULL,
-                kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
-                NULL);
+                                          authRef, &rights, NULL,
+                                          kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
+                                          NULL);
         }
         if (err != errAuthorizationSuccess) {
             error = [NSError
-                errorWithDomain:NSOSStatusErrorDomain
-                           code:err
-                       userInfo:@{
-                           NSLocalizedDescriptionKey :
-                               @"You are not authorized to perform this action."
-                               }];
+                     errorWithDomain:NSOSStatusErrorDomain
+                     code:err
+                     userInfo:@{
+                                NSLocalizedDescriptionKey :
+                                    @"You are not authorized to perform this action."
+                                }];
         }
     }
 
@@ -143,7 +143,7 @@ static NSString *kNSAuthorizationSystemDaemon =
     }
     if (err == errAuthorizationSuccess) {
         authorization =
-            [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
+        [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
     }
     assert(err == errAuthorizationSuccess);
 
@@ -157,7 +157,7 @@ static NSString *kNSAuthorizationSystemDaemon =
 // See comment in header.
 {
     return [self commandInfo][NSStringFromSelector(
-        command)][kCommandKeyAuthRightName];
+                                                   command)][kCommandKeyAuthRightName];
 }
 
 + (void)enumerateRightsUsingBlock:(void (^)(NSString *authRightName,
@@ -170,27 +170,27 @@ static NSString *kNSAuthorizationSystemDaemon =
                                                           BOOL *stop) {
 #pragma unused(key)
 #pragma unused(stop)
-      NSDictionary *commandDict;
-      NSString *authRightName;
-      id authRightDefault;
-      NSString *authRightDesc;
+        NSDictionary *commandDict;
+        NSString *authRightName;
+        id authRightDefault;
+        NSString *authRightDesc;
 
-      // If any of the following asserts fire it's likely that you've got a bug
-      // in sCommandInfo.
+        // If any of the following asserts fire it's likely that you've got a bug
+        // in sCommandInfo.
 
-      commandDict = (NSDictionary *)obj;
-      assert([commandDict isKindOfClass:[NSDictionary class]]);
+        commandDict = (NSDictionary *)obj;
+        assert([commandDict isKindOfClass:[NSDictionary class]]);
 
-      authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
-      assert([authRightName isKindOfClass:[NSString class]]);
+        authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
+        assert([authRightName isKindOfClass:[NSString class]]);
 
-      authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
-      assert(authRightDefault != nil);
+        authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
+        assert(authRightDefault != nil);
 
-      authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
-      assert([authRightDesc isKindOfClass:[NSString class]]);
+        authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
+        assert([authRightDesc isKindOfClass:[NSString class]]);
 
-      block(authRightName, authRightDefault, authRightDesc);
+        block(authRightName, authRightDefault, authRightDesc);
     }];
 }
 
@@ -200,17 +200,17 @@ static NSString *kNSAuthorizationSystemDaemon =
     [self enumerateRightsUsingBlock:^(NSString *authRightName,
                                       id authRightDefault,
                                       NSString *authRightDesc) {
-      OSStatus blockErr;
+        OSStatus blockErr;
 
-      blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
-      if (blockErr == errAuthorizationDenied) {
-        blockErr = AuthorizationRightSet(authRef, [authRightName UTF8String],
-                                         (__bridge CFTypeRef)authRightDefault,
-                                         (__bridge CFStringRef)authRightDesc,
-                                         NULL, CFSTR("Common"));
-        assert(blockErr == errAuthorizationSuccess);
-      } else {
-      }
+        blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
+        if (blockErr == errAuthorizationDenied) {
+            blockErr = AuthorizationRightSet(authRef, [authRightName UTF8String],
+                                             (__bridge CFTypeRef)authRightDefault,
+                                             (__bridge CFStringRef)authRightDesc,
+                                             NULL, CFSTR("Common"));
+            assert(blockErr == errAuthorizationSuccess);
+        } else {
+        }
     }];
 }
 
@@ -219,49 +219,44 @@ static NSString *kNSAuthorizationSystemDaemon =
     static dispatch_once_t onceToken;
     static AuthorizationFlags authFlags;
     dispatch_once(&onceToken, ^{
-      authFlags =
-          kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed |
-          kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
+        authFlags =
+        kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed |
+        kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
     });
     return authFlags;
 }
 
-+ (AuthorizationRef)authorizeSystemDaemonWithPrompt:(NSString *)prompt
++ (OSStatus)authorizeSystemDaemonWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef
 {
     AuthorizationItem authItem = { kNSAuthorizationSystemDaemon.UTF8String, 0,
-                                   NULL, 0 };
-    return [self authorizePrompt:prompt authItems:authItem];
+        NULL, 0 };
+    return [self authorizePrompt:prompt authItems:authItem authRef:authRef];
 }
 
-+ (AuthorizationRef)authorizeSMJobBlessWithPrompt:(NSString *)prompt
++ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef
 {
     AuthorizationItem authItem = { kNSAuthorizationJobBless.UTF8String, 0, NULL,
-                                   0 };
-    return [self authorizePrompt:prompt authItems:authItem];
+        0 };
+    return [self authorizePrompt:prompt authItems:authItem authRef:authRef];
 };
 
-+ (AuthorizationRef)authorizePrompt:(NSString *)prompt
-                          authItems:(AuthorizationItem)authItem
++ (OSStatus)authorizePrompt:(NSString *)prompt
+                  authItems:(AuthorizationItem)authItem
+                    authRef:(AuthorizationRef *)authRef
 {
-    AuthorizationRef authRef;
 
     AuthorizationRights authRights = { 1, &authItem };
     AuthorizationEnvironment environment = { 0, NULL };
 
     if (prompt) {
         AuthorizationItem envItem = { kAuthorizationEnvironmentPrompt, prompt.length,
-                                      (void *)prompt.UTF8String, 0 };
+            (void *)prompt.UTF8String, 0 };
         environment.count = 1;
         environment.items = &envItem;
     }
-
-    OSStatus status = AuthorizationCreate(&authRights, &environment,
-                                          [[self class] defaultFlags], &authRef);
-
-    if (status != errAuthorizationSuccess) {
-        return NULL;
-    }
-    return authRef;
+    
+    return AuthorizationCreate(&authRights, &environment,
+                               [[self class] defaultFlags], authRef);
 }
 
 + (void)authorizationFree:(AuthorizationRef)authRef
