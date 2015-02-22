@@ -24,6 +24,16 @@
 #import <Foundation/Foundation.h>
 #import "AHLaunchJob.h"
 
+/**
+ *  Function to test whether the job is currently running
+ *
+ *  @param label  Label of the LaunchD job
+ *  @param domain AHLaunchDomain
+ *
+ *  @return YES if Loaded, NO otherwise
+ */
+extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
+
 /* Bridged implementation of the ServiceManagement Framework **/
 
 /**
@@ -60,6 +70,19 @@ extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
                         AuthorizationRef authRef, NSError **error);
 
 /**
+ *  Submit a job to load and create requisit files for persistance.
+ *
+ *  @param domain     Domain for the job
+ *  @param dictionary Job object and keys
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
+BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain, NSDictionary *dictionary,
+                             AuthorizationRef authRef, NSError *__autoreleasing *error);
+
+/**
  *  Remove a loaded job
  *
  *  @param domain     Domain for the job
@@ -73,6 +96,19 @@ extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
                         AuthorizationRef authRef, NSError **error);
 
 /**
+ *  Remove a loaded job from the registry and delete the file.
+ *
+ *  @param domain     Domain for the job
+ *  @param label      Label of the job
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
+extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain, NSString *label,
+                        AuthorizationRef authRef, NSError **error);
+
+/**
  *  Submits the executable for the given label as a launchd job.
  *  @param domain     Domain for the job
  *  @param label      Label of the executable
@@ -83,3 +119,15 @@ extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
  */
 extern BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
                        AuthorizationRef authRef, NSError **error);
+
+/**
+ *  Rremoves the executable, and unloads the job.
+ *  @param domain     Domain for the job
+ *  @param label      Label of the executable
+ *  @param authRef    Authorization data for job
+ *  @param error      Pointer to error to populate should one occur
+ *
+ *  @return YES if job was successfully loaded, NO otherwise
+ */
+extern BOOL AHJobUnbless(AHLaunchDomain domain, NSString *label,
+                         AuthorizationRef authRef, NSError **error);

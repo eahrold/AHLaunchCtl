@@ -33,12 +33,12 @@
 
 - (void)testAll
 {
-    [self add];
-    [self loadAsRoot];
-    [self unload];
+    [self testAdd];
+    [self testLoadAsRoot];
+    [self testUnloadAsRoot];
     [self load];
     [self restart];
-    [self getJob];
+    [self testGetJob];
     [self remove];
 }
 
@@ -55,7 +55,7 @@
 }
 
 #pragma mark - Tests
-- (void)add
+- (void)testAdd
 {
     NSError* error;
     AHLaunchJob *job = [self theJob];
@@ -66,11 +66,43 @@
     XCTAssertTrue(success, @"Error %@", error);
 }
 
-- (void)getJob
+- (void)testRemvoe
+{
+    NSError* error;
+    AHLaunchJob *job = [self theJob];
+    BOOL success = [[AHLaunchCtl sharedController] remove:job.Label
+                                              fromDomain:kAHUserLaunchAgent
+                                                 error:&error];
+
+    XCTAssertTrue(success, @"Error %@", error);
+}
+
+- (void)testAddRoot
+{
+    NSError* error;
+    AHLaunchJob *job = [self theJob];
+    BOOL success = [[AHLaunchCtl sharedController] add:job
+                                              toDomain:kAHGlobalLaunchDaemon
+                                                 error:&error];
+
+    XCTAssertTrue(success, @"Error %@", error);
+}
+
+- (void)testRemoveRoot
+{
+    NSError* error;
+    AHLaunchJob *job = [self theJob];
+
+    BOOL success = [[AHLaunchCtl sharedController] remove:job.Label fromDomain:kAHGlobalLaunchDaemon error:&error];
+    XCTAssertTrue(success, @"Error %@", error);
+
+}
+
+- (void)testGetJob
 {
     AHLaunchJob* job =
         [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.echo.helloworld"
-                                inDomain:kAHUserLaunchAgent];
+                                inDomain:kAHGlobalLaunchDaemon];
 
     NSLog(@"%@", job);
     XCTAssertTrue(job != nil, @"Could not get job");
@@ -89,7 +121,7 @@
 }
 
 
-- (void)loadAsRoot
+- (void)testLoadAsRoot
 {
     NSError* error;
     AHLaunchJob* job = [self theJob];
@@ -98,10 +130,10 @@
                                               inDomain:kAHGlobalLaunchDaemon
                                                  error:&error];
 
-    XCTAssertFalse(success, @"Error %@", error);
+    XCTAssertTrue(success, @"Error %@", error);
 }
 
-- (void)unload
+- (void)testUnloadAsRoot
 {
     NSError* error;
 
@@ -109,7 +141,8 @@
         [[AHLaunchCtl sharedController] unload:@"com.eeaapps.echo.helloworld"
                                      inDomain:kAHGlobalLaunchDaemon
                                         error:&error];
-    XCTAssertFalse(success, @"Error %@", error);
+    
+    XCTAssertTrue(success, @"Error %@", error);
 }
 
 - (void)restart

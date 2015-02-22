@@ -79,6 +79,7 @@
 		BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		BE854D8018AA71D6001548A8 /* AHAuthorizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHAuthorizer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BE854D8118AA71D6001548A8 /* AHAuthorizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AHAuthorizer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		BE8C6BD51A9976AD00E3558C /* AHServiceManagement_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AHServiceManagement_Private.h; sourceTree = "<group>"; };
 		BEA75B3F18B531D700CA2672 /* NSFileManger+Privileged.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManger+Privileged.h"; sourceTree = "<group>"; };
 		BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManger+Privileged.m"; sourceTree = "<group>"; };
 		BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchJob.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -168,6 +169,7 @@
 				BE854D8118AA71D6001548A8 /* AHAuthorizer.m */,
 				BE6F549818B114CC00826656 /* AHServiceManagement.h */,
 				BE6F549918B114CC00826656 /* AHServiceManagement.m */,
+				BE8C6BD51A9976AD00E3558C /* AHServiceManagement_Private.h */,
 				BE76C6FB18A19369003C94A0 /* Supporting Files */,
 			);
 			path = AHLaunchCtl;

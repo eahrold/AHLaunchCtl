@@ -27,31 +27,14 @@
 @interface AHAuthorizer : NSObject
 
 /**
- *  create and external form for authorizing helper tool
- *
- *  @return NSData representation of external form
- */
-+ (NSData *)authorizeHelper;
-
-/**
- *  Used by the helper tool to check the authorization data against the command
- *dictionary
- *
- *  @param authData authorization data
- *  @param command  the selector requested by the main app
- *
- *  @return Populated NSError object on failure.
- */
-+ (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command;
-
-/**
  *  Prompt for authorization to the System Daemon
  *
- *  @param prompt string to include in the prompt dialog
+ *  @param label Unique name of the job getting authorized. Should be similar to a reverse domain.
+ *  @param prompt String used during the authorization dialog.
  *
  *  @return AuthorizationRef
  */
-+ (OSStatus)authorizeSystemDaemonWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
++ (OSStatus)authorizeSystemDaemonWithLabel:(NSString*)label prompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
 
 /**
  *  Prompt for authorization to the Service Management system

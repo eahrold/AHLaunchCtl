@@ -38,7 +38,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
     }
 
     AuthorizationRef authRef = NULL;
-    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
+    [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerMoveFile prompt:@"Trying to move a file to a privileged location" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
@@ -61,7 +61,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
     }
 
     AuthorizationRef authRef = NULL;
-    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
+    [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerCopyFile prompt:@"Trying to copy a file to a privileged location" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
@@ -84,7 +84,7 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
     }
 
     AuthorizationRef authRef = NULL;
-    [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
+    [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerDeleteFile prompt:@"Trying to remove a file from a privileged location" authRef:&authRef];
     if (authRef == NULL) {
         return NO;
     };
@@ -107,7 +107,7 @@ ofItemAtPrivilegedPath:(NSString *)path
     BOOL rc = NO;
     if ([self fileExistsAtPath:path isDirectory:nil]) {
         AuthorizationRef authRef = NULL;
-        [AHAuthorizer authorizeSystemDaemonWithPrompt:@"" authRef:&authRef];
+        [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerChownFile prompt:@"Trying to modify attributes of a file in a privileged location" authRef:&authRef];
         if (authRef == NULL) {
             return NO;
         };
