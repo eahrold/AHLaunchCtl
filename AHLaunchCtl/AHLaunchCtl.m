@@ -26,9 +26,9 @@
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
-NSString * const kAHAuthorizationLoadJobPrompt = @"Load a launchctl job into a privileged context";
-NSString * const kAHAuthorizationUnloadJobPrompt = @"Unload a launchctl job into a privileged context";
-NSString * const kAHAuthorizationReloadJobPrompt = @"Reload a launchctl job into a privileged context";
+NSString * const kAHAuthorizationLoadJobPrompt = @"Loading the job requires authorization.";
+NSString * const kAHAuthorizationUnloadJobPrompt = @"Unloading the job requires authorization. ";
+NSString * const kAHAuthorizationReloadJobPrompt = @"Reloading the job requires authorization. ";
 
 static NSString *errorMsgFromCode(NSInteger code);
 
@@ -128,47 +128,6 @@ static NSString *errorMsgFromCode(NSInteger code);
             success = [[NSFileManager defaultManager]
                        removeItemAtPath:launchdJobFile(label, domain)
                        error:error];
-        }
-    }
-
-    return success;
-}
-
-- (BOOL)remove:(NSString *)label
-fromDomainRequiringAuthorization:(AHLaunchDomain)domain
-         error:(NSError *__autoreleasing *)error {
-    BOOL success = YES;
-    if (jobIsRunning(label, domain)) {
-        if (domain > kAHUserLaunchAgent) {
-            AuthorizationRef authRef = NULL;
-
-            NSString *prompt =
-            [NSString stringWithFormat:@"Unload %@ and remove the file?",
-             launchdJobFile(label, domain)];
-
-            OSStatus status =
-            [AHAuthorizer authorizeSystemDaemonWithLabel:label
-                                                  prompt:prompt
-                                                 authRef:&authRef];
-
-            if (status == errAuthorizationCanceled) {
-                success = [[self class] errorWithMessage:@"User Canceled"
-                                                 andCode:status
-                                                   error:error];
-            } else if (authRef == NULL) {
-                success = [[self class] errorWithCode:status error:error];
-            } else {
-                if (!AHJobRemoveIncludingFile(
-                                              kAHSystemLaunchDaemon, label, authRef, error)) {
-                    success = [[self class]
-                               errorWithCode:kAHErrorCouldNotUnloadHelperTool
-                               error:error];
-                }
-            }
-
-            [AHAuthorizer authorizationFree:authRef];
-        } else {
-            [self remove:label fromDomain:domain error:error];
         }
     }
 
@@ -433,6 +392,7 @@ fromDomainRequiringAuthorization:(AHLaunchDomain)domain
                  prompt:(NSString *)prompt
                   error:(NSError *__autoreleasing *)error {
     BOOL success = YES;
+
     if (jobIsRunning(label, kAHGlobalLaunchDaemon)) {
         AuthorizationRef authRef = NULL;
         OSStatus status =
@@ -447,7 +407,7 @@ fromDomainRequiringAuthorization:(AHLaunchDomain)domain
         } else if (authRef == NULL) {
             success = [[self class] errorWithCode:status error:error];
         } else {
-            if (!AHJobUnbless(kAHSystemLaunchDaemon, label, authRef, error)) {
+            if (!AHJobUnbless(kAHGlobalLaunchDaemon, label, authRef, error)) {
                 success =
                 [[self class] errorWithCode:kAHErrorCouldNotUnloadHelperTool
                                       error:error];
@@ -495,9 +455,10 @@ fromDomainRequiringAuthorization:(AHLaunchDomain)domain
 
     AHLaunchDomain domain = global ? kAHGlobalLaunchAgent : kAHUserLaunchAgent;
 
-    BOOL success = NO;
 
     if (domain > kAHUserLaunchAgent) {
+        BOOL success = NO;
+
         AuthorizationRef authRef = NULL;
         OSStatus status = errSecSuccess;
         NSString *promptString =
@@ -509,16 +470,17 @@ fromDomainRequiringAuthorization:(AHLaunchDomain)domain
         if (status == errAuthorizationCanceled) {
             return YES;
         } else if (status != errSecSuccess) {
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
+            success =  [[self class] errorWithCode:kAHErrorInsufficientPrivileges
                                             error:error];
-        }
-
-        if (launch) {
-            success = AHCreatePrivilegedLaunchdPlist(
-                                                     domain, job.dictionary, authRef, error);
         } else {
-            success = AHRemovePrivilegedFile(
-                                             domain, launchdJobFile(job.Label, domain), authRef, error);
+
+            if (launch) {
+                success = AHCreatePrivilegedLaunchdPlist(
+                                                         domain, job.dictionary, authRef, error);
+            } else {
+                success = AHRemovePrivilegedFile(
+                                                 domain, launchdJobFile(job.Label, domain), authRef, error);
+            }
         }
         [AHAuthorizer authorizationFree:authRef];
         return success;

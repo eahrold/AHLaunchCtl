@@ -162,11 +162,11 @@
             [[NSMutableDictionary alloc] initWithCapacity:_count];
     }
 
-    id chng = change[@"new"];
+    id new = change[@"new"];
 
     if ([keyPath isEqualToString:@"StartCalendarInterval"] ||
         [keyPath isEqualToString:@"StartCalendarIntervalArray"]) {
-        return [self handleStartCalendarInterval:keyPath change:chng];
+        return [self handleStartCalendarInterval:keyPath change:new];
     }
 
     objc_property_t property =
@@ -175,9 +175,9 @@
 
     if (p != NULL) {
         if (!strncmp("Tc", p, 2)) {
-            [self writeBoolValueToDict:chng forKey:keyPath];
+            [self writeBoolValueToDict:new forKey:keyPath];
         } else
-            [self writeObjectValueToDict:chng forKey:keyPath];
+            [self writeObjectValueToDict:new forKey:keyPath];
     }
 }
 
@@ -308,9 +308,33 @@
 }
 
 + (AHLaunchJob *)jobFromFile:(NSString *)file {
-    // TODO: Fix this!!!!!!
-    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
-    return [self jobFromDictionary:dict inDomain:0];
+    // Normalize the string //
+    NSString *filePath = [file stringByExpandingTildeInPath];
+    AHLaunchDomain domain = 0;
+
+    if ([filePath hasPrefix:@"/Library/LaunchAgents"]) {
+        domain = kAHGlobalLaunchAgent;
+    } else if ([filePath hasPrefix:@"/Library/LaunchDaemons"]) {
+        domain = kAHGlobalLaunchDaemon;
+    } else if ([filePath hasPrefix:@"/System/Library/LaunchAgents"]) {
+        domain = kAHSystemLaunchAgent;
+    } else if ([filePath hasPrefix:@"/System/Library/LaunchDaemons"]) {
+        domain = kAHSystemLaunchDaemon;
+    } else if ([filePath hasPrefix:NSHomeDirectory()]) {
+        domain = kAHUserLaunchAgent;
+    }
+
+    NSDictionary *dict;
+    // Check the file returns a dict, and that the dictionary returned
+    // has both a label and program arguments keys.
+    if ((dict = [NSDictionary dictionaryWithContentsOfFile:file])&&
+        dict[NSStringFromSelector(@selector(Label))] &&
+        dict[NSStringFromSelector(@selector(ProgramArguments))])
+    {
+        return [self jobFromDictionary:dict inDomain:domain];
+    };
+
+    return nil;
 }
 
 @end

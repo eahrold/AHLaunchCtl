@@ -134,12 +134,17 @@ BOOL AHJobUnbless(AHLaunchDomain domain,
 
     // Remove the launchd plist
     NSString *const launchJobFile = launchdJobFile(label, domain);
-    AHRemovePrivilegedFile(domain, launchJobFile, authRef, error);
+    if(!AHRemovePrivilegedFile(domain, launchJobFile, authRef, error)){
+        NSLog(@"There was a problem removing the launchd.plist of the helper tool.");
+    }
 
     // Remove the helper tool binary
     NSString *const priviledgedToolBinary = [@"/Library/PrivilegedHelperTools/"
         stringByAppendingPathComponent:label];
-    AHRemovePrivilegedFile(domain, priviledgedToolBinary, authRef, error);
+
+    if(!AHRemovePrivilegedFile(domain, priviledgedToolBinary, authRef, error)){
+        NSLog(@"There was a problem removing binary file of the helper tool.");
+    }
 
     if (!success) {
         NSError *err = CFBridgingRelease(cfError);
@@ -166,7 +171,7 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
     // File path to for the launchd.plist
     NSString *filePath;
 
-    // tmpfile path the current under privileged user has access to
+    // tmp file path the current under privileged user has access to
     NSString *tmpFilePath;
 
     NSString *label = dictionary[@"Label"];
@@ -251,19 +256,6 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
         if (jobIsRunning(removeJob.Label, kAHGlobalLaunchDaemon)) {
             AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
         }
-
-#if DEBUG
-        // Check the removal was successful.
-        // WARNING: This will fail if you don't have read access to the parent
-        // directory.
-        if ([fm fileExistsAtPath:filePath]) {
-            NSLog(@"There was a problem removing %@. Removal may have failed, "
-                  @"or you do not have access to the parent directory",
-                  filePath);
-        } else {
-            NSLog(@"Successfully removed %@", filePath);
-#endif
-        }
     }
     return success;
 }
@@ -294,9 +286,8 @@ NSString *launchdJobFileDirectory(AHLaunchDomain domain) {
 NSString *launchdJobFile(NSString *label, AHLaunchDomain domain) {
     NSString *file;
     if (domain == 0 || !label) return nil;
-    file = [NSString stringWithFormat:@"%@/%@.plist",
-                                      launchdJobFileDirectory(domain),
-                                      label];
+    file = [launchdJobFileDirectory(domain) stringByAppendingPathComponent:[label stringByAppendingPathExtension:@"plist"]];
+
     return file;
 }
 

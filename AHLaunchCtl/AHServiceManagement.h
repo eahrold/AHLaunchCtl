@@ -72,7 +72,7 @@ extern BOOL AHJobSubmit(AHLaunchDomain domain,
                         NSError **error);
 
 /**
- *  Submit a job to load and create requisit files for persistance.
+ *  Submit a job to load and create requisite files for persistence.
  *
  *  @param domain     Domain for the job
  *  @param dictionary Job object and keys
@@ -131,7 +131,7 @@ extern BOOL AHJobBless(AHLaunchDomain domain,
                        NSError **error);
 
 /**
- *  Rremoves the executable, and unloads the job.
+ *  Removes the executable, and unloads the job.
  *  @param domain     Domain for the job
  *  @param label      Label of the executable
  *  @param authRef    Authorization data for job
