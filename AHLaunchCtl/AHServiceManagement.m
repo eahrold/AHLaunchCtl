@@ -12,95 +12,96 @@
 #import "AHLaunchJob.h"
 #import <ServiceManagement/ServiceManagement.h>
 
-
-BOOL jobIsRunning(NSString *label, AHLaunchDomain domain)
-{
+BOOL jobIsRunning(NSString *label, AHLaunchDomain domain) {
     NSDictionary *dict = AHJobCopyDictionary(domain, label);
     return dict ? YES : NO;
 }
 
-NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label)
-{
+NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label) {
     NSDictionary *dict;
     if (label && domain != 0) {
         dict = CFBridgingRelease(
-                                 SMJobCopyDictionary((__bridge CFStringRef)(SMDomain(domain)),
-                                                     (__bridge CFStringRef)(label)));
+            SMJobCopyDictionary((__bridge CFStringRef)(SMDomain(domain)),
+                                (__bridge CFStringRef)(label)));
         return dict;
     } else {
         return nil;
     }
 }
 
-BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
-                 AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
+BOOL AHJobSubmit(AHLaunchDomain domain,
+                 NSDictionary *dictionary,
+                 AuthorizationRef authRef,
+                 NSError *__autoreleasing *error) {
     CFErrorRef cfError;
-    if (domain == 0)
-        return NO;
+    if (domain == 0) return NO;
     cfError = NULL;
 
     BOOL rc = SMJobSubmit((__bridge CFStringRef)(SMDomain(domain)),
                           (__bridge CFDictionaryRef)dictionary,
-                          authRef, &cfError);
+                          authRef,
+                          &cfError);
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
-        if (error)
-            *error = err;
+        if (error) *error = err;
     }
 
     return rc;
 }
 
-BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain, NSDictionary *dictionary,
-                             AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
+BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain,
+                             NSDictionary *dictionary,
+                             AuthorizationRef authRef,
+                             NSError *__autoreleasing *error) {
     BOOL success = NO;
 
     if ((success = AHJobSubmit(domain, dictionary, authRef, error))) {
-        success = AHCreatePrivilegedLaunchdPlist(domain, dictionary, authRef, error);
+        success =
+            AHCreatePrivilegedLaunchdPlist(domain, dictionary, authRef, error);
     }
     return success;
 }
 
-BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
-                 AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
+BOOL AHJobRemove(AHLaunchDomain domain,
+                 NSString *label,
+                 AuthorizationRef authRef,
+                 NSError *__autoreleasing *error) {
     CFErrorRef cfError;
-    if (domain == 0)
-        return NO;
+    if (domain == 0) return NO;
     cfError = NULL;
 
     BOOL rc = SMJobRemove((__bridge CFStringRef)(SMDomain(domain)),
                           (__bridge CFStringRef)(label),
-                          authRef, YES, &cfError);
+                          authRef,
+                          YES,
+                          &cfError);
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
-        if (error)
-            *error = err;
+        if (error) *error = err;
     }
     return rc;
 }
 
-extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain, NSString *label,
-                                     AuthorizationRef authRef, NSError **error)
-{
+extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain,
+                                     NSString *label,
+                                     AuthorizationRef authRef,
+                                     NSError **error) {
     BOOL success = NO;
 
     if ((success = AHJobRemove(domain, label, authRef, error))) {
-        success = AHRemovePrivilegedFile(domain, launchdJobFile(label, domain), authRef, error);
+        success = AHRemovePrivilegedFile(
+            domain, launchdJobFile(label, domain), authRef, error);
     }
     return success;
 }
 
-
-BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
-                AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
-    if (domain == 0)
-        return NO;
+BOOL AHJobBless(AHLaunchDomain domain,
+                NSString *label,
+                AuthorizationRef authRef,
+                NSError *__autoreleasing *error) {
+    if (domain == 0) return NO;
 
     CFErrorRef cfError = NULL;
     BOOL rc = NO;
@@ -109,21 +110,22 @@ BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
         AHJobUnbless(domain, label, authRef, error);
     }
 
-    rc = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)(label),
-                    authRef, &cfError);
+    rc = SMJobBless(kSMDomainSystemLaunchd,
+                    (__bridge CFStringRef)(label),
+                    authRef,
+                    &cfError);
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
-        if (error)
-            *error = err;
+        if (error) *error = err;
     }
     return rc;
 }
 
-BOOL AHJobUnbless(AHLaunchDomain domain, NSString *label,
-                  AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
-    if (domain == 0)
-        return NO;
+BOOL AHJobUnbless(AHLaunchDomain domain,
+                  NSString *label,
+                  AuthorizationRef authRef,
+                  NSError *__autoreleasing *error) {
+    if (domain == 0) return NO;
 
     CFErrorRef cfError = NULL;
     BOOL success = NO;
@@ -131,30 +133,35 @@ BOOL AHJobUnbless(AHLaunchDomain domain, NSString *label,
     success = AHJobRemove(domain, label, authRef, error);
 
     // Remove the launchd plist
-    NSString * const launchJobFile = launchdJobFile(label, domain);
+    NSString *const launchJobFile = launchdJobFile(label, domain);
     AHRemovePrivilegedFile(domain, launchJobFile, authRef, error);
 
     // Remove the helper tool binary
-    NSString * const priviledgedToolBinary  = [@"/Library/PrivilegedHelperTools/" stringByAppendingPathComponent:label];
+    NSString *const priviledgedToolBinary = [@"/Library/PrivilegedHelperTools/"
+        stringByAppendingPathComponent:label];
     AHRemovePrivilegedFile(domain, priviledgedToolBinary, authRef, error);
 
     if (!success) {
         NSError *err = CFBridgingRelease(cfError);
-        if (error)
-            *error = err;
+        if (error) *error = err;
     }
     return success;
 }
 
-NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain)
-{
-    return CFBridgingRelease(SMCopyAllJobDictionaries((__bridge CFStringRef)(SMDomain(domain))));
+NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain) {
+    return CFBridgingRelease(
+        SMCopyAllJobDictionaries((__bridge CFStringRef)(SMDomain(domain))));
 }
 
 #pragma mark Private
-BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain, NSDictionary *dictionary, AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
-    BOOL success = YES;
+BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
+                                    NSDictionary *dictionary,
+                                    AuthorizationRef authRef,
+                                    NSError *__autoreleasing *error) {
+    BOOL success = NO;
+
+    AHLaunchJob *copyJob;
+    AHLaunchJob *chownJob;
 
     // File path to for the launchd.plist
     NSString *filePath;
@@ -163,59 +170,96 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain, NSDictionary *diction
     NSString *tmpFilePath;
 
     NSString *label = dictionary[@"Label"];
-    filePath = launchdJobFile(label, domain);
+    if (label && label.length) {
+        filePath = launchdJobFile(label, domain);
 
-    tmpFilePath = [@"/tmp" stringByAppendingPathComponent:label];
+        tmpFilePath =
+            [@"/tmp" stringByAppendingPathComponent:
+                         [[NSProcessInfo processInfo] globallyUniqueString]];
 
-    if ([dictionary writeToFile:tmpFilePath atomically:YES]) {
-        AHLaunchJob *copyJob = [AHLaunchJob new];
-        copyJob.Label = [@"com.eeaapps.ahlaunchctl.copy" stringByAppendingPathExtension:label];
-        copyJob.ProgramArguments = @[@"/bin/mv", @"-f", tmpFilePath, filePath ];
-        copyJob.RunAtLoad = YES;
+        if ([dictionary writeToFile:tmpFilePath atomically:YES]) {
+            [[NSFileManager defaultManager] setAttributes:@{
+                NSFilePosixPermissions : [NSNumber numberWithShort:0755]
+            } ofItemAtPath:tmpFilePath error:nil];
 
-        if((success = AHJobSubmit(kAHGlobalLaunchDaemon, copyJob.dictionary, authRef, error)) ){
-            sleep(0.5);
+            copyJob = [AHLaunchJob new];
+            copyJob.Label = [@"com.eeaapps.ahlaunchctl.copy"
+                stringByAppendingPathExtension:label];
+            copyJob.ProgramArguments =
+                @[ @"/bin/mv", @"-f", tmpFilePath, filePath ];
+            copyJob.RunAtLoad = YES;
+            copyJob.LaunchOnlyOnce = YES;
+
+            if ((success = AHJobSubmit(kAHGlobalLaunchDaemon,
+                                       copyJob.dictionary,
+                                       authRef,
+                                       error))) {
+                sleep(0.1);
+
+                // This should exit fast. If it's still alive unload it.
+                if (jobIsRunning(copyJob.Label, kAHGlobalLaunchDaemon)) {
+                    AHJobRemove(
+                        kAHGlobalLaunchDaemon, copyJob.Label, authRef, nil);
+                }
+
+                chownJob = [AHLaunchJob new];
+                chownJob.Label = [@"com.eeaapps.ahlaunchctl.chown"
+                    stringByAppendingPathExtension:label];
+                chownJob.ProgramArguments =
+                    @[ @"/usr/sbin/chown", @"root:wheel", filePath ];
+                chownJob.RunAtLoad = YES;
+                chownJob.LaunchOnlyOnce = YES;
+
+                success = AHJobSubmit(
+                    kAHGlobalLaunchDaemon, chownJob.dictionary, authRef, error);
+                // This should exit fast. If it's still alive unload it.
+                if (jobIsRunning(chownJob.Label, kAHGlobalLaunchDaemon)) {
+                    AHJobRemove(
+                        kAHGlobalLaunchDaemon, chownJob.Label, authRef, nil);
+                }
+            }
         }
-
-        // This should exit fast. If it's still alive unload it.
-        if(jobIsRunning(copyJob.Label, kAHGlobalLaunchDaemon)){
-            AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
-        }
-
-    } else {
-        success = NO;
     }
-
     return success;
 }
 
-BOOL AHRemovePrivilegedFile(AHLaunchDomain domain, NSString * filePath, AuthorizationRef authRef, NSError *__autoreleasing *error)
-{
+BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
+                            NSString *filePath,
+                            AuthorizationRef authRef,
+                            NSError *__autoreleasing *error) {
     BOOL success = YES;
     NSFileManager *fm = [NSFileManager defaultManager];
 
     if ([fm fileExistsAtPath:filePath]) {
-        NSString *const label = [@"com.eeaapps.ahlaunchctl.remove" stringByAppendingPathExtension:[filePath lastPathComponent]];
+        NSString *const label = [@"com.eeaapps.ahlaunchctl.remove"
+            stringByAppendingPathExtension:[filePath lastPathComponent]];
 
         AHLaunchJob *removeJob = [AHLaunchJob new];
         removeJob.Label = label;
         removeJob.ProgramArguments = @[ @"/bin/rm", filePath ];
         removeJob.RunAtLoad = YES;
+        removeJob.LaunchOnlyOnce = YES;
 
-        if((success = AHJobSubmit(kAHGlobalLaunchDaemon, removeJob.dictionary, authRef, error)) ){
+        if ((success = AHJobSubmit(kAHGlobalLaunchDaemon,
+                                   removeJob.dictionary,
+                                   authRef,
+                                   error))) {
             sleep(0.5);
         }
 
         // This should exit fast. If it's still alive unload it.
-        if(jobIsRunning(removeJob.Label, kAHGlobalLaunchDaemon)){
+        if (jobIsRunning(removeJob.Label, kAHGlobalLaunchDaemon)) {
             AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
         }
 
 #if DEBUG
         // Check the removal was successful.
-        // WARNING: This will fail if you don't have read access to the parent directory.
+        // WARNING: This will fail if you don't have read access to the parent
+        // directory.
         if ([fm fileExistsAtPath:filePath]) {
-            NSLog(@"There was a problem removing %@. Removal may have failed, or you do not have access to the parent directory", filePath);
+            NSLog(@"There was a problem removing %@. Removal may have failed, "
+                  @"or you do not have access to the parent directory",
+                  filePath);
         } else {
             NSLog(@"Successfully removed %@", filePath);
 #endif
@@ -224,8 +268,7 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain, NSString * filePath, Authoriz
     return success;
 }
 
-NSString *launchdJobFileDirectory(AHLaunchDomain domain)
-{
+NSString *launchdJobFileDirectory(AHLaunchDomain domain) {
     NSString *type;
     switch (domain) {
         case kAHGlobalLaunchAgent:
@@ -248,17 +291,16 @@ NSString *launchdJobFileDirectory(AHLaunchDomain domain)
     return type;
 }
 
-NSString *launchdJobFile(NSString *label, AHLaunchDomain domain)
-{
+NSString *launchdJobFile(NSString *label, AHLaunchDomain domain) {
     NSString *file;
-    if (domain == 0 || !label)
-        return nil;
-    file = [NSString stringWithFormat:@"%@/%@.plist", launchdJobFileDirectory(domain), label];
+    if (domain == 0 || !label) return nil;
+    file = [NSString stringWithFormat:@"%@/%@.plist",
+                                      launchdJobFileDirectory(domain),
+                                      label];
     return file;
 }
 
-NSString *SMDomain(AHLaunchDomain domain)
-{
+NSString *SMDomain(AHLaunchDomain domain) {
     if (domain > kAHGlobalLaunchAgent) {
         return (__bridge NSString *)kSMDomainSystemLaunchd;
     } else {

@@ -23,28 +23,32 @@
 #import "AHLaunchJobSchedule.h"
 
 /**
- *  AHLaunchDomain Launch Domain specifying which context the job should run under and where the launchd.plist file is located
+ *  AHLaunchDomain Launch Domain specifying which context the job should run
+ * under and where the launchd.plist file is located
  */
 typedef NS_ENUM(NSInteger, AHLaunchDomain) {
     /**
      *  User Launch Agents ~/Library/LaunchAgents.  Loaded by the Console user.
      */
-
     kAHUserLaunchAgent = 1,
     /**
-     *  Administrator provided LaunchAgents /Library/LaunchAgents/.  Loaded by the console user
+     *  Administrator provided LaunchAgents /Library/LaunchAgents/.  Loaded by
+     * the console user
      */
     kAHGlobalLaunchAgent,
     /**
-     *  Apple provided LaunchDaemons /System/Library/LaunchAgents/.  Loaded by root user
+     *  Apple provided LaunchAgents /System/Library/LaunchAgents/.  Loaded by
+     * root user
      */
     kAHSystemLaunchAgent,
     /**
-     *  Administrator provided LaunchAgents /Library/LaunchDaemons/.  Loaded by root user
+     *  Administrator provided LaunchDaemon /Library/LaunchDaemons/.  Loaded by
+     * root user
      */
     kAHGlobalLaunchDaemon,
     /**
-     *  Apple provided LaunchDaemons /System/Library/LaunchDaemons/.  Loaded by root user.
+     *  Apple provided LaunchDaemon /System/Library/LaunchDaemons/.  Loaded by
+     * root user.
      */
     kAHSystemLaunchDaemon,
 };
@@ -374,7 +378,8 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *
  *  @return allocated AHLaunchJob with corresponding keys
  */
-+ (AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict;
++ (AHLaunchJob *)jobFromDictionary:(NSDictionary *)dict
+                          inDomain:(AHLaunchDomain)domain;
 
 /**
  *  Create a job from a launchd.plist

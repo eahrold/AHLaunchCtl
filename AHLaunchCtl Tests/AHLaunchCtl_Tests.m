@@ -9,160 +9,254 @@
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
 #import "AHLaunchCtl.h"
+#import <ServiceManagement/ServiceManagement.h>
 
 @interface AHLaunchCtl_Tests : XCTestCase
 
 @end
 
-@implementation AHLaunchCtl_Tests
+@implementation AHLaunchCtl_Tests {
+    AHLaunchDomain _domain;
+    AHLaunchJob *_job;
+}
 
-- (void)setUp
-{
+- (void)setUp {
     [super setUp];
+    _domain = kAHUserLaunchAgent;
+
     // Put setup code here. This method is called before the invocation of each
     // test method in the class.
 }
 
-- (void)tearDown
-{
-    // Put teardown code here. This method is called after the invocation of each
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of
+    // each
     // test method in the class.
     [super tearDown];
 }
 
-
-- (void)testAll
-{
+#pragma mark - Default Test
+- (void)testAllStd {
     [self testAdd];
-    [self testLoadAsRoot];
-    [self testUnloadAsRoot];
-    [self load];
-    [self restart];
     [self testGetJob];
-    [self remove];
+    [self testUnload];
+    [self testLoad];
+    [self testGetJob];
+    [self testRestartJob];
+    [self testRemoveJob];
 }
 
-#pragma mark - The Job
-- (AHLaunchJob*)theJob
-{
-    AHLaunchJob* job = [AHLaunchJob new];
-    job.Program = @"/bin/echo";
-    job.Label = @"com.eeaapps.echo.helloworld";
-    job.ProgramArguments = @[ @"/bin/echo", @"hello world" ];
-    job.StandardOutPath = @"/tmp/hello.txt";
-    job.RunAtLoad = YES;
-    return job;
+#pragma mark - Priviledged tests
+- (void)testAllAsGlobalLaunchDaemon {
+    _domain = kAHGlobalLaunchDaemon;
+    [self testAllStd];
+}
+
+- (void)testAllAsGlobalLaunchAgent {
+    _domain = kAHGlobalLaunchAgent;
+    [self testAllStd];
+}
+
+- (void)testGui {
+    _job = [self guiJob];
+    _job.KeepAlive = @(YES);
+
+    _domain = kAHUserLaunchAgent;
+    [self testLoad];
+    [self testUnload];
 }
 
 #pragma mark - Tests
-- (void)testAdd
-{
-    NSError* error;
-    AHLaunchJob *job = [self theJob];
-    BOOL success = [[AHLaunchCtl sharedController] add:job
-                                             toDomain:kAHUserLaunchAgent
-                                                error:&error];
-
-    XCTAssertTrue(success, @"Error %@", error);
-}
-
-- (void)testRemvoe
-{
-    NSError* error;
-    AHLaunchJob *job = [self theJob];
-    BOOL success = [[AHLaunchCtl sharedController] remove:job.Label
-                                              fromDomain:kAHUserLaunchAgent
-                                                 error:&error];
-
-    XCTAssertTrue(success, @"Error %@", error);
-}
-
-- (void)testAddRoot
-{
-    NSError* error;
-    AHLaunchJob *job = [self theJob];
-    BOOL success = [[AHLaunchCtl sharedController] add:job
-                                              toDomain:kAHGlobalLaunchDaemon
-                                                 error:&error];
-
-    XCTAssertTrue(success, @"Error %@", error);
-}
-
-- (void)testRemoveRoot
-{
-    NSError* error;
-    AHLaunchJob *job = [self theJob];
-
-    BOOL success = [[AHLaunchCtl sharedController] remove:job.Label fromDomain:kAHGlobalLaunchDaemon error:&error];
-    XCTAssertTrue(success, @"Error %@", error);
-
-}
-
-- (void)testGetJob
-{
-    AHLaunchJob* job =
-        [AHLaunchCtl runningJobWithLabel:@"com.eeaapps.echo.helloworld"
-                                inDomain:kAHGlobalLaunchDaemon];
-
-    NSLog(@"%@", job);
-    XCTAssertTrue(job != nil, @"Could not get job");
-}
-
-- (void)load
-{
-    NSError* error;
-    AHLaunchJob* job = [self theJob];
-
-    BOOL success = [[AHLaunchCtl sharedController] load:job
-                                              inDomain:kAHGlobalLaunchDaemon
-                                                 error:&error];
-
-    XCTAssertFalse(success, @"Error %@", error);
-}
-
-
-- (void)testLoadAsRoot
-{
-    NSError* error;
-    AHLaunchJob* job = [self theJob];
-
-    BOOL success = [[AHLaunchCtl sharedController] load:job
-                                              inDomain:kAHGlobalLaunchDaemon
-                                                 error:&error];
-
-    XCTAssertTrue(success, @"Error %@", error);
-}
-
-- (void)testUnloadAsRoot
-{
-    NSError* error;
+- (void)testAdd {
+    NSError *error;
+    if (!_job) {
+        _job = [self echoJob];
+    }
 
     BOOL success =
-        [[AHLaunchCtl sharedController] unload:@"com.eeaapps.echo.helloworld"
-                                     inDomain:kAHGlobalLaunchDaemon
-                                        error:&error];
-    
+        [[AHLaunchCtl sharedController] add:_job toDomain:_domain error:&error];
+
+    NSLog(@"%@", _job);
     XCTAssertTrue(success, @"Error %@", error);
+
+    success = [self verifyWithSM];
+    XCTAssertTrue(success,
+                  @"Could not verify job was loaded using service management.");
 }
 
-- (void)restart
-{
-    NSError* error;
-    XCTAssertTrue(
-        [[AHLaunchCtl sharedController] restart:@"com.eeaapps.echo.helloworld"
-                                      inDomain:kAHUserLaunchAgent
-                                         error:&error],
-        @"Error: %@", error.localizedDescription);
+- (void)testGetJob {
+    if (!_job) {
+        _job = [self echoJob];
+    }
+
+    AHLaunchJob *job =
+        [AHLaunchCtl runningJobWithLabel:_job.Label inDomain:_domain];
+
+    NSLog(@"%@", job);
+    BOOL success = (job && job.Label && job.ProgramArguments);
+    XCTAssertTrue(success, @"Could not get job %@", job);
+
+    success = jobIsRunning(job.Label, _domain);
+    XCTAssertTrue(success, @"Could not get job %@", job);
+
+    success = [self verifyWithSM];
+    XCTAssertTrue(success,
+                  @"Could not verify job was loaded using service management.");
 }
 
-- (void)remove
-{
-    NSError* error;
+- (void)testUnload {
+
+    BOOL initialFileCheck =
+    [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
+
+    NSError *error;
+    if (!_job) {
+        _job = [self echoJob];
+    }
+
+    BOOL success = [[AHLaunchCtl sharedController] unload:_job.Label
+                                                 inDomain:_domain
+                                                    error:&error];
+
+    XCTAssertTrue(success, @"Error %@", error);
+
+    if (initialFileCheck) {
+        BOOL check2 =
+        [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
+        XCTAssertTrue(check2,
+                      @"Unloading removed the agent file, but shouldn't have!!!.");
+    }
+
+    success = [self verifyWithSM];
+    XCTAssertFalse(
+        success, @"Could not verify job was removed using service management.");
+}
+
+- (void)testLoad {
+    NSError *error;
+    if (!_job) {
+        _job = [self echoJob];
+    }
+
+    BOOL success = [[AHLaunchCtl sharedController] load:_job
+                                               inDomain:_domain
+                                                  error:&error];
+
+    XCTAssertTrue(success, @"Error %@", error);
+
+    success = [self verifyWithSM];
+    XCTAssertTrue(success,
+                  @"Could not verify job was loaded using service management.");
+}
+
+- (void)testRestartJob {
+    NSError *error;
+
+    if (!_job) {
+        _job = [self echoJob];
+    }
+
+    XCTAssertTrue([[AHLaunchCtl sharedController] restart:_job.Label
+                                                 inDomain:_domain
+                                                    error:&error],
+                  @"Error: %@",
+                  error.localizedDescription);
+
+    BOOL success = [self verifyWithSM];
     XCTAssertTrue(
-        [[AHLaunchCtl sharedController] remove:@"com.eeaapps.echo.helloworld"
-                                   fromDomain:kAHUserLaunchAgent
-                                        error:&error],
-        @"Error: %@", error.localizedDescription);
+        success,
+        @"Could not verify job was reloaded using service management.");
+}
+
+- (void)testRemoveJob {
+    NSError *error;
+    if (!_job) {
+        _job = [self echoJob];
+    }
+
+    XCTAssertTrue([[AHLaunchCtl sharedController] remove:_job.Label
+                                              fromDomain:_domain
+                                                   error:&error],
+                  @"Error: %@",
+                  error.localizedDescription);
+
+    BOOL check2 =
+        [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
+    XCTAssertFalse(check2,
+                   @"Did not remove the launch job file during user test.");
+
+    BOOL success = [self verifyWithSM];
+    XCTAssertFalse(
+        success, @"Could not verify job was loaded using service management.");
+}
+
+
+#pragma mark - Setup Helpers
+- (AHLaunchJob *)echoJob {
+    _job = [AHLaunchJob new];
+    _job.Label = @"com.eeaapps.echo.helloworld";
+    _job.ProgramArguments = @[ @"/bin/echo", @"hello world" ];
+    _job.StandardOutPath = @"/tmp/hello.txt";
+    _job.RunAtLoad = YES;
+    return _job;
+}
+
+- (AHLaunchJob *)guiJob {
+    _job = [AHLaunchJob new];
+    _job.Label = @"com.eeaapps.echo.open.preview";
+    _job.ProgramArguments =
+    @[ @"/Applications/Preview.app/Contents/MacOS/Preview" ];
+    _job.RunAtLoad = YES;
+    return _job;
+}
+
+- (NSString *)jobFile {
+    NSString *path = nil;
+    switch (_domain) {
+        case kAHUserLaunchAgent:
+            path = [@"~/Library/LaunchAgents/" stringByExpandingTildeInPath];
+            break;
+        case kAHGlobalLaunchAgent:
+            path = @"/Library/LaunchAgents/";
+            break;
+        case kAHSystemLaunchAgent:
+            path = @"/System/Library/LaunchAgents/";
+            break;
+        case kAHGlobalLaunchDaemon:
+            path = @"/Library/LaunchDaemons/";
+            break;
+        case kAHSystemLaunchDaemon:
+            path = @"/System/Library/LaunchDaemons/";
+            break;
+        default:
+            break;
+    }
+
+    NSString *jobFile =
+    [path stringByAppendingPathComponent:
+     [_job.Label stringByAppendingPathExtension:@"plist"]];
+    return jobFile;
+}
+
+
+- (BOOL)verifyWithSM {
+    CFStringRef domainStr = NULL;
+    if (_domain > kAHGlobalLaunchAgent) {
+        domainStr = kSMDomainSystemLaunchd;
+    } else {
+        domainStr = kSMDomainUserLaunchd;
+    }
+
+    BOOL success = NO;
+
+    NSDictionary *dict = CFBridgingRelease(
+        SMJobCopyDictionary(domainStr, (__bridge CFStringRef)(_job.Label)));
+
+    success = (dict != nil);
+
+    if (domainStr) CFRelease(domainStr);
+
+    return success;
 }
 
 @end

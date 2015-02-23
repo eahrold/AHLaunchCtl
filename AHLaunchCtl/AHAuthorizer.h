@@ -29,12 +29,15 @@
 /**
  *  Prompt for authorization to the System Daemon
  *
- *  @param label Unique name of the job getting authorized. Should be similar to a reverse domain.
+ *  @param label Unique name of the job getting authorized. Should be similar to
+ *a reverse domain.
  *  @param prompt String used during the authorization dialog.
  *
  *  @return AuthorizationRef
  */
-+ (OSStatus)authorizeSystemDaemonWithLabel:(NSString*)label prompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
++ (OSStatus)authorizeSystemDaemonWithLabel:(NSString *)label
+                                    prompt:(NSString *)prompt
+                                   authRef:(AuthorizationRef *)authRef;
 
 /**
  *  Prompt for authorization to the Service Management system
@@ -43,7 +46,8 @@
  *
  *  @return AuthorizationRef
  */
-+ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef;
++ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt
+                                  authRef:(AuthorizationRef *)authRef;
 
 /**
  *  Free the AuthorizationRef object

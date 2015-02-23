@@ -13,6 +13,11 @@
 		BE6F549B18B114CC00826656 /* AHServiceManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = BE6F549918B114CC00826656 /* AHServiceManagement.m */; };
 		BE76C6FF18A19369003C94A0 /* AHLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */; };
 		BE854D8318AA71D6001548A8 /* AHAuthorizer.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D8118AA71D6001548A8 /* AHAuthorizer.m */; };
+		BE8C6BDF1A9AE29F00E3558C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BE8C6BDE1A9AE29F00E3558C /* main.m */; };
+		BE8C6BE51A9AE3A400E3558C /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
+		BE8C6BE61A9AE3B000E3558C /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
+		BE8C6BE71A9AE3B700E3558C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
+		BE8C6BE81A9AE3C200E3558C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71D18A19B42003C94A0 /* SystemConfiguration.framework */; };
 		BE8EA57318B7ABC9008BEE58 /* NSFileManger+Privileged.m in Sources */ = {isa = PBXBuildFile; fileRef = BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */; };
 		BEAB0DD118AD4A0D004EE2FD /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEB00C971987404500B6206E /* AHLaunchCtl.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; };
@@ -32,6 +37,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		BE8C6BE31A9AE39C00E3558C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BE76C6E918A19369003C94A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BE76C6F018A19369003C94A0;
+			remoteInfo = AHLaunchCtl;
+		};
 		BEFC28CF19F0D84A00C35A6F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE76C6E918A19369003C94A0 /* Project object */;
@@ -42,6 +54,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		BE8C6BDA1A9AE29F00E3558C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		BEB00C961987402300B6206E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -80,6 +101,8 @@
 		BE854D8018AA71D6001548A8 /* AHAuthorizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHAuthorizer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BE854D8118AA71D6001548A8 /* AHAuthorizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AHAuthorizer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		BE8C6BD51A9976AD00E3558C /* AHServiceManagement_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AHServiceManagement_Private.h; sourceTree = "<group>"; };
+		BE8C6BDC1A9AE29F00E3558C /* rootTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = rootTest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE8C6BDE1A9AE29F00E3558C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BEA75B3F18B531D700CA2672 /* NSFileManger+Privileged.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManger+Privileged.h"; sourceTree = "<group>"; };
 		BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManger+Privileged.m"; sourceTree = "<group>"; };
 		BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AHLaunchJob.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -94,6 +117,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BE8C6BD91A9AE29F00E3558C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE8C6BE81A9AE3C200E3558C /* SystemConfiguration.framework in Frameworks */,
+				BE8C6BE71A9AE3B700E3558C /* Security.framework in Frameworks */,
+				BE8C6BE61A9AE3B000E3558C /* ServiceManagement.framework in Frameworks */,
+				BE8C6BE51A9AE3A400E3558C /* libAHLaunchCtl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +152,7 @@
 				BE2C317E1988397300F8044E /* HelperTool-CodeSign.py */,
 				BE76C6FA18A19369003C94A0 /* AHLaunchCtl */,
 				BEFC28C719F0D79D00C35A6F /* AHLaunchCtl Tests */,
+				BE8C6BDD1A9AE29F00E3558C /* AHLaunchCtl Root Test */,
 				BE76C6F318A19369003C94A0 /* Frameworks */,
 				BE76C6F218A19369003C94A0 /* Products */,
 			);
@@ -128,6 +163,7 @@
 			children = (
 				BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */,
 				BEFC28C619F0D79D00C35A6F /* AHLaunchCtl Tests.xctest */,
+				BE8C6BDC1A9AE29F00E3558C /* rootTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -182,6 +218,15 @@
 				BE76C6FC18A19369003C94A0 /* AHLaunchCtl-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BE8C6BDD1A9AE29F00E3558C /* AHLaunchCtl Root Test */ = {
+			isa = PBXGroup;
+			children = (
+				BE8C6BDE1A9AE29F00E3558C /* main.m */,
+			);
+			name = "AHLaunchCtl Root Test";
+			path = rootTest;
 			sourceTree = "<group>";
 		};
 		BE8EA57218B7A286008BEE58 /* Categories */ = {
@@ -246,6 +291,24 @@
 			productReference = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		BE8C6BDB1A9AE29F00E3558C /* rootTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE8C6BE21A9AE29F00E3558C /* Build configuration list for PBXNativeTarget "rootTest" */;
+			buildPhases = (
+				BE8C6BD81A9AE29F00E3558C /* Sources */,
+				BE8C6BD91A9AE29F00E3558C /* Frameworks */,
+				BE8C6BDA1A9AE29F00E3558C /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE8C6BE41A9AE39C00E3558C /* PBXTargetDependency */,
+			);
+			name = rootTest;
+			productName = rootTest;
+			productReference = BE8C6BDC1A9AE29F00E3558C /* rootTest */;
+			productType = "com.apple.product-type.tool";
+		};
 		BEFC28C519F0D79D00C35A6F /* AHLaunchCtl Tests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BEFC28CC19F0D79D00C35A6F /* Build configuration list for PBXNativeTarget "AHLaunchCtl Tests" */;
@@ -273,6 +336,9 @@
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Eldon Ahrold";
 				TargetAttributes = {
+					BE8C6BDB1A9AE29F00E3558C = {
+						CreatedOnToolsVersion = 6.1;
+					};
 					BEFC28C519F0D79D00C35A6F = {
 						CreatedOnToolsVersion = 6.0.1;
 					};
@@ -293,6 +359,7 @@
 			targets = (
 				BE76C6F018A19369003C94A0 /* AHLaunchCtl */,
 				BEFC28C519F0D79D00C35A6F /* AHLaunchCtl Tests */,
+				BE8C6BDB1A9AE29F00E3558C /* rootTest */,
 			);
 		};
 /* End PBXProject section */
@@ -321,6 +388,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BE8C6BD81A9AE29F00E3558C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE8C6BDF1A9AE29F00E3558C /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BEFC28C219F0D79D00C35A6F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -332,6 +407,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		BE8C6BE41A9AE39C00E3558C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BE76C6F018A19369003C94A0 /* AHLaunchCtl */;
+			targetProxy = BE8C6BE31A9AE39C00E3558C /* PBXContainerItemProxy */;
+		};
 		BEFC28D019F0D84A00C35A6F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BE76C6F018A19369003C94A0 /* AHLaunchCtl */;
@@ -442,6 +522,36 @@
 			};
 			name = Release;
 		};
+		BE8C6BE01A9AE29F00E3558C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BE8C6BE11A9AE29F00E3558C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		BEFC28CD19F0D79D00C35A6F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -506,6 +616,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		BE8C6BE21A9AE29F00E3558C /* Build configuration list for PBXNativeTarget "rootTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE8C6BE01A9AE29F00E3558C /* Debug */,
+				BE8C6BE11A9AE29F00E3558C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		BEFC28CC19F0D79D00C35A6F /* Build configuration list for PBXNativeTarget "AHLaunchCtl Tests" */ = {
 			isa = XCConfigurationList;

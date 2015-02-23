@@ -21,68 +21,76 @@
 
 #import "AHAuthorizer.h"
 
-
-static NSString *kNSAuthorizationJobBless = @"com.apple.ServiceManagement.blesshelper";
-static NSString *kNSAuthorizationSystemDaemon = @"com.apple.ServiceManagement.daemons.modify";
+static NSString *kNSAuthorizationJobBless =
+    @"com.apple.ServiceManagement.blesshelper";
+static NSString *kNSAuthorizationSystemDaemon =
+    @"com.apple.ServiceManagement.daemons.modify";
 
 @implementation AHAuthorizer
 
-+ (AuthorizationFlags)defaultFlags
-{
++ (AuthorizationFlags)defaultFlags {
     static dispatch_once_t onceToken;
     static AuthorizationFlags authFlags;
     dispatch_once(&onceToken, ^{
         authFlags =
-        kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed |
-        kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
+            kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed |
+            kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
     });
     return authFlags;
 }
 
-+ (OSStatus)authorizeSystemDaemonWithLabel:(NSString *)label prompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef
-{
-    AuthorizationItem authItem = { kNSAuthorizationSystemDaemon.UTF8String, 0,
-        NULL, 0 };
++ (OSStatus)authorizeSystemDaemonWithLabel:(NSString *)label
+                                    prompt:(NSString *)prompt
+                                   authRef:(AuthorizationRef *)authRef {
+    AuthorizationItem authItem = {
+        kNSAuthorizationSystemDaemon.UTF8String, 0, NULL, 0};
 
     if (!prompt || !prompt.length) {
-        prompt = [NSString stringWithFormat:@"%@ is trying to perform a privileged operation.",[[NSProcessInfo processInfo] processName]];
+        prompt = [NSString
+            stringWithFormat:@"%@ is trying to perform a privileged operation.",
+                             [[NSProcessInfo processInfo] processName]];
     }
 
-    authItem.name = label.UTF8String;
+    //Get userID
+    uid_t uid = getuid();
+    if (uid != 0) {
+        // Only setup custom auth name if not running as root.
+        authItem.name = label.UTF8String;
+    }
+
     return [self authorizePrompt:prompt authItems:authItem authRef:authRef];
 }
 
-+ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt authRef:(AuthorizationRef *)authRef
-{
-
-    AuthorizationItem authItem = { kNSAuthorizationJobBless.UTF8String, 0, NULL,
-        0 };
++ (OSStatus)authorizeSMJobBlessWithPrompt:(NSString *)prompt
+                                  authRef:(AuthorizationRef *)authRef {
+    AuthorizationItem authItem = {
+        kNSAuthorizationJobBless.UTF8String, 0, NULL, 0};
     return [self authorizePrompt:prompt authItems:authItem authRef:authRef];
 };
 
 + (OSStatus)authorizePrompt:(NSString *)prompt
                   authItems:(AuthorizationItem)authItem
-                    authRef:(AuthorizationRef *)authRef
-{
-
-    AuthorizationRights authRights = { 1, &authItem };
-    AuthorizationEnvironment environment = { 0, NULL };
+                    authRef:(AuthorizationRef *)authRef {
+    AuthorizationRights authRights = {1, &authItem};
+    AuthorizationEnvironment environment = {0, NULL};
 
     if (prompt) {
-        AuthorizationItem envItem = { kAuthorizationEnvironmentPrompt, prompt.length,
-            (void *)prompt.UTF8String, 0 };
+        AuthorizationItem envItem = {kAuthorizationEnvironmentPrompt,
+                                     prompt.length,
+                                     (void *)prompt.UTF8String,
+                                     0};
         environment.count = 1;
         environment.items = &envItem;
     }
 
-    return AuthorizationCreate(&authRights, &environment,
-                               [[self class] defaultFlags], authRef);
+    return AuthorizationCreate(
+        &authRights, &environment, [[self class] defaultFlags], authRef);
 }
 
-+ (void)authorizationFree:(AuthorizationRef)authRef
-{
++ (void)authorizationFree:(AuthorizationRef)authRef {
     if (authRef != NULL) {
-        OSStatus junk = AuthorizationFree(authRef, kAuthorizationFlagDestroyRights);
+        OSStatus junk =
+            AuthorizationFree(authRef, kAuthorizationFlagDestroyRights);
         assert(junk == errAuthorizationSuccess);
     }
 }

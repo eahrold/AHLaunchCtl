@@ -9,7 +9,6 @@
 #ifndef AHLaunchCtl_AHServiceManagement_Private_h
 #define AHLaunchCtl_AHServiceManagement_Private_h
 
-
 /**
  *  Directory path for launchd.plist files based on the supplied domain.
  *
@@ -38,8 +37,14 @@ extern NSString *launchdJobFile(NSString *label, AHLaunchDomain domain);
  */
 extern NSString *SMDomain(AHLaunchDomain domain);
 
-BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain, NSDictionary *dictionary, AuthorizationRef authRef, NSError *__autoreleasing *error);
+BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
+                                    NSDictionary *dictionary,
+                                    AuthorizationRef authRef,
+                                    NSError *__autoreleasing *error);
 
-BOOL AHRemovePrivilegedFile(AHLaunchDomain domain, NSString * filePath, AuthorizationRef authRef, NSError *__autoreleasing *error);
+BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
+                            NSString *filePath,
+                            AuthorizationRef authRef,
+                            NSError *__autoreleasing *error);
 
 #endif

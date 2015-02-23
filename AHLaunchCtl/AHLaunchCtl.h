@@ -69,7 +69,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
      */
     kAHErrorHelperToolNotLoaded,
     /**
-     *  Error Encountered when files associated with helper tool could not be removed
+     *  Error Encountered when files associated with helper tool could not be
+     * removed
      */
     kAHErrorCouldNotRemoveHelperToolFiles,
     /**
@@ -85,7 +86,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
      */
     kAHErrorFileNotFound,
     /**
-     *  Error Encountered when the launchd.plist file could not be written or insufficient privileges
+     *  Error Encountered when the launchd.plist file could not be written or
+     * insufficient privileges
      */
     kAHErrorCouldNotWriteFile,
     /**
@@ -137,7 +139,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)add:(AHLaunchJob *)job toDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)add:(AHLaunchJob *)job
+    toDomain:(AHLaunchDomain)domain
+       error:(NSError **)error;
 
 /**
  *  Remove launchd.plist and unload the job
@@ -148,7 +152,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)remove:(NSString *)label fromDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)remove:(NSString *)label
+    fromDomain:(AHLaunchDomain)domain
+         error:(NSError **)error;
 
 /**
  *  Remove launchd.plist and unload the job prompting for admin authorization.
@@ -159,7 +165,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)remove:(NSString *)label fromDomainRequiringAuthorization:(AHLaunchDomain)domain error:(NSError *__autoreleasing *)error;
+- (BOOL)remove:(NSString *)label
+    fromDomainRequiringAuthorization:(AHLaunchDomain)domain
+                               error:(NSError *__autoreleasing *)error;
 /**
  *  Loads launchd job
  *  @param job AHLaunchJob Object, Label and Program keys required.
@@ -168,7 +176,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)load:(AHLaunchJob *)job inDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)load:(AHLaunchJob *)job
+    inDomain:(AHLaunchDomain)domain
+       error:(NSError **)error;
 
 /**
  *  Unloads a launchd job
@@ -178,7 +188,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)unload:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)unload:(NSString *)label
+      inDomain:(AHLaunchDomain)domain
+         error:(NSError **)error;
 
 /**
  *  Loads and existing launchd.plist (Only User when not including helper tool)
@@ -188,7 +200,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)start:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)start:(NSString *)label
+     inDomain:(AHLaunchDomain)domain
+        error:(NSError **)error;
 
 /**
  *  Stops a running launchd job (Only User when not including helper tool)
@@ -198,7 +212,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)stop:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)stop:(NSString *)label
+    inDomain:(AHLaunchDomain)domain
+       error:(NSError **)error;
 
 /**
  *  Restarts a launchd job. (Only User when not including helper tool)
@@ -208,7 +224,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-- (BOOL)restart:(NSString *)label inDomain:(AHLaunchDomain)domain error:(NSError **)error;
+- (BOOL)restart:(NSString *)label
+       inDomain:(AHLaunchDomain)domain
+          error:(NSError **)error;
 
 #pragma mark - Class Methods
 /**
@@ -216,20 +234,27 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  @param app Path to the Application
  *  @param launch YES to launch, NO to stop launching
  *  @param global YES to launch for all users, NO to launch for current user.
- *  @param keepAlive YES to relaunch in the event of a crash or an attempt to quit
+ *  @param keepAlive YES to relaunch in the event of a crash or an attempt to
+ *quit
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
-+ (BOOL)launchAtLogin:(NSString *)app launch:(BOOL)launch global:(BOOL)global keepAlive:(BOOL)keepAlive error:(NSError **)error;
++ (BOOL)launchAtLogin:(NSString *)app
+               launch:(BOOL)launch
+               global:(BOOL)global
+            keepAlive:(BOOL)keepAlive
+                error:(NSError **)error;
 
 /**
  *  Schedule a LaunchD Job to run at an interval.
- *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
+ *  @param label uniquely identifier for launchd.  This should be in the form a
+ *a reverse domain
  *  @param program Path to the executable to run
  *  @param interval How often (in seconds) to run.
  *  @param domain Corresponding AHLaunchDomain
- *  @param reply Reply block executed on completion that has no return value and takes on argument NSError.
+ *  @param reply Reply block executed on completion that has no return value and
+ *takes on argument NSError.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
@@ -240,12 +265,14 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
               reply:(void (^)(NSError *error))reply;
 /**
  *  Schedule a LaunchD Job to run at an interval.
- *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
+ *  @param label uniquely identifier for launchd.  This should be in the form a
+ *a reverse domain
  *  @param program Path to the executable to run
  *  @param programArguments Array of arguments to pass to the executable.
  *  @param interval How often (in seconds) to run.
  *  @param domain Corresponding AHLaunchDomain
- *  @param reply Reply block executed on completion that has no return value and takes on argument NSError.
+ *  @param reply Reply block executed on completion that has no return value and
+ *takes on argument NSError.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
  */
@@ -258,7 +285,8 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
 /**
  *  Create a job object based on a launchd.plist file
- *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
+ *  @param label uniquely identifier for launchd.  This should be in the form a
+ *a reverse domain
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the corresponding keys
@@ -268,7 +296,8 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
 /**
  *  Create a job object based on currently running Launchd Job
- *  @param label uniquely identifier for launchd.  This should be in the form a a reverse domain
+ *  @param label uniquely identifier for launchd.  This should be in the form a
+ *a reverse domain
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the corresponding keys
@@ -311,7 +340,9 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  @param error  populated should error occur
  *
  *  @return YES for success NO on failure;
- *  @warning Must be code singed properly, and have an embedded Info.plist and Launchd.plist, and located in the applications MainBundle/Library/LaunchServices
+ *  @warning Must be code singed properly, and have an embedded Info.plist and
+ *Launchd.plist, and located in the applications
+ *MainBundle/Library/LaunchServices
  */
 + (BOOL)installHelper:(NSString *)label
                prompt:(NSString *)prompt
@@ -337,10 +368,12 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  *  @return YES for success NO on failure;
  */
 + (BOOL)uninstallHelper:(NSString *)label
-                  error:(NSError *__autoreleasing *)error __attribute__((deprecated));
+                  error:(NSError *__autoreleasing *)error
+    __attribute__((deprecated));
 
 /**
- *  Cleans up files associated with the helper tool that SMJobBless leaves behind
+ *  Cleans up files associated with the helper tool that SMJobBless leaves
+ *behind
  *
  *  @param label label of the Helper Tool
  *  @param error error object populated if an error occurs.
@@ -354,14 +387,22 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 + (BOOL)version:(NSString *)versionA isGreaterThanVersion:(NSString *)versionB;
 #pragma mark - Domain Error
 /**
- *  Convenience Method for populating an NSError using message and code.  It also can be used to provide a return value for escaping another method. e.g. on failure of a previous condition you could do "return [AHLaunchCtl errorWithMessage:@"your message" andCode:1 error:error]" and you'll get escaped out, if method return you're using on has BOOL return and error is already an __autoreleasing error pointer
+ *  Convenience Method for populating an NSError using message and code.  It
+ *also can be used to provide a return value for escaping another method. e.g.
+ *on failure of a previous condition you could do "return [AHLaunchCtl
+ *errorWithMessage:@"your message" andCode:1 error:error]" and you'll get
+ *escaped out, if method return you're using on has BOOL return and error is
+ *already an __autoreleasing error pointer
  *
  *  @param message Human readable error message
  *  @param code    error Code
  *  @param error   error pointer
  *
- *  @return YES if error code passed is 0, NO on all other error codes passed into;
+ *  @return YES if error code passed is 0, NO on all other error codes passed
+ *into;
  */
-+ (BOOL)errorWithMessage:(NSString *)message andCode:(NSInteger)code error:(NSError **)error;
++ (BOOL)errorWithMessage:(NSString *)message
+                 andCode:(NSInteger)code
+                   error:(NSError **)error;
 
 @end

@@ -66,8 +66,10 @@ extern NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain);
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
-                        AuthorizationRef authRef, NSError **error);
+extern BOOL AHJobSubmit(AHLaunchDomain domain,
+                        NSDictionary *dictionary,
+                        AuthorizationRef authRef,
+                        NSError **error);
 
 /**
  *  Submit a job to load and create requisit files for persistance.
@@ -79,8 +81,10 @@ extern BOOL AHJobSubmit(AHLaunchDomain domain, NSDictionary *dictionary,
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain, NSDictionary *dictionary,
-                             AuthorizationRef authRef, NSError *__autoreleasing *error);
+BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain,
+                             NSDictionary *dictionary,
+                             AuthorizationRef authRef,
+                             NSError *__autoreleasing *error);
 
 /**
  *  Remove a loaded job
@@ -92,8 +96,10 @@ BOOL AHJobSubmitCreatingFile(AHLaunchDomain domain, NSDictionary *dictionary,
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
-                        AuthorizationRef authRef, NSError **error);
+extern BOOL AHJobRemove(AHLaunchDomain domain,
+                        NSString *label,
+                        AuthorizationRef authRef,
+                        NSError **error);
 
 /**
  *  Remove a loaded job from the registry and delete the file.
@@ -105,8 +111,10 @@ extern BOOL AHJobRemove(AHLaunchDomain domain, NSString *label,
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain, NSString *label,
-                        AuthorizationRef authRef, NSError **error);
+extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain,
+                                     NSString *label,
+                                     AuthorizationRef authRef,
+                                     NSError **error);
 
 /**
  *  Submits the executable for the given label as a launchd job.
@@ -117,8 +125,10 @@ extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain, NSString *label,
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-extern BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
-                       AuthorizationRef authRef, NSError **error);
+extern BOOL AHJobBless(AHLaunchDomain domain,
+                       NSString *label,
+                       AuthorizationRef authRef,
+                       NSError **error);
 
 /**
  *  Rremoves the executable, and unloads the job.
@@ -129,5 +139,7 @@ extern BOOL AHJobBless(AHLaunchDomain domain, NSString *label,
  *
  *  @return YES if job was successfully loaded, NO otherwise
  */
-extern BOOL AHJobUnbless(AHLaunchDomain domain, NSString *label,
-                         AuthorizationRef authRef, NSError **error);
+extern BOOL AHJobUnbless(AHLaunchDomain domain,
+                         NSString *label,
+                         AuthorizationRef authRef,
+                         NSError **error);

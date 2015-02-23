@@ -11,20 +11,27 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
 
 @implementation AHLaunchJobSchedule
 
-- (NSDictionary *)dictionary
-{
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:5];
+- (NSDictionary *)dictionary {
+    NSMutableDictionary *dict =
+        [[NSMutableDictionary alloc] initWithCapacity:5];
+
     if (self.minute != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.minute] forKey:@"Minute"];
+        [dict setObject:[NSNumber numberWithInteger:self.minute]
+                 forKey:@"Minute"];
+
     if (self.hour != AHUndefinedSchedulComponent)
         [dict setObject:[NSNumber numberWithInteger:self.hour] forKey:@"Hour"];
+
     if (self.day != AHUndefinedSchedulComponent)
         [dict setObject:[NSNumber numberWithInteger:self.day] forKey:@"Day"];
+
     if (self.weekday != AHUndefinedSchedulComponent)
         [dict setObject:[NSNumber numberWithInteger:self.weekday]
                  forKey:@"Weekday"];
+
     if (self.month != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.month] forKey:@"Weekday"];
+        [dict setObject:[NSNumber numberWithInteger:self.month]
+                 forKey:@"Weekday"];
 
     return [NSDictionary dictionaryWithDictionary:dict];
 }
@@ -33,8 +40,7 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
                               hour:(NSInteger)hour
                                day:(NSInteger)day
                            weekday:(NSInteger)weekday
-                             month:(NSInteger)month
-{
+                             month:(NSInteger)month {
     AHLaunchJobSchedule *components = [AHLaunchJobSchedule new];
 
     if (minute != AHUndefinedSchedulComponent) {
@@ -55,16 +61,15 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
     return components;
 }
 
-+ (instancetype)dailyRunAtHour:(NSInteger)hour minute:(NSInteger)minute
-{
++ (instancetype)dailyRunAtHour:(NSInteger)hour minute:(NSInteger)minute {
     return [self scheduleWithMinute:minute
                                hour:hour
                                 day:AHUndefinedSchedulComponent
                             weekday:AHUndefinedSchedulComponent
                               month:AHUndefinedSchedulComponent];
 }
-+ (instancetype)weeklyRunOnWeekday:(NSInteger)weekday hour:(NSInteger)hour
-{
+
++ (instancetype)weeklyRunOnWeekday:(NSInteger)weekday hour:(NSInteger)hour {
     return [self scheduleWithMinute:00
                                hour:hour
                                 day:AHUndefinedSchedulComponent
@@ -72,8 +77,7 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
                               month:AHUndefinedSchedulComponent];
 }
 
-+ (instancetype)monthlyRunOnDay:(NSInteger)day hour:(NSInteger)hour
-{
++ (instancetype)monthlyRunOnDay:(NSInteger)day hour:(NSInteger)hour {
     return [self scheduleWithMinute:00
                                hour:hour
                                 day:day
