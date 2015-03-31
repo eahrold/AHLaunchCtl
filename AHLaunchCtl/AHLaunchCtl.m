@@ -19,26 +19,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "AHLaunchCtl.h"
-#import "AHAuthorizer.h"
-#import "AHServiceManagement.h"
+#import <AHLaunchCtl/AHLaunchCtl.h>
+#import <AHLaunchCtl/AHAuthorizer.h>
+#import <AHLaunchCtl/AHServiceManagement.h>
 #import "AHServiceManagement_Private.h"
+
+#import <NSString+ah_versionCompare.h>
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
-NSString * const kAHAuthorizationLoadJobPrompt = @"Loading the job requires authorization.";
-NSString * const kAHAuthorizationUnloadJobPrompt = @"Unloading the job requires authorization. ";
-NSString * const kAHAuthorizationReloadJobPrompt = @"Reloading the job requires authorization. ";
+
+static NSString *const kAHAuthorizationLoadJobPrompt =
+    @"Loading the job requires authorization.";
+static NSString *const kAHAuthorizationUnloadJobPrompt =
+    @"Unloading the job requires authorization.";
+static NSString *const kAHAuthorizationReloadJobPrompt =
+    @"Reloading the job requires authorization.";
+static NSString *const kAHAuthorizationSessionPrompt =
+    @"Performing administrative tasks requires authorization";
+
+static NSString *const kAHSessionAuthorizationKey =
+    @"com.eeaapps.ahlaunchctl.controller.session.authorization";
+
+static NSString *const kAHLaunchCtlDomain = @"com.eeaapps.ahlaunchctl";
 
 static NSString *errorMsgFromCode(NSInteger code);
-
 
 @interface AHLaunchJob ()
 @property (nonatomic, readwrite) AHLaunchDomain domain;  //
 @end
 
 #pragma mark - Launch Controller
-@implementation AHLaunchCtl
+@implementation AHLaunchCtl {
+    AuthorizationRef _authRef;
+}
 
 + (AHLaunchCtl *)sharedController {
     static dispatch_once_t onceToken;
@@ -47,90 +61,107 @@ static NSString *errorMsgFromCode(NSInteger code);
     return shared;
 }
 
-#pragma mark--- Add/Remove ---
+- (void)dealloc {
+    [self deauthorize];
+}
 
+#pragma mark - Session authorization.
+- (BOOL)authorizeWithPrompt:(NSString *)prompt {
+    OSStatus status = errAuthorizationSuccess;
+    if (_authRef == NULL) {
+        if ([self isEqual:[[self class] sharedController]]) {
+            status = errAuthorizationDenied;
+            NSLog(@"You cannot create session authorization for the shared "
+                  @"controller.");
+        } else {
+            status = [AHAuthorizer
+                authorizeSystemDaemonWithLabel:kAHSessionAuthorizationKey
+                                        prompt:kAHAuthorizationSessionPrompt
+                                       authRef:&_authRef];
+        }
+    }
+
+    return (status == errAuthorizationSuccess);
+}
+- (BOOL)authorize {
+    return [self authorizeWithPrompt:kAHAuthorizationSessionPrompt];
+}
+
+- (void)deauthorize {
+    [AHAuthorizer authorizationFree:_authRef];
+    _authRef = NULL;
+}
+
+#pragma mark--- Add/Remove ---
 - (BOOL)add:(AHLaunchJob *)job
-   toDomain:(AHLaunchDomain)domain
-      error:(NSError *__autoreleasing *)error {
+    toDomain:(AHLaunchDomain)domain
+       error:(NSError *__autoreleasing *)error {
     if (![self jobIsValid:job error:error]) {
         return NO;
     }
 
     BOOL success = NO;
     AuthorizationRef authRef = NULL;
-    OSStatus status = errSecSuccess;
 
-    //Get userID
-    uid_t uid = getuid();
-    BOOL isRoot = (uid == 0);
-    if (isRoot) {
-        [AHAuthorizer authorizeSMJobBlessWithPrompt:@"" authRef:&authRef];
-    }
-
-    if ((domain > kAHUserLaunchAgent) && !isRoot) {
-        status = [AHAuthorizer
-                  authorizeSystemDaemonWithLabel:job.Label
-                  prompt:kAHAuthorizationLoadJobPrompt
-                  authRef:&authRef];
-        if (status == errAuthorizationCanceled) {
-            return YES;
-        } else if (status == errSecSuccess) {
-            if (AHCreatePrivilegedLaunchdPlist(
-                                               domain, job.dictionary, authRef, error)) {
-                success =
-                [self load:job inDomain:domain authRef:authRef error:error];
-            }
-        } else {
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
+    if (domain > kAHUserLaunchAgent) {
+        // Get userID
+        success = [self createAuthorization:&authRef
+                                     domain:domain
+                                      label:job.Label
+                                     prompt:kAHAuthorizationLoadJobPrompt
+                                      error:error];
+        if (success) {
+            success = AHCreatePrivilegedLaunchdPlist(
+                domain, job.dictionary, authRef, error);
         }
     } else {
-        if ([job.dictionary writeToFile:launchdJobFile(job.Label, domain)
-                             atomically:YES]) {
-            success = [self load:job inDomain:domain authRef:authRef error:error];
+        if ((success =
+                 [job.dictionary writeToFile:launchdJobFile(job.Label, domain)
+                                  atomically:YES]) == NO) {
+            [[self class] errorWithCode:kAHErrorCouldNotWriteFile error:error];
         }
     }
 
-    [AHAuthorizer authorizationFree:authRef];
+    if (success) {
+        success = [self load:job inDomain:domain authRef:authRef error:error];
+    }
+
+    if (_authRef == NULL) {
+        [AHAuthorizer authorizationFree:authRef];
+    }
+    authRef = NULL;
+
     return success;
 }
 
 - (BOOL)remove:(NSString *)label
     fromDomain:(AHLaunchDomain)domain
          error:(NSError *__autoreleasing *)error {
-    BOOL success = YES;
+    BOOL success = NO;
     AuthorizationRef authRef = NULL;
 
-    //Get userID
-    uid_t uid = getuid();
-    BOOL isRoot = (uid == 0);
-    if (isRoot) {
-        [AHAuthorizer authorizeSMJobBlessWithPrompt:@"" authRef:&authRef];
-    }
-
-    if ((domain > kAHUserLaunchAgent) && !isRoot) {
-        OSStatus status = [AHAuthorizer
-                           authorizeSystemDaemonWithLabel:label
-                           prompt:kAHAuthorizationUnloadJobPrompt
-                           authRef:&authRef];
-
-        if (status == errSecSuccess) {
+    if (domain > kAHUserLaunchAgent) {
+        // Get userID
+        success = [self createAuthorization:&authRef
+                                     domain:domain
+                                      label:label
+                                     prompt:kAHAuthorizationUnloadJobPrompt
+                                      error:error];
+        if (success) {
             success = AHJobRemoveIncludingFile(domain, label, authRef, error);
-        } else if (status == errAuthorizationCanceled) {
-            success = YES;
-        } else {
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
         }
-        [AHAuthorizer authorizationFree:authRef];
     } else {
         if ((success = AHJobRemove(domain, label, authRef, error))) {
             success = [[NSFileManager defaultManager]
-                       removeItemAtPath:launchdJobFile(label, domain)
-                       error:error];
+                removeItemAtPath:launchdJobFile(label, domain)
+                           error:error];
         }
     }
 
+    if (_authRef == NULL) {
+        [AHAuthorizer authorizationFree:authRef];
+    }
+    authRef = NULL;
     return success;
 }
 
@@ -145,9 +176,11 @@ static NSString *errorMsgFromCode(NSInteger code);
     if (domain <= kAHSystemLaunchAgent) {
         // If this is a launch agent and no user is logged in no reason to load;
         consoleUser =
-        CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
+            CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
         if (!consoleUser || [consoleUser isEqualToString:@"loginwindow"]) {
+#if DEBUG
             NSLog(@"No User Logged in");
+#endif
             return YES;
         }
     }
@@ -164,35 +197,25 @@ static NSString *errorMsgFromCode(NSInteger code);
 - (BOOL)load:(AHLaunchJob *)job
     inDomain:(AHLaunchDomain)domain
        error:(NSError *__autoreleasing *)error {
-    AuthorizationRef authRef = NULL;
     BOOL success = YES;
+    AuthorizationRef authRef = NULL;
 
-    //Get userID
-    uid_t uid = getuid();
-    BOOL isRoot = (uid == 0);
-    if (isRoot) {
-        [AHAuthorizer authorizeSMJobBlessWithPrompt:@"" authRef:&authRef];
-    }
-
-    if ((domain > kAHUserLaunchAgent) && !isRoot) {
-        OSStatus status = errSecSuccess;
-        status = [AHAuthorizer
-                  authorizeSystemDaemonWithLabel:job.Label
-                  prompt:kAHAuthorizationLoadJobPrompt
-                  authRef:&authRef];
-        if (status == errAuthorizationCanceled) {
-            return YES;
-        } else if (status != errSecSuccess) {
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
-        }
-    }
+    success = [self createAuthorization:&authRef
+                                 domain:domain
+                                  label:job.Label
+                                 prompt:kAHAuthorizationLoadJobPrompt
+                                  error:error];
 
     if (success) {
         success = [self load:job inDomain:domain authRef:authRef error:error];
     }
 
-    [AHAuthorizer authorizationFree:authRef];
+    // Clean Up
+    if (_authRef == NULL) {
+        [AHAuthorizer authorizationFree:authRef];
+    }
+    authRef = NULL;
+
     return success;
 }
 
@@ -209,7 +232,7 @@ static NSString *errorMsgFromCode(NSInteger code);
     // If this is a launch agent and no user is logged in no reason to unload;
     if (domain <= kAHSystemLaunchAgent) {
         NSString *result =
-        CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
+            CFBridgingRelease(SCDynamicStoreCopyConsoleUser(NULL, NULL, NULL));
         if ([result isEqualToString:@"loginwindow"] || !result) {
             NSLog(@"No User Logged in");
             return YES;
@@ -226,32 +249,23 @@ static NSString *errorMsgFromCode(NSInteger code);
     AuthorizationRef authRef = NULL;
     BOOL success = YES;
 
-    //Get userID
-    uid_t uid = getuid();
-    BOOL isRoot = (uid == 0);
-    if (isRoot) {
-        [AHAuthorizer authorizeSMJobBlessWithPrompt:@"" authRef:&authRef];
-    }
-
-    if ((domain > kAHUserLaunchAgent) && !isRoot) {
-        OSStatus status = errSecSuccess;
-        status = [AHAuthorizer
-                  authorizeSystemDaemonWithLabel:label
-                  prompt:kAHAuthorizationUnloadJobPrompt
-                  authRef:&authRef];
-        if (status == errAuthorizationCanceled) {
-            return YES;
-        } else if (status != errSecSuccess)
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
-    }
+    success = [self createAuthorization:&authRef
+                                 domain:domain
+                                  label:label
+                                 prompt:kAHAuthorizationUnloadJobPrompt
+                                  error:error];
 
     if (success) {
         success =
-        [self unload:label inDomain:domain authRef:authRef error:error];
+            [self unload:label inDomain:domain authRef:authRef error:error];
     }
 
-    [AHAuthorizer authorizationFree:authRef];
+    // Clean Up
+    if (_authRef == NULL) {
+        [AHAuthorizer authorizationFree:authRef];
+    }
+    authRef = NULL;
+
     return success;
 }
 
@@ -261,27 +275,14 @@ static NSString *errorMsgFromCode(NSInteger code);
     AuthorizationRef authRef = NULL;
     BOOL success = YES;
 
-    //Get userID
-    uid_t uid = getuid();
-    BOOL isRoot = (uid == 0);
-    if (isRoot) {
-        [AHAuthorizer authorizeSMJobBlessWithPrompt:@"" authRef:&authRef];
-    }
+    // Get userID
+    success = [self createAuthorization:&authRef
+                                 domain:domain
+                                  label:job.Label
+                                 prompt:kAHAuthorizationReloadJobPrompt
+                                  error:error];
 
-    if ((domain > kAHUserLaunchAgent) && !isRoot) {
-        OSStatus status = errSecSuccess;
-        status = [AHAuthorizer
-                  authorizeSystemDaemonWithLabel:job.Label
-                  prompt:kAHAuthorizationReloadJobPrompt
-                  authRef:&authRef];
-        if (status == errAuthorizationCanceled) {
-            return YES;
-        } else if (status != errSecSuccess)
-            success = [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
-    }
-
-    if (jobIsRunning(job.Label, domain)) {
+    if (jobIsRunning2(job.Label, domain) && success) {
         if (![self unload:job.Label
                  inDomain:domain
                   authRef:authRef
@@ -290,10 +291,17 @@ static NSString *errorMsgFromCode(NSInteger code);
                                             error:error];
         }
     }
+
     if (success) {
         success = [self load:job inDomain:domain authRef:authRef error:error];
     }
-    [AHAuthorizer authorizationFree:authRef];
+
+    // Clean Up
+    if (_authRef == NULL) {
+        [AHAuthorizer authorizationFree:authRef];
+    }
+    authRef = NULL;
+
     return success;
 }
 
@@ -303,7 +311,7 @@ static NSString *errorMsgFromCode(NSInteger code);
         error:(NSError *__autoreleasing *)error {
     if (jobIsRunning(label, domain)) {
         return
-        [[self class] errorWithCode:kAHErrorJobAlreadyLoaded error:error];
+            [[self class] errorWithCode:kAHErrorJobAlreadyLoaded error:error];
     }
 
     AHLaunchJob *job = [[self class] jobFromFileNamed:label inDomain:domain];
@@ -338,22 +346,23 @@ static NSString *errorMsgFromCode(NSInteger code);
     NSString *availableVersion;
 
     AHLaunchJob *job =
-    [[self class] runningJobWithLabel:label inDomain:kAHGlobalLaunchDaemon];
+        [[self class] runningJobWithLabel:label inDomain:kAHGlobalLaunchDaemon];
+
     if (job) {
         currentVersion = job.executableVersion;
 
-        NSString *xpcToolPath = [NSString
-                                 stringWithFormat:@"Contents/Library/LaunchServices/%@", label];
+        NSString *xpcToolPath = [@"Contents/Library/LaunchServices"
+            stringByAppendingPathComponent:label];
         NSURL *appBundleURL = [[NSBundle mainBundle] bundleURL];
+
         NSURL *helperTool =
-        [appBundleURL URLByAppendingPathComponent:xpcToolPath];
+            [appBundleURL URLByAppendingPathComponent:xpcToolPath];
         NSDictionary *helperPlist = CFBridgingRelease(
-                                                      CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(helperTool)));
+            CFBundleCopyInfoDictionaryForURL((__bridge CFURLRef)(helperTool)));
 
         availableVersion = helperPlist[@"CFBundleVersion"];
 
-        if (![[self class] version:availableVersion
-              isGreaterThanVersion:currentVersion]) {
+        if ([availableVersion ah_version_isLessThanOrEqualTo:currentVersion]) {
             return YES;
         }
     }
@@ -362,14 +371,14 @@ static NSString *errorMsgFromCode(NSInteger code);
 
     AuthorizationRef authRef = NULL;
     OSStatus status =
-    [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt authRef:&authRef];
+        [AHAuthorizer authorizeSMJobBlessWithPrompt:prompt authRef:&authRef];
 
     if (status == errAuthorizationCanceled) {
-        return [[self class] errorWithMessage:@"User Canceled"
-                                      andCode:status
-                                        error:error];
+        return [[self class] errorWithCode:kAHErrorUserCanceledAuthorization
+                                     error:error];
     } else if (authRef == NULL) {
-        [[self class] errorWithCode:kAHErrorInsufficientPrivileges error:error];
+        return [[self class] errorWithCode:kAHErrorInsufficientPrivileges
+                                     error:error];
     } else {
         // If the job is running un-bless it in order to re-bless it.
         // This addresses a condition where when replaced, the binary has an
@@ -384,6 +393,7 @@ static NSString *errorMsgFromCode(NSInteger code);
                                             error:error];
         }
     }
+
     [AHAuthorizer authorizationFree:authRef];
     return success;
 }
@@ -396,21 +406,22 @@ static NSString *errorMsgFromCode(NSInteger code);
     if (jobIsRunning(label, kAHGlobalLaunchDaemon)) {
         AuthorizationRef authRef = NULL;
         OSStatus status =
-        [AHAuthorizer authorizeSystemDaemonWithLabel:label
-                                              prompt:prompt
-                                             authRef:&authRef];
+            [AHAuthorizer authorizeSystemDaemonWithLabel:label
+                                                  prompt:prompt
+                                                 authRef:&authRef];
 
         if (status == errAuthorizationCanceled) {
-            success = [[self class] errorWithMessage:@"User Canceled"
-                                             andCode:status
-                                               error:error];
+            success =
+                [[self class] errorWithCode:kAHErrorUserCanceledAuthorization
+                                      error:error];
         } else if (authRef == NULL) {
-            success = [[self class] errorWithCode:status error:error];
+            return [[self class] errorWithCode:kAHErrorInsufficientPrivileges
+                                         error:error];
         } else {
             if (!AHJobUnbless(kAHGlobalLaunchDaemon, label, authRef, error)) {
                 success =
-                [[self class] errorWithCode:kAHErrorCouldNotUnloadHelperTool
-                                      error:error];
+                    [[self class] errorWithCode:kAHErrorCouldNotUnloadHelperTool
+                                          error:error];
             }
         }
         [AHAuthorizer authorizationFree:authRef];
@@ -423,9 +434,9 @@ static NSString *errorMsgFromCode(NSInteger code);
 + (BOOL)uninstallHelper:(NSString *)label
                   error:(NSError *__autoreleasing *)error {
     NSString *defaultPrompt = [NSString
-                               stringWithFormat:
-                               @"%@ is trying to uninstall a the helper tool and it's components.",
-                               [[NSProcessInfo processInfo] processName]];
+        stringWithFormat:
+            @"%@ is trying to uninstall a the helper tool and it's components.",
+            [[NSProcessInfo processInfo] processName]];
     return [self uninstallHelper:label prompt:defaultPrompt error:error];
 }
 
@@ -443,55 +454,24 @@ static NSString *errorMsgFromCode(NSInteger code);
                 error:(NSError *__autoreleasing *)error {
     NSBundle *appBundle = [NSBundle bundleWithPath:app];
     NSString *appIdentifier =
-    [appBundle.bundleIdentifier stringByAppendingPathExtension:@"launcher"];
-
-    AHLaunchJob *job = [AHLaunchJob new];
-    job.Label = appIdentifier;
-    job.Program = appBundle.executablePath;
-    job.RunAtLoad = YES;
-    job.KeepAlive = @{
-                      @"SuccessfulExit" : [NSNumber numberWithBool:keepAlive]
-                      };
+        [appBundle.bundleIdentifier stringByAppendingPathExtension:@"launcher"];
 
     AHLaunchDomain domain = global ? kAHGlobalLaunchAgent : kAHUserLaunchAgent;
 
-
-    if (domain > kAHUserLaunchAgent) {
-        BOOL success = NO;
-
-        AuthorizationRef authRef = NULL;
-        OSStatus status = errSecSuccess;
-        NSString *promptString =
-        [NSString stringWithFormat:@"Trying to %@ global launch agent.",
-         launch ? @"enable" : @"disable"];
-        status = [AHAuthorizer authorizeSystemDaemonWithLabel:job.Label
-                                                       prompt:promptString
-                                                      authRef:&authRef];
-        if (status == errAuthorizationCanceled) {
-            return YES;
-        } else if (status != errSecSuccess) {
-            success =  [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                            error:error];
-        } else {
-
-            if (launch) {
-                success = AHCreatePrivilegedLaunchdPlist(
-                                                         domain, job.dictionary, authRef, error);
-            } else {
-                success = AHRemovePrivilegedFile(
-                                                 domain, launchdJobFile(job.Label, domain), authRef, error);
-            }
-        }
-        [AHAuthorizer authorizationFree:authRef];
-        return success;
-    }
-
-    NSString *jobFile = launchdJobFile(job.Label, domain);
     if (launch) {
-        return [job.dictionary writeToFile:jobFile atomically:YES];
+        AHLaunchJob *job = [AHLaunchJob new];
+        job.Label = appIdentifier;
+        job.Program = appBundle.executablePath;
+        job.RunAtLoad = YES;
+        job.KeepAlive = @{
+            @"SuccessfulExit" : [NSNumber numberWithBool:keepAlive]
+        };
+
+        return [[AHLaunchCtl new] add:job toDomain:domain error:error];
     } else {
-        return [[NSFileManager defaultManager] removeItemAtPath:jobFile
-                                                          error:error];
+        return [[AHLaunchCtl new] remove:appIdentifier
+                              fromDomain:domain
+                                   error:error];
     }
 }
 
@@ -501,19 +481,19 @@ static NSString *errorMsgFromCode(NSInteger code);
              domain:(AHLaunchDomain)domain
               reply:(void (^)(NSError *error))reply {
     [self scheduleJob:label
-              program:program
-     programArguments:nil
-             interval:seconds
-               domain:domain
-                reply:^(NSError *error) { reply(error); }];
+                 program:program
+        programArguments:nil
+                interval:seconds
+                  domain:domain
+                   reply:^(NSError *error) { reply(error); }];
 }
 
 + (void)scheduleJob:(NSString *)label
-            program:(NSString *)program
-   programArguments:(NSArray *)programArguments
-           interval:(int)seconds
-             domain:(AHLaunchDomain)domain
-              reply:(void (^)(NSError *error))reply {
+             program:(NSString *)program
+    programArguments:(NSArray *)programArguments
+            interval:(int)seconds
+              domain:(AHLaunchDomain)domain
+               reply:(void (^)(NSError *error))reply {
     AHLaunchCtl *controller = [AHLaunchCtl new];
     AHLaunchJob *job = [AHLaunchJob new];
     job.Label = label;
@@ -535,7 +515,7 @@ static NSString *errorMsgFromCode(NSInteger code);
         label = [label stringByDeletingPathExtension];
 
     NSPredicate *predicate =
-    [NSPredicate predicateWithFormat:@"%@ == SELF.Label ", label];
+        [NSPredicate predicateWithFormat:@"%@ == SELF.Label ", label];
 
     for (AHLaunchJob *job in jobs) {
         if ([predicate evaluateWithObject:job]) {
@@ -569,10 +549,10 @@ static NSString *errorMsgFromCode(NSInteger code);
 + (NSArray *)runningJobsMatching:(NSString *)match
                         inDomain:(AHLaunchDomain)domain {
     NSPredicate *predicate = [NSPredicate
-                              predicateWithFormat:
-                              @"SELF.Label CONTAINS[c] %@ OR SELF.Program CONTAINS[c] %@",
-                              match,
-                              match];
+        predicateWithFormat:
+            @"SELF.Label CONTAINS[c] %@ OR SELF.Program CONTAINS[c] %@",
+            match,
+            match];
     return [self jobMatch:predicate domain:domain];
 }
 
@@ -581,7 +561,7 @@ static NSString *errorMsgFromCode(NSInteger code);
     NSMutableArray *jobs;
     NSString *launchDirectory = launchdJobFileDirectory(domain);
     NSArray *launchFiles = [[NSFileManager defaultManager]
-                            contentsOfDirectoryAtPath:launchDirectory
+        contentsOfDirectoryAtPath:launchDirectory
                             error:nil];
 
     if (launchFiles.count) {
@@ -590,9 +570,9 @@ static NSString *errorMsgFromCode(NSInteger code);
 
     for (NSString *file in launchFiles) {
         NSString *filePath =
-        [NSString stringWithFormat:@"%@/%@", launchDirectory, file];
+            [NSString stringWithFormat:@"%@/%@", launchDirectory, file];
         NSDictionary *dict =
-        [NSDictionary dictionaryWithContentsOfFile:filePath];
+            [NSDictionary dictionaryWithContentsOfFile:filePath];
         if (dict) {
             @try {
                 job = [AHLaunchJob jobFromDictionary:dict inDomain:domain];
@@ -612,7 +592,7 @@ static NSString *errorMsgFromCode(NSInteger code);
     if (!array.count) return nil;
 
     NSMutableArray *jobs =
-    [[NSMutableArray alloc] initWithCapacity:array.count];
+        [[NSMutableArray alloc] initWithCapacity:array.count];
     for (NSDictionary *dict in array) {
         AHLaunchJob *job;
         if (predicate) {
@@ -631,6 +611,45 @@ static NSString *errorMsgFromCode(NSInteger code);
 }
 
 #pragma mark - Private
+- (BOOL)createAuthorization:(AuthorizationRef *)authRef
+                     domain:(AHLaunchDomain)domain
+                      label:(NSString *)label
+                     prompt:(NSString *)prompt
+                      error:(NSError *__autoreleasing *)error {
+    OSStatus status = errSecSuccess;
+
+    // If the user is root create an authoriztion
+    BOOL isRoot = (getuid() == 0);
+    if (isRoot) {
+        status = [AHAuthorizer authorizeSystemDaemonWithLabel:label
+                                                       prompt:@""
+                                                      authRef:authRef];
+    }
+
+    // If domain is greater than the user domain,
+    if ((domain > kAHUserLaunchAgent) && !isRoot) {
+        if (_authRef != NULL) {
+            *authRef = _authRef;
+            status = errSecSuccess;
+        } else {
+            status = [AHAuthorizer authorizeSystemDaemonWithLabel:label
+                                                           prompt:prompt
+                                                          authRef:authRef];
+        }
+
+        if (status != errSecSuccess) {
+            if (status == errAuthorizationCanceled) {
+                [[self class] errorWithCode:kAHErrorUserCanceledAuthorization
+                                      error:error];
+            } else {
+                [[self class] errorWithCode:kAHErrorInsufficientPrivileges
+                                      error:error];
+            }
+        }
+    }
+
+    return (status == errSecSuccess);
+}
 
 - (BOOL)jobIsValid:(AHLaunchJob *)job error:(NSError *__autoreleasing *)error {
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -656,41 +675,14 @@ static NSString *errorMsgFromCode(NSInteger code);
                          error:(NSError *__autoreleasing *)error {
     NSFileManager *fm = [NSFileManager new];
     NSString *file = launchdJobFile(label, domain);
-    if ([fm fileExistsAtPath:file isDirectory:NO]) {
+    BOOL isDir;
+    if ([fm fileExistsAtPath:file isDirectory:&isDir] && !isDir) {
         return [fm removeItemAtPath:file error:error];
+    } else if (isDir) {
+        return [[self class] errorWithCode:kAHErrorFileIsDirectory error:error];
     } else {
         return YES;
     }
-}
-
-+ (BOOL)version:(NSString *)versionA isGreaterThanVersion:(NSString *)versionB {
-    NSMutableArray *bVer = [[NSMutableArray alloc]
-                            initWithArray:
-                            [NSArray
-                             arrayWithArray:[versionB componentsSeparatedByString:@"."]]];
-
-    NSMutableArray *aVer = [[NSMutableArray alloc]
-                            initWithArray:
-                            [NSArray
-                             arrayWithArray:[versionA componentsSeparatedByString:@"."]]];
-
-    NSInteger max = 3;
-
-    while (aVer.count < max) {
-        [aVer addObject:@"0"];
-    }
-
-    while (bVer.count < max) {
-        [bVer addObject:@"0"];
-    }
-
-    for (NSInteger i = 0; i < max; i++) {
-        if ([[aVer objectAtIndex:i] integerValue] >
-            [[bVer objectAtIndex:i] integerValue]) {
-            return YES;
-        }
-    }
-    return NO;
 }
 
 #pragma mark - Error Codes
@@ -698,13 +690,14 @@ static NSString *errorMsgFromCode(NSInteger code);
     BOOL rc = code != 0 ? NO : YES;
     NSString *msg = errorMsgFromCode(code);
     NSError *err =
-    [NSError errorWithDomain:@"com.eeaapps.launchctl"
-                        code:code
-                    userInfo:@{NSLocalizedDescriptionKey : msg}];
-    if (error)
+        [NSError errorWithDomain:kAHLaunchCtlDomain
+                            code:code
+                        userInfo:@{NSLocalizedDescriptionKey : msg}];
+    if (error) {
         *error = err;
-    else
+    } else {
         NSLog(@"Error: %@", msg);
+    }
 
     return rc;
 }
@@ -714,13 +707,15 @@ static NSString *errorMsgFromCode(NSInteger code);
                    error:(NSError *__autoreleasing *)error {
     BOOL rc = code != 0 ? NO : YES;
     NSError *err =
-    [NSError errorWithDomain:@"com.eeaapps.launchctl"
-                        code:code
-                    userInfo:@{NSLocalizedDescriptionKey : message}];
-    if (error)
+        [NSError errorWithDomain:kAHLaunchCtlDomain
+                            code:code
+                        userInfo:@{NSLocalizedDescriptionKey : message}];
+
+    if (error) {
         *error = err;
-    else
+    } else {
         NSLog(@"Error: %@", message);
+    }
     return rc;
 }
 
@@ -730,10 +725,11 @@ static NSString *errorMsgFromCode(NSInteger code);
     BOOL rc = code != 0 ? NO : YES;
 
     NSError *err = CFBridgingRelease(cfError);
-    if (error)
+    if (error) {
         *error = err;
-    else
+    } else {
         NSLog(@"Error: %@", err.localizedDescription);
+    }
 
     return rc;
 }
@@ -746,65 +742,133 @@ static NSString *errorMsgFromCode(NSInteger code) {
     NSString *msg;
     switch (code) {
         case kAHErrorJobNotLoaded:
-            msg = @"Job not loaded";
+            msg =
+                NSLocalizedStringFromTable(@"Job not loaded",
+                                           @"AHLaunchCtl",
+                                           @"Error when the job is not loaded");
             break;
         case kAHErrorFileNotFound:
-            msg = @"we could not find the specified launchd.plist to load the "
-            @"job";
+            msg = NSLocalizedStringFromTable(
+                @"Could not find the specified launchd.plist to load the job",
+                @"AHLaunchCtl",
+                @"Error when the job file is not found.");
+            break;
+        case kAHErrorFileIsDirectory:
+            msg = NSLocalizedStringFromTable(
+                @"The suggested file to remove is a directory.",
+                @"AHLaunchCtl",
+                @"Error when the FILE that is suppose to be removed is a "
+                @"directory");
             break;
         case kAHErrorCouldNotLoadJob:
-            msg = @"Could not load job";
+            msg =
+                NSLocalizedStringFromTable(@"Could not load job",
+                                           @"AHLaunchCtl",
+                                           @"Error when the job is not loaded");
             break;
         case kAHErrorCouldNotLoadHelperTool:
-            msg = @"Unable to install the privileged helper tool";
+            msg = NSLocalizedStringFromTable(
+                @"Unable to install the privileged helper tool",
+                @"AHLaunchCtl",
+                @"Error when the helper tool cannot be loaded.");
             break;
         case kAHErrorCouldNotUnloadHelperTool:
-            msg = @"Unable to remove the privileged helper tool";
+            msg = NSLocalizedStringFromTable(
+                @"Unable to remove the privileged helper tool",
+                @"AHLaunchCtl",
+                @"Error when cannot unload helper tool");
             break;
         case kAHErrorHelperToolNotLoaded:
-            msg = @"The helper tool is not currently loaded. It may have "
-            @"already been " @"unloaded, or never installed.";
+            msg = NSLocalizedStringFromTable(
+                @"Cannot unload The helper tool, it is not currently loaded.",
+                @"AHLaunchCtl",
+                @"Error when the helper tool is not loaded");
             break;
         case kAHErrorCouldNotRemoveHelperToolFiles:
-            msg = @"Unable to remove some files associated with the privileged "
-            @"helper " @"tool";
+            msg = NSLocalizedStringFromTable(
+                @"Unable to remove some files associated with the privileged "
+                @"helper tool",
+                @"AHLaunchCtl",
+                @"Error when a removing privileged helper.");
             break;
         case kAHErrorJobAlreadyExists:
-            msg = @"The specified job already exists";
+            msg = NSLocalizedStringFromTable(
+                @"The specified job already exists",
+                @"AHLaunchCtl",
+                @"Error when the job is alreay exists");
             break;
         case kAHErrorJobAlreadyLoaded:
-            msg = @"The specified job is already loaded";
+            msg = NSLocalizedStringFromTable(
+                @"The specified job is already loaded",
+                @"AHLaunchCtl",
+                @"Error when the job is already loaded");
             break;
         case kAHErrorJobCouldNotReload:
-            msg = @"There were problems reloading the job";
+            msg = NSLocalizedStringFromTable(
+                @"There were problems reloading the job",
+                @"AHLaunchCtl",
+                @"Error when the could not be reloaded");
             break;
         case kAHErrorJobLabelNotValid:
-            msg = @"The label is not valid. please format as a unique reverse "
-            @"domain";
+            msg = NSLocalizedStringFromTable(
+                @"The job label is not valid.",
+                @"AHLaunchCtl",
+                @"Error when the job label is not valid");
             break;
         case kAHErrorCouldNotUnloadJob:
-            msg = @"Could not unload job";
+            msg = NSLocalizedStringFromTable(
+                @"Could not unload job",
+                @"AHLaunchCtl",
+                @"Error when the job could not be unloaded");
             break;
         case kAHErrorMultipleJobsMatching:
-            msg = @"More than one job matched that description";
+            msg = NSLocalizedStringFromTable(
+                @"More than one job matched that description",
+                @"AHLaunchCtl",
+                @"Error when the job matching returned more than one result");
             break;
         case kAHErrorCouldNotWriteFile:
-            msg = @"There were problem writing to the file";
+            msg = NSLocalizedStringFromTable(
+                @"There were problem writing to the file",
+                @"AHLaunchCtl",
+                @"Error when the the launchd.plist file could not be written");
             break;
         case kAHErrorInsufficientPrivileges:
-            msg = @"You are not authorized to to perform this action";
+            msg = NSLocalizedStringFromTable(
+                @"You are not authorized to to perform this action",
+                @"AHLaunchCtl",
+                @"Error when user is not authorized.");
             break;
         case kAHErrorJobMissingRequiredKeys:
-            msg = @"The Submitted Job was missing some required keys";
+            msg = NSLocalizedStringFromTable(
+                @"The Submitted Job was missing some required keys",
+                @"AHLaunchCtl",
+                @"Error when the job is missing required keys");
             break;
         case kAHErrorExecutingAsIncorrectUser:
-            msg = @"Could not set the Job to run in the proper context";
+            msg = NSLocalizedStringFromTable(
+                @"Could not set the Job to run in the proper context",
+                @"AHLaunchCtl",
+                @"Error when job context could not be set.");
             break;
         case kAHErrorProgramNotExecutable:
-            msg = @"The path specified doesn’t appear to be executable.";
+            msg = NSLocalizedStringFromTable(
+                @"The path specified doesn’t appear to be executable.",
+                @"AHLaunchCtl",
+                @"Error when the submitted job's executable could not be set.");
             break;
+        case kAHErrorUserCanceledAuthorization:
+            msg = NSLocalizedStringFromTable(
+                @"Authorizaton canceled by user.",
+                @"AHLaunchCtl",
+                @"Error when authorization is canceled by user");
         default:
-            msg = @"unknown problem occurred";
+            msg = (__bridge_transfer NSString *)SecCopyErrorMessageString(
+                      (int)code, NULL)
+                      ?: NSLocalizedStringFromTable(
+                             @"An unknown problem occurred",
+                             @"AHLaunchCtl",
+                             @"Generic error");
             break;
     }
     return msg;

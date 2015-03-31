@@ -20,8 +20,8 @@
 // THE SOFTWARE.
 
 #import "AHLaunchJob.h"
+#import <AHLaunchCtl/AHServiceManagement.h>
 
-#import "AHServiceManagement.h"
 #import <objc/runtime.h>
 
 @interface AHLaunchJob ()<NSSecureCoding>
@@ -185,7 +185,7 @@
     }
 }
 
-#pragma mark --- Accessors ---
+#pragma mark--- Accessors ---
 - (id)StartCalendarInterval {
     if (!_StartCalendarInterval) {
         id sci = _internalDictionary[NSStringFromSelector(
@@ -210,23 +210,30 @@
 }
 
 - (void)setStartCalendarInterval:(id)StartCalendarInterval {
+    NSString *startCalendarKey =
+        NSStringFromSelector(@selector(StartCalendarInterval));
+
+    // Handle as single schedule.
     if ([StartCalendarInterval isKindOfClass:[AHLaunchJobSchedule class]]) {
-        _internalDictionary[NSStringFromSelector(@selector(
-            StartCalendarInterval))] = [StartCalendarInterval dictionary];
-    } else if ([StartCalendarInterval isKindOfClass:[NSArray class]]) {
+        _internalDictionary[startCalendarKey] =
+            [StartCalendarInterval dictionary];
+    }
+
+    // Handle as array of schedules
+    else if ([StartCalendarInterval isKindOfClass:[NSArray class]]) {
         NSMutableArray *scheduleArray = [[NSMutableArray alloc]
             initWithCapacity:[StartCalendarInterval count]];
         for (AHLaunchJobSchedule *schedule in StartCalendarInterval) {
             [scheduleArray addObject:schedule.dictionary];
         }
-        _internalDictionary[NSStringFromSelector(
-            @selector(StartCalendarInterval))] = [scheduleArray copy];
+        _internalDictionary[startCalendarKey] = [scheduleArray copy];
     }
 }
 
 - (NSArray *)StartCalendarIntervalArray {
     NSArray *array;
-    if((array = self.StartCalendarInterval) && [array isKindOfClass:[NSArray class]]){
+    if ((array = self.StartCalendarInterval) &&
+        [array isKindOfClass:[NSArray class]]) {
         _StartCalendarIntervalArray = array;
     }
     return _StartCalendarIntervalArray;
@@ -241,7 +248,7 @@
     if (_LastExitStatus) {
         return _LastExitStatus;
     }
-    id value = [self serviceManagementValueForKey:@"LastExitStatus"];
+    id value = [self serviceManagementValueForKey:NSStringFromSelector(@selector(LastExitStatus))];
     if (!value || ![value isKindOfClass:[NSNumber class]]) {
         return -1;
     }
@@ -252,7 +259,7 @@
     if (_PID) {
         return _PID;
     }
-    id value = [self serviceManagementValueForKey:@"PID"];
+    id value = [self serviceManagementValueForKey:NSStringFromSelector(@selector(PID))];
     if (!value || ![value isKindOfClass:[NSNumber class]]) {
         return -1;
     }
@@ -260,7 +267,7 @@
 }
 
 - (BOOL)isCurrentlyLoaded {
-    id test = [self serviceManagementValueForKey:@"Label"];
+    id test = [self serviceManagementValueForKey:NSStringFromSelector(@selector(Label))];
     if (test) return YES;
     return NO;
 }
@@ -297,7 +304,7 @@
 
 #pragma mark--- Private Methods ---
 - (id)serviceManagementValueForKey:(NSString *)key {
-    if (self.Label && self.domain != 0) {
+    if (self.Label && (self.domain != 0)) {
         NSDictionary *dict = AHJobCopyDictionary(self.domain, self.Label);
         return [dict objectForKey:key];
     } else {
@@ -306,8 +313,8 @@
 }
 
 - (void)writeBoolValueToDict:(id)value forKey:(NSString *)keyPath {
-    if ([value isEqual:@YES]) {
-        [_internalDictionary setValue:[NSNumber numberWithBool:(BOOL)value]
+    if ([value isKindOfClass:[NSNumber class]]) {
+        [_internalDictionary setValue:[NSNumber numberWithBool:[value boolValue]]
                                forKey:keyPath];
     } else {
         [_internalDictionary removeObjectForKey:keyPath];
@@ -315,13 +322,21 @@
 }
 
 - (void)writeObjectValueToDict:(id)value forKey:(NSString *)keyPath {
-    NSString *stringValue;
-    if ([value isKindOfClass:[NSString class]]) stringValue = value;
-    if ([value isKindOfClass:[NSNull class]] ||
-        [stringValue isEqualToString:@""]) {
-        [_internalDictionary removeObjectForKey:keyPath];
-    } else {
+    BOOL write = YES;
+    if ([value isKindOfClass:[NSString class]] && ([value length] == 0)){
+        write = NO;
+    } else if ([value isKindOfClass:[NSDictionary class]] || [value isKindOfClass:[NSArray class]]){
+        if ([value count] == 0) {
+            write = NO;
+        }
+    } else if ([value isKindOfClass:[NSNull class]]){
+        write = NO;
+    }
+
+    if (write) {
         [_internalDictionary setValue:value forKey:keyPath];
+    } else {
+        [_internalDictionary removeObjectForKey:keyPath];
     }
 }
 
@@ -355,16 +370,16 @@
 
 + (AHLaunchJob *)jobFromFile:(NSString *)file {
     // Normalize the string //
-    NSString *filePath = [file stringByExpandingTildeInPath];
+    NSString *filePath = file.stringByExpandingTildeInPath;
     AHLaunchDomain domain = 0;
 
-    if ([filePath hasPrefix:@"/Library/LaunchAgents"]) {
+    if ([filePath hasPrefix:kAHGlobalLaunchAgentDirectory]) {
         domain = kAHGlobalLaunchAgent;
-    } else if ([filePath hasPrefix:@"/Library/LaunchDaemons"]) {
+    } else if ([filePath hasPrefix:kAHGlobalLaunchDaemonDirectory]) {
         domain = kAHGlobalLaunchDaemon;
-    } else if ([filePath hasPrefix:@"/System/Library/LaunchAgents"]) {
+    } else if ([filePath hasPrefix:kAHSystemLaunchAgentDirectory]) {
         domain = kAHSystemLaunchAgent;
-    } else if ([filePath hasPrefix:@"/System/Library/LaunchDaemons"]) {
+    } else if ([filePath hasPrefix:kAHSystemLaunchDaemonDirectory]) {
         domain = kAHSystemLaunchDaemon;
     } else if ([filePath hasPrefix:NSHomeDirectory()]) {
         domain = kAHUserLaunchAgent;

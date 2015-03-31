@@ -8,13 +8,42 @@
 
 #import "AHServiceManagement.h"
 #import "AHServiceManagement_Private.h"
-
 #import "AHLaunchJob.h"
+
 #import <ServiceManagement/ServiceManagement.h>
+
+/** ~/Library/LaunchAgents/ */
+NSString *const kAHUserLaunchAgentTildeDirectory = @"~/Library/LaunchAgents/";
+
+/** /Library/LaunchDaemons/ */
+NSString *const kAHGlobalLaunchDaemonDirectory = @"/Library/LaunchDaemons/";
+
+/** /Library/LaunchAgents/ */
+NSString *const kAHGlobalLaunchAgentDirectory = @"/Library/LaunchAgents/";
+
+/** /System/Library/LaunchDaemons/ */
+NSString *const kAHSystemLaunchDaemonDirectory = @"/System/Library/LaunchDaemons/";
+
+/** /System/Library/LaunchAgents/ */
+NSString *const kAHSystemLaunchAgentDirectory = @"/System/Library/LaunchAgents/";
+
+static NSString *const kAHChownJobPrefix = @"com.eeaapps.ahlaunchctl.chown";
+static NSString *const kAHCopyJobPrefix = @"com.eeaapps.ahlaunchctl.copy";
+static NSString *const kAHRemoveJobPrefix = @"com.eeaapps.ahlaunchctl.remove";
 
 BOOL jobIsRunning(NSString *label, AHLaunchDomain domain) {
     NSDictionary *dict = AHJobCopyDictionary(domain, label);
     return dict ? YES : NO;
+}
+
+BOOL jobIsRunning2(NSString *label, AHLaunchDomain domain) {
+    NSArray *runningJobs = AHCopyAllJobDictionaries(domain);
+    NSPredicate *check =
+        [NSPredicate predicateWithFormat:@"%K == %@",
+                                         NSStringFromSelector(@selector(Label)),
+                                         label];
+    
+    return  ([runningJobs filteredArrayUsingPredicate:check].count > 0);
 }
 
 NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label) {
@@ -134,15 +163,16 @@ BOOL AHJobUnbless(AHLaunchDomain domain,
 
     // Remove the launchd plist
     NSString *const launchJobFile = launchdJobFile(label, domain);
-    if(!AHRemovePrivilegedFile(domain, launchJobFile, authRef, error)){
-        NSLog(@"There was a problem removing the launchd.plist of the helper tool.");
+    if (!AHRemovePrivilegedFile(domain, launchJobFile, authRef, error)) {
+        NSLog(@"There was a problem removing the launchd.plist of the helper "
+              @"tool.");
     }
 
     // Remove the helper tool binary
     NSString *const privilegedToolBinary = [@"/Library/PrivilegedHelperTools/"
         stringByAppendingPathComponent:label];
 
-    if(!AHRemovePrivilegedFile(domain, privilegedToolBinary, authRef, error)){
+    if (!AHRemovePrivilegedFile(domain, privilegedToolBinary, authRef, error)) {
         NSLog(@"There was a problem removing binary file of the helper tool.");
     }
 
@@ -188,7 +218,7 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
             } ofItemAtPath:tmpFilePath error:nil];
 
             copyJob = [AHLaunchJob new];
-            copyJob.Label = [@"com.eeaapps.ahlaunchctl.copy"
+            copyJob.Label = [kAHCopyJobPrefix
                 stringByAppendingPathExtension:label];
             copyJob.ProgramArguments =
                 @[ @"/bin/mv", @"-f", tmpFilePath, filePath ];
@@ -202,13 +232,13 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
                 sleep(0.1);
 
                 // This should exit fast. If it's still alive unload it.
-                if (jobIsRunning(copyJob.Label, kAHGlobalLaunchDaemon)) {
+                if (jobIsRunning2(copyJob.Label, kAHGlobalLaunchDaemon)) {
                     AHJobRemove(
                         kAHGlobalLaunchDaemon, copyJob.Label, authRef, nil);
                 }
 
                 chownJob = [AHLaunchJob new];
-                chownJob.Label = [@"com.eeaapps.ahlaunchctl.chown"
+                chownJob.Label = [kAHChownJobPrefix
                     stringByAppendingPathExtension:label];
                 chownJob.ProgramArguments =
                     @[ @"/usr/sbin/chown", @"root:wheel", filePath ];
@@ -218,7 +248,7 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
                 success = AHJobSubmit(
                     kAHGlobalLaunchDaemon, chownJob.dictionary, authRef, error);
                 // This should exit fast. If it's still alive unload it.
-                if (jobIsRunning(chownJob.Label, kAHGlobalLaunchDaemon)) {
+                if (jobIsRunning2(chownJob.Label, kAHGlobalLaunchDaemon)) {
                     AHJobRemove(
                         kAHGlobalLaunchDaemon, chownJob.Label, authRef, nil);
                 }
@@ -236,12 +266,13 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
     NSFileManager *fm = [NSFileManager defaultManager];
 
     if ([fm fileExistsAtPath:filePath]) {
-        NSString *const label = [@"com.eeaapps.ahlaunchctl.remove"
-            stringByAppendingPathExtension:[filePath lastPathComponent]];
+        NSString *const label = [kAHRemoveJobPrefix
+            stringByAppendingPathExtension:filePath.lastPathComponent];
 
         AHLaunchJob *removeJob = [AHLaunchJob new];
         removeJob.Label = label;
         removeJob.ProgramArguments = @[ @"/bin/rm", filePath ];
+
         removeJob.RunAtLoad = YES;
         removeJob.LaunchOnlyOnce = YES;
 
@@ -253,7 +284,7 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
         }
 
         // This should exit fast. If it's still alive unload it.
-        if (jobIsRunning(removeJob.Label, kAHGlobalLaunchDaemon)) {
+        if (jobIsRunning2(removeJob.Label, kAHGlobalLaunchDaemon)) {
             AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
         }
     }
@@ -264,20 +295,20 @@ NSString *launchdJobFileDirectory(AHLaunchDomain domain) {
     NSString *type;
     switch (domain) {
         case kAHGlobalLaunchAgent:
-            type = @"/Library/LaunchAgents/";
+            type = kAHGlobalLaunchAgentDirectory;
             break;
         case kAHGlobalLaunchDaemon:
-            type = @"/Library/LaunchDaemons/";
+            type = kAHGlobalLaunchDaemonDirectory;
             break;
         case kAHSystemLaunchAgent:
-            type = @"/System/Library/LaunchAgents/";
+            type = kAHSystemLaunchAgentDirectory;
             break;
         case kAHSystemLaunchDaemon:
-            type = @"/System/Library/LaunchDaemons/";
+            type =kAHSystemLaunchDaemonDirectory;
             break;
         case kAHUserLaunchAgent:
         default:
-            type = [@"~/Library/LaunchAgents/" stringByExpandingTildeInPath];
+            type = kAHUserLaunchAgentTildeDirectory.stringByExpandingTildeInPath;
             break;
     }
     return type;
@@ -286,7 +317,9 @@ NSString *launchdJobFileDirectory(AHLaunchDomain domain) {
 NSString *launchdJobFile(NSString *label, AHLaunchDomain domain) {
     NSString *file;
     if (domain == 0 || !label) return nil;
-    file = [launchdJobFileDirectory(domain) stringByAppendingPathComponent:[label stringByAppendingPathExtension:@"plist"]];
+    file = [launchdJobFileDirectory(domain)
+        stringByAppendingPathComponent:
+            [label stringByAppendingPathExtension:@"plist"]];
 
     return file;
 }

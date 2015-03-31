@@ -33,8 +33,9 @@ static NSString *kNSAuthorizationSystemDaemon =
     static AuthorizationFlags authFlags;
     dispatch_once(&onceToken, ^{
         authFlags =
-            kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed |
-            kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
+            kAuthorizationFlagInteractionAllowed |
+            kAuthorizationFlagPreAuthorize |
+            kAuthorizationFlagExtendRights;
     });
     return authFlags;
 }

@@ -9,6 +9,8 @@
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
 #import "AHLaunchCtl.h"
+#import "AHServiceManagement.h"
+ 
 #import <ServiceManagement/ServiceManagement.h>
 
 @interface AHLaunchCtl_Tests : XCTestCase
@@ -18,14 +20,16 @@
 @implementation AHLaunchCtl_Tests {
     AHLaunchDomain _domain;
     AHLaunchJob *_job;
+    AHLaunchCtl *_controller;
 }
 
 - (void)setUp {
-    [super setUp];
-    _domain = kAHUserLaunchAgent;
-
     // Put setup code here. This method is called before the invocation of each
     // test method in the class.
+    [super setUp];
+
+    _domain = kAHUserLaunchAgent;
+    _controller = [AHLaunchCtl new];
 }
 
 - (void)tearDown {
@@ -36,7 +40,7 @@
 }
 
 #pragma mark - Default Test
-- (void)testAllStd {
+- (void)testAllUserLaunchAgent {
     [self testAdd];
     [self testGetJob];
     [self testUnload];
@@ -50,21 +54,49 @@
 #pragma mark - Privileged tests
 - (void)testAllAsGlobalLaunchDaemon {
     _domain = kAHGlobalLaunchDaemon;
-    [self testAllStd];
+    [self testAllUserLaunchAgent];
 }
 
 - (void)testAllAsGlobalLaunchAgent {
     _domain = kAHGlobalLaunchAgent;
-    [self testAllStd];
+    [self testAllUserLaunchAgent];
 }
 
-- (void)testGui {
+- (void)testKeepAliveGui {
     _job = [self guiJob];
     _job.KeepAlive = @(YES);
 
     _domain = kAHUserLaunchAgent;
     [self testLoad];
     [self testUnload];
+}
+
+- (void)testCreateJobFromDict {
+    _job = [AHLaunchJob jobFromDictionary:@{
+        @"Label" : @"com.me",
+        @"ProgramArguments" : @[ @"/bin/echo", @"hello world!" ],
+        @"SD" : @"gramps"
+    } inDomain:kAHUserLaunchAgent];
+
+    printf("%s", _job.dictionary.description.UTF8String);
+
+    XCTAssertTrue(_job.dictionary[@"Label"], @"Job was not created");
+    XCTAssertFalse(_job.dictionary[@"SD"], @"Job was not created");
+}
+
+- (void)testAuthorizedController {
+    if ([_controller authorize]) {
+        [self testAllAsGlobalLaunchDaemon];
+    }
+    [_controller deauthorize];
+}
+
+- (void)testAddSchedule {
+    _job = [self echoJob];
+    _job.StartCalendarInterval =
+        [AHLaunchJobSchedule dailyRunAtHour:1 minute:10];
+
+    [self testAdd];
 }
 
 #pragma mark - Tests
@@ -74,8 +106,7 @@
         _job = [self echoJob];
     }
 
-    BOOL success =
-        [[AHLaunchCtl sharedController] add:_job toDomain:_domain error:&error];
+    BOOL success = [_controller add:_job toDomain:_domain error:&error];
 
     NSLog(@"%@", _job);
     XCTAssertTrue(success, @"Error %@", error);
@@ -114,9 +145,8 @@
         _job = [self echoJob];
     }
 
-    BOOL success = [[AHLaunchCtl sharedController] unload:_job.Label
-                                                 inDomain:_domain
-                                                    error:&error];
+    BOOL success =
+        [_controller unload:_job.Label inDomain:_domain error:&error];
 
     XCTAssertTrue(success, @"Error %@", error);
 
@@ -139,15 +169,14 @@
         _job = [self echoJob];
     }
 
-    BOOL success = [[AHLaunchCtl sharedController] load:_job
-                                               inDomain:_domain
-                                                  error:&error];
+    BOOL success = [_controller load:_job inDomain:_domain error:&error];
+    if (error.code != kAHErrorUserCanceledAuthorization) {
+        XCTAssertTrue(success, @"Error %@", error);
 
-    XCTAssertTrue(success, @"Error %@", error);
+        success = [self verifyWithSM];
+        XCTAssertTrue(success, @"Could not verify job was loaded using service management.");
+    }
 
-    success = [self verifyWithSM];
-    XCTAssertTrue(success,
-                  @"Could not verify job was loaded using service management.");
 }
 
 - (void)testRestartJob {
@@ -157,11 +186,10 @@
         _job = [self echoJob];
     }
 
-    XCTAssertTrue([[AHLaunchCtl sharedController] restart:_job.Label
-                                                 inDomain:_domain
-                                                    error:&error],
-                  @"Error: %@",
-                  error.localizedDescription);
+    XCTAssertTrue(
+        [_controller restart:_job.Label inDomain:_domain error:&error],
+        @"Error: %@",
+        error.localizedDescription);
 
     BOOL success = [self verifyWithSM];
     XCTAssertTrue(
@@ -175,11 +203,10 @@
         _job = [self echoJob];
     }
 
-    XCTAssertTrue([[AHLaunchCtl sharedController] remove:_job.Label
-                                              fromDomain:_domain
-                                                   error:&error],
-                  @"Error: %@",
-                  error.localizedDescription);
+    XCTAssertTrue(
+        [_controller remove:_job.Label fromDomain:_domain error:&error],
+        @"Error: %@",
+        error.localizedDescription);
 
     BOOL check2 =
         [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
@@ -270,19 +297,19 @@
     NSString *path = nil;
     switch (_domain) {
         case kAHUserLaunchAgent:
-            path = [@"~/Library/LaunchAgents/" stringByExpandingTildeInPath];
+            path = kAHUserLaunchAgentTildeDirectory.stringByExpandingTildeInPath;
             break;
         case kAHGlobalLaunchAgent:
-            path = @"/Library/LaunchAgents/";
+            path = kAHGlobalLaunchAgentDirectory;
             break;
         case kAHSystemLaunchAgent:
-            path = @"/System/Library/LaunchAgents/";
+            path = kAHSystemLaunchAgentDirectory;
             break;
         case kAHGlobalLaunchDaemon:
-            path = @"/Library/LaunchDaemons/";
+            path = kAHGlobalLaunchDaemonDirectory;
             break;
         case kAHSystemLaunchDaemon:
-            path = @"/System/Library/LaunchDaemons/";
+            path = kAHSystemLaunchDaemonDirectory;
             break;
         default:
             break;

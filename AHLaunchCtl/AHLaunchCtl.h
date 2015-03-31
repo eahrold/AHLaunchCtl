@@ -21,8 +21,7 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "AHLaunchJob.h"
-#import "AHServiceManagement.h"
+#import <AHLaunchCtl/AHLaunchJob.h>
 
 /**
  *  AHLaunchCtlErrorCodes
@@ -86,6 +85,10 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
      */
     kAHErrorFileNotFound,
     /**
+     *  Error Encountered when the launchd.plist is actually a directory not a file
+     */
+    kAHErrorFileIsDirectory,
+    /**
      *  Error Encountered when the launchd.plist file could not be written or
      * insufficient privileges
      */
@@ -106,17 +109,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
      *  Error Encountered when the program to be loaded is not executable
      */
     kAHErrorProgramNotExecutable,
+    /**
+     *  User Canceled authorization.
+     */
+    kAHErrorUserCanceledAuthorization = errAuthorizationCanceled,
 };
-
-/**
- *  Function to test whether the job is currently running
- *
- *  @param label  Label of the LaunchD job
- *  @param domain AHLaunchDomain
- *
- *  @return YES if Loaded, NO otherwise
- */
-extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
 /**
  *  Objective-C Framework For LaunchAgents and LaunchDaemons
@@ -130,6 +127,22 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
  */
 + (AHLaunchCtl *)sharedController;
 #pragma mark - Public Methods
+/**
+ *  Create session wide authorization linked to the controller.
+ *
+ *  @param string to display for the Authorization creation dialog.
+ *
+ *  @return
+ */
+- (BOOL) authorizeWithPrompt:(NSString *)prompt;
+- (BOOL) authorize;
+
+/**
+ *  Deauthorize the session.
+ *  @note This is called when the controller is deallocated.
+ */
+- (void)deauthorize;
+
 /**
  *  Write the launchd.plist and load the job into context
  *
@@ -157,7 +170,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
          error:(NSError **)error;
 
 /**
- *  Loads launchd job
+ *  Loads launchd job (will not write file)
  *  @param job AHLaunchJob Object, Label and Program keys required.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -169,7 +182,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
        error:(NSError **)error;
 
 /**
- *  Unloads a launchd job
+ *  Unloads a launchd job (will not remove file)
  *  @param label Name of the running launchctl job.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -181,7 +194,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
          error:(NSError **)error;
 
 /**
- *  Loads and existing launchd.plist (Only User when not including helper tool)
+ *  Loads and existing launchd.plist
  *  @param label Name of the launchctl file.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -193,7 +206,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
         error:(NSError **)error;
 
 /**
- *  Stops a running launchd job (Only User when not including helper tool)
+ *  Stops a running launchd job, synonomus with unload
  *  @param label Name of the running launchctl job.
  *  @param error Populated should an error occur.
  *  @param domain Corresponding AHLaunchDomain
@@ -205,7 +218,7 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
        error:(NSError **)error;
 
 /**
- *  Restarts a launchd job. (Only User when not including helper tool)
+ *  Restarts a launchd job with an existsing launchd.plist file.
  *  @param label Name of the running launchctl job.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -371,8 +384,6 @@ extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 + (BOOL)removeFilesForHelperWithLabel:(NSString *)label
                                 error:(NSError *__autoreleasing *)error;
 
-#pragma mark - Utility
-+ (BOOL)version:(NSString *)versionA isGreaterThanVersion:(NSString *)versionB;
 #pragma mark - Domain Error
 /**
  *  Convenience Method for populating an NSError using message and code.  It

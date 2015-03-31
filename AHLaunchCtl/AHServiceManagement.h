@@ -22,7 +22,26 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "AHLaunchJob.h"
+#import <AHLaunchCtl/AHLaunchJob.h>
+
+/** ~/Library/LaunchAgents/
+ * @warning Make sure to expand the tilde if necissary for checking!
+ */
+extern NSString *const kAHUserLaunchAgentTildeDirectory;
+
+/** /Library/LaunchDaemons/ */
+extern NSString *const kAHGlobalLaunchDaemonDirectory;
+
+/** /Library/LaunchAgents/ */
+extern NSString *const kAHGlobalLaunchAgentDirectory;
+
+/** /System/Library/LaunchDaemons/ */
+extern NSString *const kAHSystemLaunchDaemonDirectory;
+
+/** /System/Library/LaunchAgents/ */
+extern NSString *const kAHSystemLaunchAgentDirectory;
+
+
 
 /**
  *  Function to test whether the job is currently running
@@ -34,7 +53,17 @@
  */
 extern BOOL jobIsRunning(NSString *label, AHLaunchDomain domain);
 
-/* Bridged implementation of the ServiceManagement Framework **/
+/**
+ *  More expensive version of jobIsRunning(), but will not cause "launchadd: FAILURE:" messages to appear in the system.log when the job is not loaded.
+ *
+ *  @param label  Label of the LaunchD job
+ *  @param domain AHLaunchDomain
+ *
+ *  @return YES if Loaded, NO otherwise
+ */
+extern BOOL jobIsRunning2(NSString *label, AHLaunchDomain domain);
+
+#pragma mark - Bridged ServiceManagement
 
 /**
  *  Dictionary representation of the LaunchD job
