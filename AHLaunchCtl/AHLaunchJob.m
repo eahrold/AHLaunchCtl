@@ -136,6 +136,7 @@
     }
     free(properties);
 }
+
 - (void)removeObservingOnAllProperties {
     unsigned int count;
     objc_property_t *properties = class_copyPropertyList([self class], &count);
@@ -293,14 +294,18 @@
     job.domain = domain;
 
     for (id key in dict) {
-        if ([key isKindOfClass:[NSString class]]) {
+        if ([key isKindOfClass:[NSString class]] &&
+            [job respondsToSelector:NSSelectorFromString(key)])
+        {
             @try {
-                [job setValue:[dict valueForKey:key] forKey:key];
+                [job setValue:dict[key] forKey:key];
             }
             @catch (NSException *exception) {
-                NSLog(@"Exception Raised: %@", exception);
+#if DEBUG
+                NSLog(@"[DEBUG] there was a problem parsing launchd.plist of %@: %@", dict[NSStringFromSelector(@selector(Label))],exception);
+#endif
             }
-            [job.internalDictionary setValue:[dict valueForKey:key] forKey:key];
+            [job.internalDictionary setValue:dict[key] forKey:key];
         }
     }
     [job startObservingOnAllProperties];

@@ -66,6 +66,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  Disabled
  */
 @property (nonatomic) BOOL Disabled;
+
 #pragma mark -
 /**
  *  Program
@@ -82,7 +83,9 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
 
 /**
  *  see man launchd.plist  
- */ @property(copy, nonatomic) NSString *ServiceDescription;
+ */
+@property(copy, nonatomic) NSString *ServiceDescription;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -96,6 +99,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSDictionary *inetdCompatibility;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -109,6 +113,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *LimitLoadToSessionType;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -122,6 +127,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL BeginTransactionAtShutdown;
+
 #pragma mark -
 /**
  *  KeepAlive dictionary or Number use @YES and @NO
@@ -135,6 +141,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL RunAtLoad;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -144,6 +151,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *WorkingDirectory;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -165,6 +173,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) NSInteger ThrottleInterval;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -216,6 +225,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL WaitForDebugger;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -225,6 +235,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSDictionary *HardResourceLimits;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -234,6 +245,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *ProcessType;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -251,6 +263,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL LaunchOnlyOnce;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -260,6 +273,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSDictionary *Sockets;
+
 #pragma mark - Specialized / Undocumented Apple Keys
 /**
  *  see man launchd.plist
@@ -273,6 +287,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *MachExceptionHandler;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -282,6 +297,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *PosixSpawnType;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -291,6 +307,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL XPCDomainBootstrapper;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -300,6 +317,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (copy, nonatomic) NSString *SHAuthorizationRight;
+
 #pragma mark -
 /**
  *  see man launchd.plist
@@ -317,6 +335,7 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
  *  see man launchd.plist
  */
 @property (nonatomic) BOOL MultipleInstances;
+
 #pragma mark -
 /**
  *  see man launchd.plist
