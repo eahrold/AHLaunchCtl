@@ -36,7 +36,7 @@ this will load a job and create the launchd.plist file in the approperiate locat
 AHLaunchJob* job = [AHLaunchJob new];
 job.Program = @"/bin/echo";
 job.Label = @"com.eeaapps.echo";
-job.ProgramArguments = @[@"hello"];
+job.ProgramArguments = @[@"/bin/echo", @"hello world!"];
 job.StandardOutPath = @"/tmp/hello.txt";
 job.RunAtLoad = YES;
 job.StartCalendarInterval = [AHLaunchJobSchedule dailyRunAtHour:2 minute:00];
