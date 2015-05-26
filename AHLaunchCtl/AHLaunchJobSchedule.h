@@ -16,6 +16,10 @@ extern NSInteger AHUndefinedSchedulComponent;
  *  Schedule Class for StartCalendarIntervals
  */
 @interface AHLaunchJobSchedule : NSDateComponents
+
+// Init with a dictionary of keys, such as a dictionary
+- (instancetype)initWithDictionary:(NSDictionary *)dictionary;
+
 - (NSDictionary *)dictionary;
 
 /**

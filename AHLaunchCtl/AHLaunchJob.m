@@ -37,6 +37,9 @@
     unsigned int _count;
 }
 
+@synthesize StartCalendarInterval = _StartCalendarInterval;
+@synthesize StartCalendarIntervalArray = _StartCalendarIntervalArray;
+
 - (void)dealloc {
     [self removeObservingOnAllProperties];
 }
@@ -99,7 +102,7 @@
 
 #pragma mark - Instance Methods
 - (NSDictionary *)dictionary {
-    return [NSDictionary dictionaryWithDictionary:_internalDictionary];
+    return [_internalDictionary copy];
 }
 
 - (NSString *)executableVersion {
@@ -116,8 +119,13 @@
 
 - (NSSet *)ignoredProperties {
     NSSet *const ignoredProperties = [NSSet
-        setWithArray:
-            @[ @"PID", @"LastExitStatus", @"isCurrentlyLoaded", @"domain" ]];
+        setWithObjects:NSStringFromSelector(@selector(StartCalendarInterval)),
+                       NSStringFromSelector(@selector(PID)),
+                       NSStringFromSelector(@selector(LastExitStatus)),
+                       NSStringFromSelector(@selector(isCurrentlyLoaded)),
+                       NSStringFromSelector(@selector(domain)),
+                       nil];
+
     return ignoredProperties;
 }
 
@@ -165,11 +173,6 @@
 
     id new = change[@"new"];
 
-    if ([keyPath isEqualToString:@"StartCalendarInterval"] ||
-        [keyPath isEqualToString:@"StartCalendarIntervalArray"]) {
-        return [self handleStartCalendarInterval:keyPath change:new];
-    }
-
     objc_property_t property =
         class_getProperty([self class], keyPath.UTF8String);
     const char *p = property_getAttributes(property);
@@ -182,22 +185,58 @@
     }
 }
 
-- (void)handleStartCalendarInterval:(NSString *)key change:(id)change {
-    if ([change isKindOfClass:[AHLaunchJobSchedule class]]) {
-        [_internalDictionary setObject:[change dictionary]
-                                forKey:@"StartCalendarInterval"];
-
-    } else if ([change isKindOfClass:[NSArray class]]) {
-        NSMutableArray *sci =
-            [[NSMutableArray alloc] initWithCapacity:[change count]];
-        for (AHLaunchJobSchedule *schedule in change) {
-            [sci addObject:schedule.dictionary];
+#pragma mark --- Accessors ---
+- (id)StartCalendarInterval {
+    if (!_StartCalendarInterval) {
+        id sci = _internalDictionary[NSStringFromSelector(
+            @selector(StartCalendarInterval))];
+        if ([sci isKindOfClass:[NSDictionary class]]) {
+            _StartCalendarInterval =
+                [[AHLaunchJobSchedule alloc] initWithDictionary:sci];
+        } else if ([sci isKindOfClass:[NSArray class]]) {
+            NSMutableArray *scheduleArray =
+                [NSMutableArray arrayWithCapacity:[sci count]];
+            for (NSDictionary *d in sci) {
+                AHLaunchJobSchedule *scheudle =
+                    [[AHLaunchJobSchedule alloc] initWithDictionary:d];
+                if (scheudle) {
+                    [scheduleArray addObject:scheudle];
+                };
+            }
+            _StartCalendarInterval = scheduleArray;
         }
-        [_internalDictionary setObject:sci forKey:@"StartCalendarInterval"];
+    }
+    return _StartCalendarInterval;
+}
+
+- (void)setStartCalendarInterval:(id)StartCalendarInterval {
+    if ([StartCalendarInterval isKindOfClass:[AHLaunchJobSchedule class]]) {
+        _internalDictionary[NSStringFromSelector(@selector(
+            StartCalendarInterval))] = [StartCalendarInterval dictionary];
+    } else if ([StartCalendarInterval isKindOfClass:[NSArray class]]) {
+        NSMutableArray *scheduleArray = [[NSMutableArray alloc]
+            initWithCapacity:[StartCalendarInterval count]];
+        for (AHLaunchJobSchedule *schedule in StartCalendarInterval) {
+            [scheduleArray addObject:schedule.dictionary];
+        }
+        _internalDictionary[NSStringFromSelector(
+            @selector(StartCalendarInterval))] = [scheduleArray copy];
     }
 }
 
-#pragma mark--- Accessors ---
+- (NSArray *)StartCalendarIntervalArray {
+    NSArray *array;
+    if((array = self.StartCalendarInterval) && [array isKindOfClass:[NSArray class]]){
+        _StartCalendarIntervalArray = array;
+    }
+    return _StartCalendarIntervalArray;
+}
+
+- (void)setStartCalendarIntervalArray:(NSArray *)StartCalendarIntervalArray {
+    self.StartCalendarInterval = StartCalendarIntervalArray;
+}
+
+#pragma mark
 - (NSInteger)LastExitStatus {
     if (_LastExitStatus) {
         return _LastExitStatus;
@@ -295,14 +334,16 @@
 
     for (id key in dict) {
         if ([key isKindOfClass:[NSString class]] &&
-            [job respondsToSelector:NSSelectorFromString(key)])
-        {
+            [job respondsToSelector:NSSelectorFromString(key)]) {
             @try {
                 [job setValue:dict[key] forKey:key];
             }
             @catch (NSException *exception) {
 #if DEBUG
-                NSLog(@"[DEBUG] there was a problem parsing launchd.plist of %@: %@", dict[NSStringFromSelector(@selector(Label))],exception);
+                NSLog(@"[DEBUG] there was a problem parsing launchd.plist of "
+                      @"%@: %@",
+                      dict[NSStringFromSelector(@selector(Label))],
+                      exception);
 #endif
             }
             [job.internalDictionary setValue:dict[key] forKey:key];
@@ -332,10 +373,9 @@
     NSDictionary *dict;
     // Check the file returns a dict, and that the dictionary returned
     // has both a label and program arguments keys.
-    if ((dict = [NSDictionary dictionaryWithContentsOfFile:file])&&
+    if ((dict = [NSDictionary dictionaryWithContentsOfFile:file]) &&
         dict[NSStringFromSelector(@selector(Label))] &&
-        dict[NSStringFromSelector(@selector(ProgramArguments))])
-    {
+        dict[NSStringFromSelector(@selector(ProgramArguments))]) {
         return [self jobFromDictionary:dict inDomain:domain];
     };
 

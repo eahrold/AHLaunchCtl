@@ -82,9 +82,9 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
 @property (nonatomic) NSInteger StartInterval;
 
 /**
- *  see man launchd.plist  
+ *  see man launchd.plist
  */
-@property(copy, nonatomic) NSString *ServiceDescription;
+@property (copy, nonatomic) NSString *ServiceDescription;
 
 #pragma mark -
 /**
@@ -194,15 +194,16 @@ typedef NS_ENUM(NSInteger, AHLaunchDomain) {
 
 #pragma mark - Schedule
 /**
- * StartCalendarInterval dictionary of integers or array of dictionary of
- * integers
+ * StartCalendarInterval AHLaunchJobSchedule of integers or array of
+ * AHLaunchJobSchedules
  */
-@property (copy, nonatomic) AHLaunchJobSchedule *StartCalendarInterval;
+@property (copy, nonatomic) id StartCalendarInterval;
+
 /**
  * Array Of AHLaunchJobSchedule for scheduling multiple runs with the same
  * Launch Job
  */
-@property (copy, nonatomic) NSArray *StartCalendarIntervalArray;
+@property (copy, nonatomic) NSArray *StartCalendarIntervalArray __deprecated_msg("Use StartCalendarInterval instead.");
 
 #pragma mark - In/Out
 /**

@@ -44,6 +44,7 @@
     [self testGetJob];
     [self testRestartJob];
     [self testRemoveJob];
+    [self testStartCalendarInterval];
 }
 
 #pragma mark - Priviledged tests
@@ -105,9 +106,8 @@
 }
 
 - (void)testUnload {
-
     BOOL initialFileCheck =
-    [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
+        [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
 
     NSError *error;
     if (!_job) {
@@ -122,9 +122,10 @@
 
     if (initialFileCheck) {
         BOOL check2 =
-        [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
-        XCTAssertTrue(check2,
-                      @"Unloading removed the agent file, but shouldn't have!!!.");
+            [[NSFileManager defaultManager] fileExistsAtPath:[self jobFile]];
+        XCTAssertTrue(
+            check2,
+            @"Unloading removed the agent file, but shouldn't have!!!.");
     }
 
     success = [self verifyWithSM];
@@ -190,6 +191,61 @@
         success, @"Could not verify job was loaded using service management.");
 }
 
+- (void)testStartCalendarInterval {
+    AHLaunchJob *job = [[AHLaunchJob alloc] init];
+    NSError *error = nil;
+    job.ProgramArguments = @[ @"/bin/echo", @"hello world!" ];
+    job.Label = @"com.eeaapps.ahlaunchctl.check.schedule";
+
+    AHLaunchJobSchedule *schedule =
+        [AHLaunchJobSchedule dailyRunAtHour:1 minute:00];
+    job.StartCalendarInterval = schedule;
+
+    [[AHLaunchCtl sharedController] load:job
+                                inDomain:kAHUserLaunchAgent
+                                   error:&error];
+
+    XCTAssertNil(error, @"%@", error);
+
+    XCTAssertEqualObjects(schedule,
+                          job.StartCalendarInterval,
+                          @"Thsese should be equal %@ and %@",
+                          schedule,
+                          job.StartCalendarInterval);
+
+    error = nil;
+    [[AHLaunchCtl sharedController] unload:job.Label
+                                  inDomain:kAHUserLaunchAgent
+                                     error:&error];
+    XCTAssertNil(error, @"%@", error);
+
+    NSLog(@"%@", job.dictionary);
+    NSLog(@"Dictionary Description: %@", job.StartCalendarInterval);
+}
+- (void)testCustomJobKeys {
+    NSError *error;
+    _job = [self echoJob];
+
+    NSMutableDictionary *dict = [[_job dictionary] mutableCopy];
+    [dict setValue:@{
+        @"one" : @"first",
+        @"two" : @"second"
+    } forKey:@"cccDict"];
+
+    AHLaunchJob *badJob =
+        [AHLaunchJob jobFromDictionary:dict inDomain:kAHUserLaunchAgent];
+
+    XCTAssertTrue([[AHLaunchCtl sharedController] load:badJob
+                                              inDomain:kAHUserLaunchAgent
+                                                 error:&error],
+                  @"%@",
+                  error);
+    ;
+
+    [[AHLaunchCtl sharedController] unload:badJob.Label
+                                  inDomain:kAHUserLaunchAgent
+                                     error:nil];
+}
 
 #pragma mark - Setup Helpers
 - (AHLaunchJob *)echoJob {
@@ -205,7 +261,7 @@
     _job = [AHLaunchJob new];
     _job.Label = @"com.eeaapps.echo.open.preview";
     _job.ProgramArguments =
-    @[ @"/Applications/Preview.app/Contents/MacOS/Preview" ];
+        @[ @"/Applications/Preview.app/Contents/MacOS/Preview" ];
     _job.RunAtLoad = YES;
     return _job;
 }
@@ -233,11 +289,10 @@
     }
 
     NSString *jobFile =
-    [path stringByAppendingPathComponent:
-     [_job.Label stringByAppendingPathExtension:@"plist"]];
+        [path stringByAppendingPathComponent:
+                  [_job.Label stringByAppendingPathExtension:@"plist"]];
     return jobFile;
 }
-
 
 - (BOOL)verifyWithSM {
     CFStringRef domainStr = NULL;

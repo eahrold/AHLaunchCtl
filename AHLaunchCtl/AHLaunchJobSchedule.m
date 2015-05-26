@@ -11,27 +11,56 @@ NSInteger AHUndefinedSchedulComponent = NSUndefinedDateComponent;
 
 @implementation AHLaunchJobSchedule
 
+- (instancetype)initWithDictionary:(NSDictionary *)dictionary {
+    if (self = [super init]) {
+        [dictionary enumerateKeysAndObjectsUsingBlock:^(NSString *key,
+                                                        NSNumber *obj,
+                                                        BOOL *stop) {
+            if ([key.lowercaseString
+                    isEqualToString:NSStringFromSelector(@selector(minute))]) {
+                self.minute = obj.integerValue;
+            } else if ([key.lowercaseString
+                           isEqualToString:NSStringFromSelector(
+                                               @selector(hour))]) {
+                self.hour = obj.integerValue;
+            } else if ([key.lowercaseString
+                           isEqualToString:NSStringFromSelector(
+                                               @selector(weekday))]) {
+                self.weekday = obj.integerValue;
+            } else if ([key.lowercaseString
+                           isEqualToString:NSStringFromSelector(
+                                               @selector(weekday))]) {
+                self.day = obj.integerValue;
+            } else if ([key.lowercaseString
+                           isEqualToString:NSStringFromSelector(
+                                               @selector(month))]) {
+                self.month = obj.integerValue;
+            }
+        }];
+    }
+    return self;
+}
+
+- (NSString *)description {
+    return self.dictionary.description;
+}
+
 - (NSDictionary *)dictionary {
     NSMutableDictionary *dict =
         [[NSMutableDictionary alloc] initWithCapacity:5];
 
     if (self.minute != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.minute]
-                 forKey:@"Minute"];
+        dict[@"Minute"] = @(self.minute);
 
-    if (self.hour != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.hour] forKey:@"Hour"];
+    if (self.hour != AHUndefinedSchedulComponent) dict[@"Hour"] = @(self.hour);
 
-    if (self.day != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.day] forKey:@"Day"];
+    if (self.day != AHUndefinedSchedulComponent) dict[@"Day"] = @(self.day);
 
     if (self.weekday != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.weekday]
-                 forKey:@"Weekday"];
+        dict[@"Weekday"] = @(self.weekday);
 
     if (self.month != AHUndefinedSchedulComponent)
-        [dict setObject:[NSNumber numberWithInteger:self.month]
-                 forKey:@"Weekday"];
+        dict[@"Month"] = @(self.month);
 
     return [NSDictionary dictionaryWithDictionary:dict];
 }
