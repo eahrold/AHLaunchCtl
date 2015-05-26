@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'AHLaunchCtl'
-  spec.version = '0.4.2'
+  spec.version = '0.4.3'
   spec.license = 'MIT'
   spec.summary = 'A LaunchD framework for OSX Cocoa apps.'
   spec.homepage = 'https://github.com/eahrold/AHLaunchCtl'
