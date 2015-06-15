@@ -1,16 +1,14 @@
 #AHLaunchCtl 
 Objective-C library for managing launchd
 Daemons / Agents.  
-It has some simple methods built in 
 
-#Usage 
-
-##Domains
+##Usage:
+####Domains
 There are five domain constants representing the common locations of LaunchDaemons/LaunchAgents
 
 1. _kAHUserLaunchAgent_  
    User Launch Agents **~/Library/LaunchAgents**
-  loaded by the Console user
+  loaded by the console user
   
 2. _kAHGlobalLaunchAgent_  
   Administrator provided LaunchAgents **/Library/LaunchAgents/**
@@ -29,8 +27,8 @@ There are five domain constants representing the common locations of LaunchDaemo
  loaded by root user
  
  
-##Add Job
-this will load a job and create the launchd.plist file in the approperiate location
+####Add Job
+This will load a job and create the launchd.plist file in the approperiate location.
 
 ```objective-c
 AHLaunchJob* job = [AHLaunchJob new];
@@ -49,8 +47,8 @@ job.StartCalendarInterval = [AHLaunchJobSchedule dailyRunAtHour:2 minute:00];
 }];  
 ```
 
-##Remove Job
-this will unload a job and remove associated launchd.plist file
+####Remove Job
+This will unload a job and remove associated launchd.plist file.
 ```Objective-C
 [[AHLaunchCtl sharedControler] remove:@"com.eeaapps.echo"
                            fromDomain:kAHUserLaunchAgent
@@ -58,9 +56,9 @@ this will unload a job and remove associated launchd.plist file
 }]; 	 
 ```
 
-##Load Job
-simply load a job, this is good for one off jobs you need executed. 
-It will not create a launchd file, but run the specified launchd job as long as the user in logged in (for LaunchAgents) or until the system is rebooted (LaunchDaemons)
+####Load Job
+Simply load a job, this is good for one off jobs you need executed. 
+It will not create a launchd file, but it will run the specified launchd job as long as the user in logged in (for LaunchAgents) or until the system is rebooted (LaunchDaemons).
 ```objective-c
 AHLaunchJob* job = [AHLaunchJob new];
 ...(build the job as you would for adding one)...
@@ -68,7 +66,7 @@ AHLaunchJob* job = [AHLaunchJob new];
 
 ```
 
-##Unload Job
+####Unload Job
 Unload a job temporairly, this will not remove the launchd.plist file
 ```objective-c
 [[AHLaunchCtl sharedControler] unload:@"com.eeaapps.echo.helloworld"
@@ -76,7 +74,7 @@ Unload a job temporairly, this will not remove the launchd.plist file
                                 error:&error];
 ```
 
-##Scheduling
+####Scheduling
 To set the StartCalendarInterval key in the job, use the AHLaunchJobSchedule class.
 
 ```Objective-c
@@ -88,7 +86,7 @@ To set the StartCalendarInterval key in the job, use the AHLaunchJobSchedule cla
 ```
 _Passing ```AHUndefinedSchedulComponent``` to any of the above parameters will make it behave like a wildcard for that parameter._
 
-**There are also some connivence methods**
+**There are also some convenience methods**
 ```
 + (instancetype)dailyRunAtHour:(NSInteger)hour minute:(NSInteger)minute;
 + (instancetype)weeklyRunOnWeekday:(NSInteger)weekday hour:(NSInteger)hour;
@@ -97,7 +95,7 @@ _Passing ```AHUndefinedSchedulComponent``` to any of the above parameters will m
 ```
 
 
-##Install PriviledgedHelperTool (Uses SMJobBless)
+####Install PriviledgedHelperTool (Uses SMJobBless)
 Your helper tool must be properly code signed, and have an embedded Info.plist and Launchd.plist file.** 
 ```objective-c
 	NSError *error;
@@ -108,7 +106,7 @@ Your helper tool must be properly code signed, and have an embedded Info.plist a
     	NSLog(@"error: %@",error);
 ```
   
-**_See the HelperTool-CodeSign.py script at the root of this repo, for more details, it's extremely helpfull for getting the proper certificate name and .plists created._ 
+**_See the HelperTool-CodeSign.py script at the root of this repo, for more details, it's extremely helpful for getting the proper certificate name and .plists created._ 
  
 
-###There are many more convience methods, see the AHLaunchCtl.h for what's avaliabvle.
+####There are many more convenience methods, see the AHLaunchCtl.h for what's avaliabvle.
