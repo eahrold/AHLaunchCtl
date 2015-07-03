@@ -10,7 +10,7 @@
 /**
  *  Used as a wildcard in schedule
  */
-extern NSInteger AHUndefinedSchedulComponent;
+extern NSInteger AHUndefinedScheduleComponent;
 
 /**
  *  Schedule Class for StartCalendarIntervals
@@ -24,7 +24,7 @@ extern NSInteger AHUndefinedSchedulComponent;
 
 /**
  *  Set up a custom AHLaunchCtl Schedule
- *  @discussion Pass AHUndefinedSchedulComponent to any unused parameter.
+ *  @discussion Pass AHUndefinedScheduleComponent to any unused parameter.
  *
  *  @param minute  minuet of the hour
  *  @param hour    hour of the day
