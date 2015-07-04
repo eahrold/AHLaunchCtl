@@ -1,33 +1,36 @@
 #AHLaunchCtl
-Objective-C library for managing launchd
-Daemons / Agents.
+Objective-C library for managing launchd Daemons & Agents.
 
-##Usage:
-####Domains
-There are five domain constants representing the common locations of LaunchDaemons/LaunchAgents
+## Usage:
+*  [Add Job](#add-job)  
+* [Remove Job](#remove-job)  
+* [Load Job](#load-job)  
+*  [Unload Job](#unload-job)  
+*  [Scheduling](#scheduling) 
+ 
+-
+####*__Notes__*
+ * There are five members of AHLaunchDomain representing the common locations of LaunchDaemons and LaunchAgents.
 
-1. _kAHUserLaunchAgent_
-   User Launch Agents **~/Library/LaunchAgents**
-  loaded by the console user
+	```objective-c
+	/* User Launch Agents `~/Library/LaunchAgents`.  Loaded by the console user.*/
+	kAHUserLaunchAgent,
 
-2. _kAHGlobalLaunchAgent_
-  Administrator provided LaunchAgents **/Library/LaunchAgents/**
-	loaded by the console user
+	/* Administrator provided LaunchAgents `/Library/LaunchAgents/`.  Loaded by the console user */
+	kAHGlobalLaunchAgent,
 
-3. _kAHSystemLaunchAgent_
-  Apple provided LaunchDaemons **/System/Library/LaunchAgents/**
- loaded by root user
+	/* Apple provided LaunchAgents `/System/Library/LaunchAgents/`.  Loaded by root user.*/
+	kAHSystemLaunchAgent,
 
-4. _kAHGlobalLaunchDaemon_
-  Administrator provided LaunchAgents **/Library/LaunchDaemons/**
-  loaded by root user
+	/* Administrator provided LaunchDaemon `/Library/LaunchDaemons/`.  Loaded by root user.*/
+	kAHGlobalLaunchDaemon,
 
-5. _kAHSystemLaunchDaemon_
-   Apple provided LaunchDaemons **/System/Library/LaunchDaemons/**
- loaded by root user
+	/* Apple provided LaunchDaemon `/System/Library/LaunchDaemons/`.  Loaded by root user.*/
+	kAHSystemLaunchDaemon,
+	```
 
-
-####Add Job
+-
+### Add Job
 This will load a job and create the launchd.plist file in the appropriate location.
 
 ```objective-c
@@ -39,45 +42,47 @@ job.StandardOutPath = @"/tmp/hello.txt";
 job.RunAtLoad = YES;
 job.StartCalendarInterval = [AHLaunchJobSchedule dailyRunAtHour:2 minute:00];
 
+// All sharedController methods return BOOL values.
+// `YES` for success, `NO` on failure (which will also populate an NSError).
 [[AHLaunchCtl sharedController] add:job
-                          toDomain:kAHUserLaunchAgent
-                             error:&error];
-
-
-}];
+                           toDomain:kAHUserLaunchAgent
+                              error:&error];
 ```
-
-####Remove Job
+-
+### Remove Job
 This will unload a job and remove associated launchd.plist file.
-```Objective-C
+```objective-c
 [[AHLaunchCtl sharedController] remove:@"com.eeaapps.echo"
-                           fromDomain:kAHUserLaunchAgent
-                                error:&error];
-}];
+                            fromDomain:kAHUserLaunchAgent
+                                 error:&error];
 ```
-
-####Load Job
+-
+### Load Job
 Simply load a job, this is good for one off jobs you need executed.
 It will not create a launchd file, but it will run the specified launchd job as long as the user in logged in (for LaunchAgents) or until the system is rebooted (LaunchDaemons).
 ```objective-c
 AHLaunchJob* job = [AHLaunchJob new];
-...(build the job as you would for adding one)...
-[[AHLaunchCtl sharedController] load:job inDomain:kAHGlobalLaunchDaemon error:&error];
+
+// build the job as you would for adding one ...
+
+[[AHLaunchCtl sharedController] load:job
+						    inDomain:kAHGlobalLaunchDaemon
+					  	  	   error:&error];
 
 ```
-
-####Unload Job
+-
+### Unload Job
 Unload a job temporarily, this will not remove the launchd.plist file
 ```objective-c
 [[AHLaunchCtl sharedController] unload:@"com.eeaapps.echo.helloworld"
-                             inDomain:kAHGlobalLaunchDaemon
-                                error:&error];
+                              inDomain:kAHGlobalLaunchDaemon
+                                 error:&error];
 ```
-
-####Scheduling
+-
+### Scheduling
 To set the StartCalendarInterval key in the job, use the AHLaunchJobSchedule class.
 
-```Objective-c
+```objective-c
 + (instancetype)scheduleWithMinute:(NSInteger)minute
                               hour:(NSInteger)hour
                                day:(NSInteger)day
@@ -86,16 +91,18 @@ To set the StartCalendarInterval key in the job, use the AHLaunchJobSchedule cla
 ```
 _Passing ```AHUndefinedScheduleComponent``` to any of the above parameters will make it behave like a wildcard for that parameter._
 
+-
+
 **There are also some convenience methods**
-```
+```objective-c
 + (instancetype)dailyRunAtHour:(NSInteger)hour minute:(NSInteger)minute;
 + (instancetype)weeklyRunOnWeekday:(NSInteger)weekday hour:(NSInteger)hour;
 + (instancetype)monthlyRunOnDay:(NSInteger)day hour:(NSInteger)hour;
 
 ```
 
-
-####Install PrivilegedHelperTool (Uses SMJobBless)
+-
+#### Install Privileged Helper Tool
 Your helper tool must be properly code signed, and have an embedded Info.plist and Launchd.plist file.**
 ```objective-c
 	NSError *error;
@@ -106,7 +113,10 @@ Your helper tool must be properly code signed, and have an embedded Info.plist a
     	NSLog(@"error: %@",error);
 ```
 
-**_See the HelperTool-CodeSign.py script at the root of this repo, for more details, it's extremely helpful for getting the proper certificate name and .plists created._
+**_See the HelperTool-CodeSign.py script at the root of this repo, for more details, it's helpful for getting the proper certificate name and .plists created._
+
+-
+
+_see the AHLaunchCtl.h for full usage._
 
 
-####There are many more convenience methods; see the AHLaunchCtl.h for what's available.

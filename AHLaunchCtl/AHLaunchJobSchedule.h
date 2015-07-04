@@ -26,7 +26,7 @@ extern NSInteger AHUndefinedScheduleComponent;
  *  Set up a custom AHLaunchCtl Schedule
  *  @discussion Pass AHUndefinedScheduleComponent to any unused parameter.
  *
- *  @param minute  minuet of the hour
+ *  @param minute  minute of the hour
  *  @param hour    hour of the day
  *  @param day     day of the month
  *  @param weekday day of the week (0 is sunday)

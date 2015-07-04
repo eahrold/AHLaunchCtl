@@ -49,18 +49,25 @@ NSInteger AHUndefinedScheduleComponent = NSUndefinedDateComponent;
     NSMutableDictionary *dict =
         [[NSMutableDictionary alloc] initWithCapacity:5];
 
-    if (self.minute != AHUndefinedScheduleComponent)
+    if (self.minute != AHUndefinedScheduleComponent) {
         dict[@"Minute"] = @(self.minute);
+    }
 
-    if (self.hour != AHUndefinedScheduleComponent) dict[@"Hour"] = @(self.hour);
+    if (self.hour != AHUndefinedScheduleComponent) {
+        dict[@"Hour"] = @(self.hour);
+    }
 
-    if (self.day != AHUndefinedScheduleComponent) dict[@"Day"] = @(self.day);
+    if (self.day != AHUndefinedScheduleComponent) {
+        dict[@"Day"] = @(self.day);
+    }
 
-    if (self.weekday != AHUndefinedScheduleComponent)
+    if (self.weekday != AHUndefinedScheduleComponent) {
         dict[@"Weekday"] = @(self.weekday);
+    }
 
-    if (self.month != AHUndefinedScheduleComponent)
+    if (self.month != AHUndefinedScheduleComponent) {
         dict[@"Month"] = @(self.month);
+    }
 
     return [NSDictionary dictionaryWithDictionary:dict];
 }
