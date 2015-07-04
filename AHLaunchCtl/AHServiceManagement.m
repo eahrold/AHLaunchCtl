@@ -139,10 +139,10 @@ BOOL AHJobUnbless(AHLaunchDomain domain,
     }
 
     // Remove the helper tool binary
-    NSString *const priviledgedToolBinary = [@"/Library/PrivilegedHelperTools/"
+    NSString *const privilegedToolBinary = [@"/Library/PrivilegedHelperTools/"
         stringByAppendingPathComponent:label];
 
-    if(!AHRemovePrivilegedFile(domain, priviledgedToolBinary, authRef, error)){
+    if(!AHRemovePrivilegedFile(domain, privilegedToolBinary, authRef, error)){
         NSLog(@"There was a problem removing binary file of the helper tool.");
     }
 

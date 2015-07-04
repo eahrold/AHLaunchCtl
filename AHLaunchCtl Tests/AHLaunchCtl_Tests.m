@@ -47,7 +47,7 @@
     [self testStartCalendarInterval];
 }
 
-#pragma mark - Priviledged tests
+#pragma mark - Privileged tests
 - (void)testAllAsGlobalLaunchDaemon {
     _domain = kAHGlobalLaunchDaemon;
     [self testAllStd];
