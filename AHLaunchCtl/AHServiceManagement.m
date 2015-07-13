@@ -22,10 +22,12 @@ NSString *const kAHGlobalLaunchDaemonDirectory = @"/Library/LaunchDaemons/";
 NSString *const kAHGlobalLaunchAgentDirectory = @"/Library/LaunchAgents/";
 
 /** /System/Library/LaunchDaemons/ */
-NSString *const kAHSystemLaunchDaemonDirectory = @"/System/Library/LaunchDaemons/";
+NSString *const kAHSystemLaunchDaemonDirectory =
+    @"/System/Library/LaunchDaemons/";
 
 /** /System/Library/LaunchAgents/ */
-NSString *const kAHSystemLaunchAgentDirectory = @"/System/Library/LaunchAgents/";
+NSString *const kAHSystemLaunchAgentDirectory =
+    @"/System/Library/LaunchAgents/";
 
 static NSString *const kAHChownJobPrefix = @"com.eeaapps.ahlaunchctl.chown";
 static NSString *const kAHCopyJobPrefix = @"com.eeaapps.ahlaunchctl.copy";
@@ -38,12 +40,11 @@ BOOL jobIsRunning(NSString *label, AHLaunchDomain domain) {
 
 BOOL jobIsRunning2(NSString *label, AHLaunchDomain domain) {
     NSArray *runningJobs = AHCopyAllJobDictionaries(domain);
-    NSPredicate *check =
-        [NSPredicate predicateWithFormat:@"%K == %@",
-                                         NSStringFromSelector(@selector(Label)),
-                                         label];
-    
-    return  ([runningJobs filteredArrayUsingPredicate:check].count > 0);
+    NSPredicate *check = [NSPredicate
+        predicateWithFormat:@"%K == %@", NSStringFromSelector(@selector(Label)),
+                            label];
+
+    return ([runningJobs filteredArrayUsingPredicate:check].count > 0);
 }
 
 NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label) {
@@ -66,10 +67,9 @@ BOOL AHJobSubmit(AHLaunchDomain domain,
     if (domain == 0) return NO;
     cfError = NULL;
 
-    BOOL rc = SMJobSubmit((__bridge CFStringRef)(SMDomain(domain)),
-                          (__bridge CFDictionaryRef)dictionary,
-                          authRef,
-                          &cfError);
+    BOOL rc =
+        SMJobSubmit((__bridge CFStringRef)(SMDomain(domain)),
+                    (__bridge CFDictionaryRef)dictionary, authRef, &cfError);
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
@@ -100,11 +100,9 @@ BOOL AHJobRemove(AHLaunchDomain domain,
     if (domain == 0) return NO;
     cfError = NULL;
 
-    BOOL rc = SMJobRemove((__bridge CFStringRef)(SMDomain(domain)),
-                          (__bridge CFStringRef)(label),
-                          authRef,
-                          YES,
-                          &cfError);
+    BOOL rc =
+        SMJobRemove((__bridge CFStringRef)(SMDomain(domain)),
+                    (__bridge CFStringRef)(label), authRef, YES, &cfError);
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
@@ -120,8 +118,8 @@ extern BOOL AHJobRemoveIncludingFile(AHLaunchDomain domain,
     BOOL success = NO;
 
     if ((success = AHJobRemove(domain, label, authRef, error))) {
-        success = AHRemovePrivilegedFile(
-            domain, launchdJobFile(label, domain), authRef, error);
+        success = AHRemovePrivilegedFile(domain, launchdJobFile(label, domain),
+                                         authRef, error);
     }
     return success;
 }
@@ -139,10 +137,8 @@ BOOL AHJobBless(AHLaunchDomain domain,
         AHJobUnbless(domain, label, authRef, error);
     }
 
-    rc = SMJobBless(kSMDomainSystemLaunchd,
-                    (__bridge CFStringRef)(label),
-                    authRef,
-                    &cfError);
+    rc = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)(label),
+                    authRef, &cfError);
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
         if (error) *error = err;
@@ -204,53 +200,65 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
     // tmp file path the current under privileged user has access to
     NSString *tmpFilePath;
 
+    NSFileManager *fileManager = [NSFileManager new];
     NSString *label = dictionary[@"Label"];
-    if (label && label.length) {
+
+    if (label.length == 0) {
         filePath = launchdJobFile(label, domain);
 
-        tmpFilePath =
-            [@"/tmp" stringByAppendingPathComponent:
-                         [[NSProcessInfo processInfo] globallyUniqueString]];
+        NSDictionary *launchPlistPermissions =
+            @{NSFilePosixPermissions : [NSNumber numberWithShort:0644]};
 
-        if ([dictionary writeToFile:tmpFilePath atomically:YES]) {
-            [[NSFileManager defaultManager] setAttributes:@{
-                NSFilePosixPermissions : [NSNumber numberWithShort:0755]
-            } ofItemAtPath:tmpFilePath error:nil];
+        if (getuid() == 0) {
+            if ([dictionary writeToFile:filePath atomically:YES]) {
+                success = [fileManager setAttributes:launchPlistPermissions
+                                        ofItemAtPath:filePath
+                                               error:error];
+            }
+        } else {
+            tmpFilePath = [@"/tmp"
+                stringByAppendingPathComponent:
+                    [[NSProcessInfo processInfo] globallyUniqueString]];
 
-            copyJob = [AHLaunchJob new];
-            copyJob.Label = [kAHCopyJobPrefix
-                stringByAppendingPathExtension:label];
-            copyJob.ProgramArguments =
-                @[ @"/bin/mv", @"-f", tmpFilePath, filePath ];
-            copyJob.RunAtLoad = YES;
-            copyJob.LaunchOnlyOnce = YES;
+            if ([dictionary writeToFile:tmpFilePath atomically:YES]) {
+                [fileManager setAttributes:launchPlistPermissions
+                              ofItemAtPath:tmpFilePath
+                                     error:nil];
 
-            if ((success = AHJobSubmit(kAHGlobalLaunchDaemon,
-                                       copyJob.dictionary,
-                                       authRef,
-                                       error))) {
-                sleep(0.1);
+                copyJob = [AHLaunchJob new];
+                copyJob.Label =
+                    [kAHCopyJobPrefix stringByAppendingPathExtension:label];
+                copyJob.ProgramArguments =
+                    @[ @"/bin/mv", @"-f", tmpFilePath, filePath ];
+                copyJob.RunAtLoad = YES;
+                copyJob.LaunchOnlyOnce = YES;
 
-                // This should exit fast. If it's still alive unload it.
-                if (jobIsRunning2(copyJob.Label, kAHGlobalLaunchDaemon)) {
-                    AHJobRemove(
-                        kAHGlobalLaunchDaemon, copyJob.Label, authRef, nil);
-                }
+                if ((success =
+                         AHJobSubmit(kAHGlobalLaunchDaemon, copyJob.dictionary,
+                                     authRef, error))) {
+                    [NSThread sleepForTimeInterval:0.5];
 
-                chownJob = [AHLaunchJob new];
-                chownJob.Label = [kAHChownJobPrefix
-                    stringByAppendingPathExtension:label];
-                chownJob.ProgramArguments =
-                    @[ @"/usr/sbin/chown", @"root:wheel", filePath ];
-                chownJob.RunAtLoad = YES;
-                chownJob.LaunchOnlyOnce = YES;
+                    // This should exit fast. If it's still alive unload it.
+                    if (jobIsRunning2(copyJob.Label, kAHGlobalLaunchDaemon)) {
+                        AHJobRemove(kAHGlobalLaunchDaemon, copyJob.Label,
+                                    authRef, nil);
+                    }
 
-                success = AHJobSubmit(
-                    kAHGlobalLaunchDaemon, chownJob.dictionary, authRef, error);
-                // This should exit fast. If it's still alive unload it.
-                if (jobIsRunning2(chownJob.Label, kAHGlobalLaunchDaemon)) {
-                    AHJobRemove(
-                        kAHGlobalLaunchDaemon, chownJob.Label, authRef, nil);
+                    chownJob = [AHLaunchJob new];
+                    chownJob.Label = [kAHChownJobPrefix
+                        stringByAppendingPathExtension:label];
+                    chownJob.ProgramArguments =
+                        @[ @"/usr/sbin/chown", @"root:wheel", filePath ];
+                    chownJob.RunAtLoad = YES;
+                    chownJob.LaunchOnlyOnce = YES;
+
+                    success = AHJobSubmit(kAHGlobalLaunchDaemon,
+                                          chownJob.dictionary, authRef, error);
+                    // This should exit fast. If it's still alive unload it.
+                    if (jobIsRunning2(chownJob.Label, kAHGlobalLaunchDaemon)) {
+                        AHJobRemove(kAHGlobalLaunchDaemon, chownJob.Label,
+                                    authRef, nil);
+                    }
                 }
             }
         }
@@ -276,11 +284,9 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
         removeJob.RunAtLoad = YES;
         removeJob.LaunchOnlyOnce = YES;
 
-        if ((success = AHJobSubmit(kAHGlobalLaunchDaemon,
-                                   removeJob.dictionary,
-                                   authRef,
-                                   error))) {
-            sleep(0.5);
+        if ((success = AHJobSubmit(kAHGlobalLaunchDaemon, removeJob.dictionary,
+                                   authRef, error))) {
+            [NSThread sleepForTimeInterval:0.5];
         }
 
         // This should exit fast. If it's still alive unload it.
@@ -304,11 +310,12 @@ NSString *launchdJobFileDirectory(AHLaunchDomain domain) {
             type = kAHSystemLaunchAgentDirectory;
             break;
         case kAHSystemLaunchDaemon:
-            type =kAHSystemLaunchDaemonDirectory;
+            type = kAHSystemLaunchDaemonDirectory;
             break;
         case kAHUserLaunchAgent:
         default:
-            type = kAHUserLaunchAgentTildeDirectory.stringByExpandingTildeInPath;
+            type =
+                kAHUserLaunchAgentTildeDirectory.stringByExpandingTildeInPath;
             break;
     }
     return type;
