@@ -203,14 +203,14 @@ BOOL AHCreatePrivilegedLaunchdPlist(AHLaunchDomain domain,
     NSFileManager *fileManager = [NSFileManager new];
     NSString *label = dictionary[@"Label"];
 
-    if (label.length == 0) {
+    if (label.length) {
         filePath = launchdJobFile(label, domain);
 
         NSDictionary *launchPlistPermissions =
             @{NSFilePosixPermissions : [NSNumber numberWithShort:0644]};
 
         if (getuid() == 0) {
-            if ([dictionary writeToFile:filePath atomically:YES]) {
+            if ((success = [dictionary writeToFile:filePath atomically:YES])) {
                 success = [fileManager setAttributes:launchPlistPermissions
                                         ofItemAtPath:filePath
                                                error:error];
@@ -274,24 +274,31 @@ BOOL AHRemovePrivilegedFile(AHLaunchDomain domain,
     NSFileManager *fm = [NSFileManager defaultManager];
 
     if ([fm fileExistsAtPath:filePath]) {
-        NSString *const label = [kAHRemoveJobPrefix
-            stringByAppendingPathExtension:filePath.lastPathComponent];
+        if (getuid() == 0) {
+            [fm removeItemAtPath:filePath error:error];
+        } else {
+            NSString *const label = [kAHRemoveJobPrefix
+                                     stringByAppendingPathExtension:filePath.lastPathComponent];
 
-        AHLaunchJob *removeJob = [AHLaunchJob new];
-        removeJob.Label = label;
-        removeJob.ProgramArguments = @[ @"/bin/rm", filePath ];
+            AHLaunchJob *removeJob = [AHLaunchJob new];
+            removeJob.Label = label;
+            removeJob.ProgramArguments = @[ @"/bin/rm", filePath ];
 
-        removeJob.RunAtLoad = YES;
-        removeJob.LaunchOnlyOnce = YES;
+            removeJob.RunAtLoad = YES;
+            removeJob.LaunchOnlyOnce = YES;
 
-        if ((success = AHJobSubmit(kAHGlobalLaunchDaemon, removeJob.dictionary,
-                                   authRef, error))) {
-            [NSThread sleepForTimeInterval:0.5];
-        }
+            if ((success = AHJobSubmit(kAHGlobalLaunchDaemon,
+                                       removeJob.dictionary,
+                                       authRef,
+                                       error))) {
 
-        // This should exit fast. If it's still alive unload it.
-        if (jobIsRunning2(removeJob.Label, kAHGlobalLaunchDaemon)) {
-            AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
+                [NSThread sleepForTimeInterval:0.5];
+            }
+
+            // This should exit fast. If it's still alive unload it.
+            if (jobIsRunning2(label, kAHGlobalLaunchDaemon)) {
+                AHJobRemove(kAHGlobalLaunchDaemon, label, authRef, nil);
+            }
         }
     }
     return success;

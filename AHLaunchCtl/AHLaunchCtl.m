@@ -618,28 +618,24 @@ static NSString *errorMsgFromCode(NSInteger code);
                       error:(NSError *__autoreleasing *)error {
     OSStatus status = errSecSuccess;
 
-    // If the user is root no need to create an authorization.
-    if (getuid() != 0) {
-        // If domain is greater than the user domain,
-        if ((domain > kAHUserLaunchAgent)) {
-            if (_authRef != NULL) {
-                *authRef = _authRef;
-                status = errSecSuccess;
-            } else {
-                status = [AHAuthorizer authorizeSystemDaemonWithLabel:label
-                                                               prompt:prompt
-                                                              authRef:authRef];
-            }
+    // If domain is greater than the user domain,
+    if ((domain > kAHUserLaunchAgent)) {
+        if (_authRef != NULL) {
+            *authRef = _authRef;
+            status = errSecSuccess;
+        } else {
+            status = [AHAuthorizer authorizeSystemDaemonWithLabel:label
+                                                           prompt:prompt
+                                                          authRef:authRef];
+        }
 
-            if (status != errSecSuccess) {
-                if (status == errAuthorizationCanceled) {
-                    [[self class]
-                        errorWithCode:kAHErrorUserCanceledAuthorization
-                                error:error];
-                } else {
-                    [[self class] errorWithCode:kAHErrorInsufficientPrivileges
-                                          error:error];
-                }
+        if (status != errSecSuccess) {
+            if (status == errAuthorizationCanceled) {
+                [[self class] errorWithCode:kAHErrorUserCanceledAuthorization
+                                      error:error];
+            } else {
+                [[self class] errorWithCode:kAHErrorInsufficientPrivileges
+                                      error:error];
             }
         }
     }
