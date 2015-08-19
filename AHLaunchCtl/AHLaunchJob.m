@@ -180,8 +180,9 @@
     if (p != NULL) {
         if (!strncmp("Tc", p, 2)) {
             [self writeBoolValueToDict:new forKey:keyPath];
-        } else
+        } else {
             [self writeObjectValueToDict:new forKey:keyPath];
+        }
     }
 }
 
@@ -222,9 +223,17 @@
     // Handle as array of schedules
     else if ([StartCalendarInterval isKindOfClass:[NSArray class]]) {
         NSMutableArray *scheduleArray = [[NSMutableArray alloc]
-            initWithCapacity:[StartCalendarInterval count]];
-        for (AHLaunchJobSchedule *schedule in StartCalendarInterval) {
-            [scheduleArray addObject:schedule.dictionary];
+                                         initWithCapacity:[StartCalendarInterval count]];
+        for (id schedule in StartCalendarInterval) {
+            AHLaunchJobSchedule *sch;
+            if ([schedule isKindOfClass:[NSDictionary class]]){
+                sch = [[AHLaunchJobSchedule alloc] initWithDictionary:schedule];
+            } else if ([schedule isKindOfClass:[AHLaunchJobSchedule class]]){
+                sch = schedule;
+            }
+            if (sch) {
+                [scheduleArray addObject:sch.dictionary];
+            }
         }
         _internalDictionary[startCalendarKey] = [scheduleArray copy];
     }
