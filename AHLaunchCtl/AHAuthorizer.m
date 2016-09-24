@@ -74,19 +74,26 @@ static NSString *kNSAuthorizationSystemDaemon =
                     authRef:(AuthorizationRef *)authRef {
     AuthorizationRights authRights = {1, &authItem};
     AuthorizationEnvironment environment = {0, NULL};
+    AuthorizationFlags flags = [[self class] defaultFlags];
 
-    if (prompt) {
+    if(prompt.length){
         AuthorizationItem envItem = {kAuthorizationEnvironmentPrompt,
-                                     prompt.length,
-                                     (void *)prompt.UTF8String,
-                                     0};
+            prompt.length,
+            (void *)prompt.UTF8String,
+            0};
         environment.count = 1;
         environment.items = &envItem;
+
+        // NOTE: envItems gets optimized out outside of the
+        // if statement so just do the return right here
+        return AuthorizationCreate(
+            &authRights, &environment, flags, authRef);
     }
 
     return AuthorizationCreate(
-        &authRights, &environment, [[self class] defaultFlags], authRef);
+        &authRights, &environment, flags, authRef);;
 }
+
 
 + (void)authorizationFree:(AuthorizationRef)authRef {
     if (authRef != NULL) {
