@@ -130,9 +130,9 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 /**
  *  Create session wide authorization linked to the controller.
  *
- *  @param string to display for the Authorization creation dialog.
+ *  @param prompt String to display for the Authorization creation dialog.
  *
- *  @return
+ *  @return Returns `YES` on success, or `NO` on failure.
  */
 - (BOOL) authorizeWithPrompt:(NSString *)prompt;
 - (BOOL) authorize;
@@ -256,8 +256,6 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
  *  @param domain Corresponding AHLaunchDomain
  *  @param reply Reply block executed on completion that has no return value and
  *takes on argument NSError.
- *
- *  @return Returns `YES` on success, or `NO` on failure.
  */
 + (void)scheduleJob:(NSString *)label
             program:(NSString *)program
@@ -274,8 +272,6 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
  *  @param domain Corresponding AHLaunchDomain
  *  @param reply Reply block executed on completion that has no return value and
  *takes on argument NSError.
- *
- *  @return Returns `YES` on success, or `NO` on failure.
  */
 + (void)scheduleJob:(NSString *)label
              program:(NSString *)program
