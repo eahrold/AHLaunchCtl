@@ -171,6 +171,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Loads launchd job (will not write file)
+ *
  *  @param job AHLaunchJob Object, Label and Program keys required.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -183,6 +184,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Unloads a launchd job (will not remove file)
+ *
  *  @param label Name of the running launchctl job.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -195,6 +197,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Loads and existing launchd.plist
+ *
  *  @param label Name of the launchctl file.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -207,6 +210,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Stops a running launchd job, synonomus with unload
+ *
  *  @param label Name of the running launchctl job.
  *  @param error Populated should an error occur.
  *  @param domain Corresponding AHLaunchDomain
@@ -219,6 +223,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Restarts a launchd job with an existsing launchd.plist file.
+ *
  *  @param label Name of the running launchctl job.
  *  @param domain Corresponding AHLaunchDomain
  *  @param error Populated should an error occur.
@@ -232,11 +237,11 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 #pragma mark - Class Methods
 /**
  *  Launch an application at login.
+ *
  *  @param app Path to the Application
  *  @param launch YES to launch, NO to stop launching
  *  @param global YES to launch for all users, NO to launch for current user.
- *  @param keepAlive YES to relaunch in the event of a crash or an attempt to
- *quit
+ *  @param keepAlive YES to relaunch in the event of a crash or an attempt to quit
  *  @param error Populated should an error occur.
  *
  *  @return Returns `YES` on success, or `NO` on failure.
@@ -249,8 +254,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Schedule a LaunchD Job to run at an interval.
- *  @param label uniquely identifier for launchd.  This should be in the form a
- *a reverse domain
+ *
+ *  @param label uniquely identifier for launchd. This should be in the form of a reverse domain
  *  @param program Path to the executable to run
  *  @param interval How often (in seconds) to run.
  *  @param domain Corresponding AHLaunchDomain
@@ -264,8 +269,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
               reply:(void (^)(NSError *error))reply;
 /**
  *  Schedule a LaunchD Job to run at an interval.
- *  @param label uniquely identifier for launchd.  This should be in the form a
- *a reverse domain
+ *
+ *  @param label uniquely identifier for launchd. This should be in the form of a reverse domain
  *  @param program Path to the executable to run
  *  @param programArguments Array of arguments to pass to the executable.
  *  @param interval How often (in seconds) to run.
@@ -282,8 +287,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Create a job object based on a launchd.plist file
- *  @param label uniquely identifier for launchd.  This should be in the form a
- *a reverse domain
+ *
+ *  @param label uniquely identifier for launchd. This should be in the form of a reverse domain
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the corresponding keys
@@ -293,8 +298,8 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  Create a job object based on currently running Launchd Job
- *  @param label uniquely identifier for launchd.  This should be in the form a
- *a reverse domain
+ *
+ *  @param label uniquely identifier for launchd. This should be in the form of a reverse domain
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return an allocated AHLaunchJob with the corresponding keys
@@ -304,6 +309,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  List with all Jobs available based of files in the specified domain
+ *
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return Array of allocated AHLaunchJob with the corresponding keys
@@ -312,6 +318,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
 
 /**
  *  List with all currently running jobs in the specified domain
+ *
  *  @param domain Corresponding AHLaunchDomain
  *
  *  @return Array of allocated AHLaunchJob with the corresponding keys
@@ -330,7 +337,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
                         inDomain:(AHLaunchDomain)domain;
 
 /**
- *  installs a privileged helper tool with the specified label.
+ *  Installs a privileged helper tool with the specified label using a custom prompt.
  *
  *  @param label  label of the Helper Tool
  *  @param prompt message to prefix the authorization prompt
@@ -346,7 +353,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
                 error:(NSError **)error;
 
 /**
- *  Uninstalls HelperTool with specified label.
+ *  Uninstalls HelperTool with specified label using a custom prompt.
  *
  *  @param label Label of the Helper Tool.
  *  @param prompt Message to prefix the authorization prompt.
@@ -357,7 +364,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
                  prompt:(NSString *)prompt
                   error:(NSError *__autoreleasing *)error;
 /**
- *  uninstalls HelperTool with specified label.
+ *  Uninstalls HelperTool with specified label.
  *
  *  @param label label of the Helper Tool
  *  @param error error object populated if an error occurs.
@@ -369,8 +376,7 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
     __attribute__((deprecated));
 
 /**
- *  Cleans up files associated with the helper tool that SMJobBless leaves
- *behind
+ *  Cleans up files associated with the helper tool that  SMJobBless leaves behind
  *
  *  @param label label of the Helper Tool
  *  @param error error object populated if an error occurs.

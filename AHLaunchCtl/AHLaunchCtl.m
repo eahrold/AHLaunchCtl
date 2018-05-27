@@ -485,9 +485,7 @@ static NSString *errorMsgFromCode(NSInteger code);
         programArguments:nil
                 interval:seconds
                   domain:domain
-                   reply:^(NSError *error) {
-                     reply(error);
-                   }];
+                   reply:reply];
 }
 
 + (void)scheduleJob:(NSString *)label
