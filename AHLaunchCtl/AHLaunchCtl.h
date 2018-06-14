@@ -22,6 +22,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AHLaunchCtl/AHLaunchJob.h>
+#import <AHLaunchCtl/AHLaunchJobSchedule.h>
 
 /**
  *  AHLaunchCtlErrorCodes

@@ -7,6 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F44259920D2183800EB8C64 /* AHLaunchCtl.h in Headers */ = {isa = PBXBuildFile; fileRef = BE76C6FD18A19369003C94A0 /* AHLaunchCtl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2F44259A20D2183C00EB8C64 /* AHLaunchCtl.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C6FE18A19369003C94A0 /* AHLaunchCtl.m */; };
+		2F44259B20D2184000EB8C64 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2F44259C20D2184300EB8C64 /* AHLaunchJob.m in Sources */ = {isa = PBXBuildFile; fileRef = BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */; };
+		2F44259D20D2184600EB8C64 /* AHLaunchJobSchedule.h in Headers */ = {isa = PBXBuildFile; fileRef = BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2F44259E20D2184A00EB8C64 /* AHLaunchJobSchedule.m in Sources */ = {isa = PBXBuildFile; fileRef = BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */; };
+		2F44259F20D2184E00EB8C64 /* AHAuthorizer.h in Headers */ = {isa = PBXBuildFile; fileRef = BE854D8018AA71D6001548A8 /* AHAuthorizer.h */; };
+		2F4425A020D2185100EB8C64 /* AHAuthorizer.m in Sources */ = {isa = PBXBuildFile; fileRef = BE854D8118AA71D6001548A8 /* AHAuthorizer.m */; };
+		2F4425A120D2185500EB8C64 /* AHServiceManagement.h in Headers */ = {isa = PBXBuildFile; fileRef = BE6F549818B114CC00826656 /* AHServiceManagement.h */; };
+		2F4425A220D2185700EB8C64 /* AHServiceManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = BE6F549918B114CC00826656 /* AHServiceManagement.m */; };
+		2F4425A320D2185C00EB8C64 /* NSString+ah_versionCompare.h in Headers */ = {isa = PBXBuildFile; fileRef = BE8D5D531B48534200DBEAE3 /* NSString+ah_versionCompare.h */; };
+		2F4425A420D2185E00EB8C64 /* NSString+ah_versionCompare.m in Sources */ = {isa = PBXBuildFile; fileRef = BE8D5D541B48534200DBEAE3 /* NSString+ah_versionCompare.m */; };
+		2F4425A520D2186200EB8C64 /* NSFileManger+Privileged.m in Sources */ = {isa = PBXBuildFile; fileRef = BEA75B4018B531D700CA2672 /* NSFileManger+Privileged.m */; };
+		2F4425A620D21B1100EB8C64 /* AHLaunchCtl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F44258220D2182100EB8C64 /* AHLaunchCtl.framework */; };
 		BE190A51190C3A7300607787 /* AHLaunchJobSchedule.h in Headers */ = {isa = PBXBuildFile; fileRef = BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BE190A52190C3A7300607787 /* AHLaunchJobSchedule.m in Sources */ = {isa = PBXBuildFile; fileRef = BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */; };
 		BE6F549A18B114CC00826656 /* AHServiceManagement.h in Headers */ = {isa = PBXBuildFile; fileRef = BE6F549818B114CC00826656 /* AHServiceManagement.h */; };
@@ -31,7 +45,6 @@
 		BEED2D6418A3117A00A1D6C0 /* AHLaunchJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BEED2D6218A3117A00A1D6C0 /* AHLaunchJob.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BEED2D6518A3117A00A1D6C0 /* AHLaunchJob.m in Sources */ = {isa = PBXBuildFile; fileRef = BEED2D6318A3117A00A1D6C0 /* AHLaunchJob.m */; };
 		BEFC28CB19F0D79D00C35A6F /* AHLaunchCtl_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = BEFC28CA19F0D79D00C35A6F /* AHLaunchCtl_Tests.m */; };
-		BEFC28D119F0D85200C35A6F /* libAHLaunchCtl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */; };
 		BEFC28D219F0D85B00C35A6F /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C71B18A19B2C003C94A0 /* ServiceManagement.framework */; };
 		BEFC28D319F0D86000C35A6F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE76C6F718A19369003C94A0 /* Foundation.framework */; };
 		BEFC28D419F0D86600C35A6F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE5B001018A48412000D8603 /* Security.framework */; };
@@ -39,14 +52,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BE8C6BE31A9AE39C00E3558C /* PBXContainerItemProxy */ = {
+		2F4425A720D21B1D00EB8C64 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE76C6E918A19369003C94A0 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BE76C6F018A19369003C94A0;
-			remoteInfo = AHLaunchCtl;
+			remoteGlobalIDString = 2F44258120D2182100EB8C64;
+			remoteInfo = LaunchCtlFramework;
 		};
-		BEFC28CF19F0D84A00C35A6F /* PBXContainerItemProxy */ = {
+		BE8C6BE31A9AE39C00E3558C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BE76C6E918A19369003C94A0 /* Project object */;
 			proxyType = 1;
@@ -82,6 +95,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2F44258220D2182100EB8C64 /* AHLaunchCtl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AHLaunchCtl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHLaunchJobSchedule.h; sourceTree = "<group>"; };
 		BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHLaunchJobSchedule.m; sourceTree = "<group>"; };
 		BE2C317E1988397300F8044E /* HelperTool-CodeSign.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = "HelperTool-CodeSign.py"; sourceTree = "<group>"; };
@@ -117,6 +131,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2F44257E20D2182100EB8C64 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BE76C6EE18A19369003C94A0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -139,11 +160,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F4425A620D21B1100EB8C64 /* AHLaunchCtl.framework in Frameworks */,
 				BEFC28D519F0D8A500C35A6F /* SystemConfiguration.framework in Frameworks */,
 				BEFC28D419F0D86600C35A6F /* Security.framework in Frameworks */,
 				BEFC28D319F0D86000C35A6F /* Foundation.framework in Frameworks */,
 				BEFC28D219F0D85B00C35A6F /* ServiceManagement.framework in Frameworks */,
-				BEFC28D119F0D85200C35A6F /* libAHLaunchCtl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +189,7 @@
 				BE76C6F118A19369003C94A0 /* libAHLaunchCtl.a */,
 				BEFC28C619F0D79D00C35A6F /* AHLaunchCtl Tests.xctest */,
 				BE8C6BDC1A9AE29F00E3558C /* rootTest */,
+				2F44258220D2182100EB8C64 /* AHLaunchCtl.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -264,6 +286,19 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		2F44257F20D2182100EB8C64 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F4425A120D2185500EB8C64 /* AHServiceManagement.h in Headers */,
+				2F44259B20D2184000EB8C64 /* AHLaunchJob.h in Headers */,
+				2F44259920D2183800EB8C64 /* AHLaunchCtl.h in Headers */,
+				2F44259F20D2184E00EB8C64 /* AHAuthorizer.h in Headers */,
+				2F4425A320D2185C00EB8C64 /* NSString+ah_versionCompare.h in Headers */,
+				2F44259D20D2184600EB8C64 /* AHLaunchJobSchedule.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BE76C6EF18A19369003C94A0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,6 +315,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		2F44258120D2182100EB8C64 /* AHLaunchCtlFramework */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2F44259320D2182200EB8C64 /* Build configuration list for PBXNativeTarget "AHLaunchCtlFramework" */;
+			buildPhases = (
+				2F44257D20D2182100EB8C64 /* Sources */,
+				2F44257E20D2182100EB8C64 /* Frameworks */,
+				2F44257F20D2182100EB8C64 /* Headers */,
+				2F44258020D2182100EB8C64 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AHLaunchCtlFramework;
+			productName = LaunchCtl;
+			productReference = 2F44258220D2182100EB8C64 /* AHLaunchCtl.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		BE76C6F018A19369003C94A0 /* AHLaunchCtl */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BE76C71518A19369003C94A0 /* Build configuration list for PBXNativeTarget "AHLaunchCtl" */;
@@ -327,7 +380,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				BEFC28D019F0D84A00C35A6F /* PBXTargetDependency */,
+				2F4425A820D21B1D00EB8C64 /* PBXTargetDependency */,
 			);
 			name = "AHLaunchCtl Tests";
 			productName = "AHLaunchCtl Tests";
@@ -343,6 +396,10 @@
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Eldon Ahrold";
 				TargetAttributes = {
+					2F44258120D2182100EB8C64 = {
+						CreatedOnToolsVersion = 9.4;
+						ProvisioningStyle = Automatic;
+					};
 					BE8C6BDB1A9AE29F00E3558C = {
 						CreatedOnToolsVersion = 6.1;
 					};
@@ -364,6 +421,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				2F44258120D2182100EB8C64 /* AHLaunchCtlFramework */,
 				BE76C6F018A19369003C94A0 /* AHLaunchCtl */,
 				BEFC28C519F0D79D00C35A6F /* AHLaunchCtl Tests */,
 				BE8C6BDB1A9AE29F00E3558C /* rootTest */,
@@ -372,6 +430,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2F44258020D2182100EB8C64 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BEFC28C419F0D79D00C35A6F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -382,6 +447,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2F44257D20D2182100EB8C64 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F4425A520D2186200EB8C64 /* NSFileManger+Privileged.m in Sources */,
+				2F44259E20D2184A00EB8C64 /* AHLaunchJobSchedule.m in Sources */,
+				2F44259A20D2183C00EB8C64 /* AHLaunchCtl.m in Sources */,
+				2F4425A220D2185700EB8C64 /* AHServiceManagement.m in Sources */,
+				2F4425A420D2185E00EB8C64 /* NSString+ah_versionCompare.m in Sources */,
+				2F44259C20D2184300EB8C64 /* AHLaunchJob.m in Sources */,
+				2F4425A020D2185100EB8C64 /* AHAuthorizer.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BE76C6ED18A19369003C94A0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -415,19 +494,116 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2F4425A820D21B1D00EB8C64 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2F44258120D2182100EB8C64 /* AHLaunchCtlFramework */;
+			targetProxy = 2F4425A720D21B1D00EB8C64 /* PBXContainerItemProxy */;
+		};
 		BE8C6BE41A9AE39C00E3558C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BE76C6F018A19369003C94A0 /* AHLaunchCtl */;
 			targetProxy = BE8C6BE31A9AE39C00E3558C /* PBXContainerItemProxy */;
 		};
-		BEFC28D019F0D84A00C35A6F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BE76C6F018A19369003C94A0 /* AHLaunchCtl */;
-			targetProxy = BEFC28CF19F0D84A00C35A6F /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		2F44259420D2182200EB8C64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eeaapps.AHLaunchCtl;
+				PRODUCT_NAME = AHLaunchCtl;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		2F44259520D2182200EB8C64 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eeaapps.AHLaunchCtl;
+				PRODUCT_NAME = AHLaunchCtl;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		BE76C71318A19369003C94A0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -607,6 +783,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2F44259320D2182200EB8C64 /* Build configuration list for PBXNativeTarget "AHLaunchCtlFramework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F44259420D2182200EB8C64 /* Debug */,
+				2F44259520D2182200EB8C64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BE76C6EC18A19369003C94A0 /* Build configuration list for PBXProject "AHLaunchCtl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
