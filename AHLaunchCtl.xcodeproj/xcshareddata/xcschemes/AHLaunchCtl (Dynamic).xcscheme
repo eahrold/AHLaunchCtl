@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0940"
+   LastUpgradeVersion = "1010"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2F44258120D2182100EB8C64"
                BuildableName = "AHLaunchCtl.framework"
-               BlueprintName = "AHLaunchCtlFramework"
+               BlueprintName = "AHLaunchCtl (Dynamic)"
                ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -47,7 +47,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F44258120D2182100EB8C64"
             BuildableName = "AHLaunchCtl.framework"
-            BlueprintName = "AHLaunchCtlFramework"
+            BlueprintName = "AHLaunchCtl (Dynamic)"
             ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -65,7 +65,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F44258120D2182100EB8C64"
             BuildableName = "AHLaunchCtl.framework"
-            BlueprintName = "AHLaunchCtlFramework"
+            BlueprintName = "AHLaunchCtl (Dynamic)"
             ReferencedContainer = "container:AHLaunchCtl.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
