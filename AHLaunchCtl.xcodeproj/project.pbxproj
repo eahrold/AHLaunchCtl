@@ -77,7 +77,6 @@
 /* Begin PBXFileReference section */
 		2F44258220D2182100EB8C64 /* AHLaunchCtl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AHLaunchCtl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FF73D8D21C381F00067ED27 /* AHLaunchCtl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AHLaunchCtl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2FF73D8E21C381F10067ED27 /* AHLaunchCtlFramework copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "AHLaunchCtlFramework copy-Info.plist"; path = "/Users/yang/workspace/projects/CoreSSH/Carthage/Checkouts/AHLaunchCtl/AHLaunchCtlFramework copy-Info.plist"; sourceTree = "<absolute>"; };
 		BE190A4F190C3A7300607787 /* AHLaunchJobSchedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHLaunchJobSchedule.h; sourceTree = "<group>"; };
 		BE190A50190C3A7300607787 /* AHLaunchJobSchedule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHLaunchJobSchedule.m; sourceTree = "<group>"; };
 		BE2C317E1988397300F8044E /* HelperTool-CodeSign.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = "HelperTool-CodeSign.py"; sourceTree = "<group>"; };
@@ -160,7 +159,6 @@
 				BE8C6BDD1A9AE29F00E3558C /* AHLaunchCtl Root Test */,
 				BE76C6F318A19369003C94A0 /* Frameworks */,
 				BE76C6F218A19369003C94A0 /* Products */,
-				2FF73D8E21C381F10067ED27 /* AHLaunchCtlFramework copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
