@@ -29,17 +29,17 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
 @implementation NSFileManager (Privileged)
 
 - (BOOL)moveItemAtPath:(NSString *)path
-    toPrivilegedLocation:(NSString *)location
-               overwrite:(BOOL)overwrite
-                   error:(NSError *__autoreleasing *)error {
+  toPrivilegedLocation:(NSString *)location
+               message:(NSString *)message
+             overwrite:(BOOL)overwrite
+                 error:(NSError *__autoreleasing *)error {
     AHLaunchJob *job;
     if (![self testSource:path andDest:location error:error]) {
     }
 
     AuthorizationRef authRef = NULL;
     [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerMoveFile
-                                          prompt:@"Trying to move a file to a "
-                                                 @"privileged location"
+                                          prompt:message
                                          authRef:&authRef];
     if (authRef == NULL) {
         return NO;
@@ -49,35 +49,53 @@ static NSString *kNSFileManagerErrNoDirectoryAtLocation =
     job.Label = kNSFileManagerMoveFile;
     job.ProgramArguments = @[ @"/bin/mv", path, location ];
 
-    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error) ==
-                   0
-               ? YES
-               : NO;
+    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error) == 0;
+}
+
+- (BOOL)moveItemAtPath:(NSString *)path
+  toPrivilegedLocation:(NSString *)location
+             overwrite:(BOOL)overwrite
+                 error:(NSError *__autoreleasing *)error {
+    return [self moveItemAtPath:path
+           toPrivilegedLocation:location
+                        message:@"Trying to copy a file to a privileged location"
+                      overwrite:overwrite
+                          error:error];
+}
+
+- (BOOL)copyItemAtPath:(NSString *)path
+  toPrivilegedLocation:(NSString *)location
+               message:(NSString *)message
+             overwrite:(BOOL)overwrite
+                 error:(NSError **)error {
+    AHLaunchJob *job;
+    if (![self testSource:path andDest:location error:error]) {
+        return NO;
+    }
+    
+    AuthorizationRef authRef = NULL;
+    [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerCopyFile
+                                          prompt:message
+                                         authRef:&authRef];
+    if (authRef == NULL) {
+        return NO;
+    };
+    job = [self FileManagerJob];
+    job.Label = kNSFileManagerCopyFile;
+    job.ProgramArguments = @[ @"/bin/cp", @"-a", path, location ];
+    
+    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
 }
 
 - (BOOL)copyItemAtPath:(NSString *)path
     toPrivilegedLocation:(NSString *)location
                overwrite:(BOOL)overwrite
                    error:(NSError **)error {
-    AHLaunchJob *job;
-    if (![self testSource:path andDest:location error:error]) {
-        return NO;
-    }
-
-    AuthorizationRef authRef = NULL;
-    [AHAuthorizer authorizeSystemDaemonWithLabel:kNSFileManagerCopyFile
-                                          prompt:@"Trying to copy a file to a "
-                                                 @"privileged location"
-                                         authRef:&authRef];
-    if (authRef == NULL) {
-        return NO;
-    };
-
-    job = [self FileManagerJob];
-    job.Label = kNSFileManagerCopyFile;
-    job.ProgramArguments = @[ @"/bin/cp", @"-a", path, location ];
-
-    return AHJobSubmit(kAHSystemLaunchDaemon, job.dictionary, authRef, error);
+    return [self copyItemAtPath:path
+           toPrivilegedLocation:location
+                        message:@"Trying to copy a file to a privileged location"
+                      overwrite:overwrite
+                          error:error];
 }
 
 - (BOOL)deleteItemAtPrivilegedPath:(NSString *)path
