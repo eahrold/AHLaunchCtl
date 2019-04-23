@@ -234,6 +234,18 @@ typedef NS_ENUM(NSInteger, AHLaunchCtlErrorCodes) {
        inDomain:(AHLaunchDomain)domain
           error:(NSError **)error;
 
+/**
+ *  Checks if a launchd job is running.
+ *
+ *  @param label Name of the running launchctl job.
+ *  @param domain Corresponding AHLaunchDomain
+ *
+ *  @return Returns `YES` if running, otherwise `NO`.
+ */
+- (BOOL)isRunning:(NSString *)label
+       inDomain:(AHLaunchDomain)domain;
+
+
 #pragma mark - Class Methods
 /**
  *  Launch an application at login.

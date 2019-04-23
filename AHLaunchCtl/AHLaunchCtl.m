@@ -339,6 +339,14 @@ static NSString *errorMsgFromCode(NSInteger code);
     return [self reload:job inDomain:domain error:error];
 }
 
+- (BOOL)isRunning:(NSString *)label
+       inDomain:(AHLaunchDomain)domain{
+    
+    AHLaunchJob *job = [[self class] runningJobWithLabel:label inDomain:domain];
+    return (!!job);
+}
+
+
 #pragma mark - Helper Tool Installation / Removal
 + (BOOL)installHelper:(NSString *)label
                prompt:(NSString *)prompt
