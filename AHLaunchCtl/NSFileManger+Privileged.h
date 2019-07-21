@@ -10,10 +10,25 @@
 #import "AHLaunchCtl.h"
 
 /**
- *  A Category for NSFileManger that extends it to perform privileged
- * operations using AHLaunchCtl library and
+ * A Category for NSFileManger that extends it to perform privileged operations using AHLaunchCtl library.
  */
 @interface NSFileManager (Privileged)
+/**
+ *  Move a file to an protected path
+ *
+ *  @param path      source file
+ *  @param location  destination folder
+ *  @param message   message to show when prompting rights
+ *  @param overwrite YES to overwrite, NO to ignore
+ *  @param error     populate should error occur
+ *
+ *  @return YES on success NO on failure
+ */
+- (BOOL)moveItemAtPath:(NSString *)path
+  toPrivilegedLocation:(NSString *)location
+               message:(NSString *)message
+             overwrite:(BOOL)overwrite
+                 error:(NSError **)error;
 /**
  *  Move a file to an protected path
  *
@@ -25,24 +40,26 @@
  *  @return YES on success NO on failure
  */
 - (BOOL)moveItemAtPath:(NSString *)path
-    toPrivilegedLocation:(NSString *)location
-               overwrite:(BOOL)overwrite
-                   error:(NSError **)error;
+  toPrivilegedLocation:(NSString *)location
+             overwrite:(BOOL)overwrite
+                 error:(NSError **)error;
 
 /**
  *  Move a file to an protected path
  *
  *  @param path      source file
  *  @param location  destination folder
+ *  @param message   message to show when prompting rights
  *  @param overwrite YES to overwrite, NO to ignore
  *  @param error     populate should error occur
  *
  *  @return YES on success NO on failure
  */
 - (BOOL)copyItemAtPath:(NSString *)path
-    toPrivilegedLocation:(NSString *)location
-               overwrite:(BOOL)overwrite
-                   error:(NSError **)error;
+  toPrivilegedLocation:(NSString *)location
+               message:(NSString *)message
+             overwrite:(BOOL)overwrite
+                 error:(NSError **)error;
 
 /**
  *  Move a file to an protected path
@@ -64,8 +81,6 @@
  *
  *  @return YES on success NO on failure
  */
-- (BOOL)setAttributes:(NSDictionary *)attributes
-    ofItemAtPrivilegedPath:(NSString *)path
-                     error:(NSError **)error;
+- (BOOL)setAttributes:(NSDictionary *)attributes ofItemAtPrivilegedPath:(NSString *)path error:(NSError **)error;
 
 @end
