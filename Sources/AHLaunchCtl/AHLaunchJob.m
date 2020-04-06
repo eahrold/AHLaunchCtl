@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 
 #import "AHLaunchJob.h"
-#import <AHLaunchCtl/AHServiceManagement.h>
+#import "AHServiceManagement.h"
 
 #import <objc/runtime.h>
 

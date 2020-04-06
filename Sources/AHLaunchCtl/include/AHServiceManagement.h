@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import <AHLaunchCtl/AHLaunchJob.h>
+#import "AHLaunchJob.h"
 
 /** ~/Library/LaunchAgents/
  * @warning Make sure to expand the tilde if necissary for checking!

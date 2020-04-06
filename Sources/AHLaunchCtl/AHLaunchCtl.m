@@ -19,12 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <AHLaunchCtl/AHLaunchCtl.h>
-#import <AHLaunchCtl/AHAuthorizer.h>
-#import <AHLaunchCtl/AHServiceManagement.h>
+#import "AHLaunchCtl.h"
+#import "AHAuthorizer.h"
+#import "AHServiceManagement.h"
 #import "AHServiceManagement_Private.h"
 
-#import <NSString+ah_versionCompare.h>
+#import "NSString+ah_versionCompare.h"
 
 #import <SystemConfiguration/SystemConfiguration.h>
 
