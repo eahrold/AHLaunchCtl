@@ -1,2 +1,7 @@
 *.xcodeproj/project.xcworkspace/xcuserdata
 *.xcodeproj/xcuserdata
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/

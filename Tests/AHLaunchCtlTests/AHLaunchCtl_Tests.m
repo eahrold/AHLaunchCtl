@@ -8,8 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
-#import "AHLaunchCtl.h"
-#import "AHServiceManagement.h"
+@import AHLaunchCtl;
  
 #import <ServiceManagement/ServiceManagement.h>
 

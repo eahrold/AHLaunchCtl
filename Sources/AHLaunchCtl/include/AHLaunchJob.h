@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import <AHLaunchCtl/AHLaunchJobSchedule.h>
+#import "AHLaunchJobSchedule.h"
 
 /**
  *  AHLaunchDomain Launch Domain specifying which context the job should run

@@ -8,7 +8,6 @@
 
 #import "AHServiceManagement.h"
 #import "AHServiceManagement_Private.h"
-#import "AHLaunchJob.h"
 
 #import <ServiceManagement/ServiceManagement.h>
 
@@ -50,9 +49,12 @@ BOOL jobIsRunning2(NSString *label, AHLaunchDomain domain) {
 NSDictionary *AHJobCopyDictionary(AHLaunchDomain domain, NSString *label) {
     NSDictionary *dict;
     if (label && domain != 0) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         dict = CFBridgingRelease(
             SMJobCopyDictionary((__bridge CFStringRef)(SMDomain(domain)),
                                 (__bridge CFStringRef)(label)));
+#pragma clang diagnostic pop
         return dict;
     } else {
         return nil;
@@ -67,9 +69,12 @@ BOOL AHJobSubmit(AHLaunchDomain domain,
     if (domain == 0) return NO;
     cfError = NULL;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     BOOL rc =
         SMJobSubmit((__bridge CFStringRef)(SMDomain(domain)),
                     (__bridge CFDictionaryRef)dictionary, authRef, &cfError);
+#pragma clang diagnostic pop
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
@@ -100,9 +105,12 @@ BOOL AHJobRemove(AHLaunchDomain domain,
     if (domain == 0) return NO;
     cfError = NULL;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     BOOL rc =
         SMJobRemove((__bridge CFStringRef)(SMDomain(domain)),
                     (__bridge CFStringRef)(label), authRef, YES, &cfError);
+#pragma clang diagnostic pop
 
     if (!rc) {
         NSError *err = CFBridgingRelease(cfError);
@@ -180,8 +188,11 @@ BOOL AHJobUnbless(AHLaunchDomain domain,
 }
 
 NSArray *AHCopyAllJobDictionaries(AHLaunchDomain domain) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return CFBridgingRelease(
         SMCopyAllJobDictionaries((__bridge CFStringRef)(SMDomain(domain))));
+#pragma clang diagnostic pop
 }
 
 #pragma mark Private

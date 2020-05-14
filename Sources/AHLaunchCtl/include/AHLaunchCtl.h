@@ -21,7 +21,8 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import <AHLaunchCtl/AHLaunchJob.h>
+#import "AHLaunchJob.h"
+#import "AHLaunchJobSchedule.h"
 
 /**
  *  AHLaunchCtlErrorCodes

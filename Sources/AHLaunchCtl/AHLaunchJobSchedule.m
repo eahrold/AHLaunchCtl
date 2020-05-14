@@ -7,7 +7,7 @@
 //
 
 #import "AHLaunchJobSchedule.h"
-NSInteger AHUndefinedScheduleComponent = NSUndefinedDateComponent;
+NSInteger AHUndefinedScheduleComponent = NSDateComponentUndefined;
 
 @implementation AHLaunchJobSchedule
 
